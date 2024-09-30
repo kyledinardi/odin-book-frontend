@@ -1,9 +1,9 @@
-import Navbar from './Navbar.jsx';
+import Sidebar from './Sidebar.jsx';
 
 function ErrorPage() {
   return (
     <>
-      <Navbar />
+      <Sidebar />
       <div>
         <h1>404</h1>
         <h2>Page not found</h2>
