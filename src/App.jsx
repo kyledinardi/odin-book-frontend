@@ -20,7 +20,7 @@ function App() {
   return (
     <>
       <Sidebar />
-      <Outlet context={[currentUser]} />
+      <Outlet context={[currentUser, setCurrentUser]} />
     </>
   );
 }

@@ -5,6 +5,7 @@ import ErrorPage from './components/ErrorPage.jsx';
 import Login from './components/Login.jsx';
 import SignUp from './components/SignUp.jsx';
 import PostPage from './components/PostPage.jsx';
+import UsersPage from './components/UsersPage.jsx';
 
 const routes = [
   {
@@ -16,6 +17,7 @@ const routes = [
     children: [
       { index: true, element: <Home /> },
       { path: 'posts/:postId', element: <PostPage /> },
+      { path: '/users', element: <UsersPage /> },
     ],
   },
 
