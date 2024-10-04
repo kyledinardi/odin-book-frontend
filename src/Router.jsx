@@ -4,14 +4,19 @@ import Home from './components/Home.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
 import Login from './components/Login.jsx';
 import SignUp from './components/SignUp.jsx';
+import PostPage from './components/PostPage.jsx';
 
 const routes = [
   {
     path: '/',
     element: <App />,
-    children: [{ index: true, element: <Home /> }],
     errorElement: <ErrorPage />,
     loader: () => (localStorage.getItem('token') ? null : redirect('/login')),
+
+    children: [
+      { index: true, element: <Home /> },
+      { path: 'posts/:postId', element: <PostPage /> },
+    ],
   },
 
   {
