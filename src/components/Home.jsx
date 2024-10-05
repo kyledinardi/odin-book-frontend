@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import Post from './Post.jsx';

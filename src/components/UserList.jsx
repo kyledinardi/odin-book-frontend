@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import User from './User.jsx';
 
-function UsersPage() {
+function UserList() {
   const [users, setUsers] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const [currentUser, setCurrentUser] = useOutletContext();
@@ -42,4 +42,4 @@ function UsersPage() {
   );
 }
 
-export default UsersPage;
+export default UserList;
