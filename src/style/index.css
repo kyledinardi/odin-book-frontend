@@ -1,4 +1,57 @@
+:root {
+  background-color: black;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+:root,
+body,
+#root,
+.app {
+  scrollbar-gutter: stable both-edges;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 1fr 600px 1fr;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.sidebarContainer {
+  display: flex;
+  justify-content: end;
+}
+
+main {
+  max-width: 600px;
+  border: 1px solid #222;
+}
+
+a {
+  color: #6161ff;
+}
+
+button {
+  cursor: pointer;
+  background-color: white;
+}
+
 img {
   max-width: 300px;
   height: auto;
+}
+
+.pfp {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
 }

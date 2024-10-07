@@ -18,10 +18,12 @@ function App() {
   }, []);
 
   return (
-    <>
-      <Sidebar />
+    <div className='app'>
+      <div className='sidebarContainer'>
+        <Sidebar currentUser={currentUser} />
+      </div>
       <Outlet context={[currentUser, setCurrentUser]} />
-    </>
+    </div>
   );
 }
 

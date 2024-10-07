@@ -26,7 +26,7 @@ function Post({ post, replacePost }) {
   return (
     <div>
       <Link to={`/users/${post.authorId}`}>
-        <img src={post.author.pfpUrl} alt='' />
+        <img className='pfp' src={post.author.pfpUrl} alt='' />
         <span>{post.author.username}</span>
       </Link>
       <Link to={`/posts/${post.id}`}>

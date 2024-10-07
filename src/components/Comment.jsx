@@ -5,7 +5,7 @@ function Comment({ comment }) {
   return (
     <div>
       <Link to={`/users/${comment.userId}`}>
-        <img src={comment.user.pfpUrl} alt='' />
+        <img className='pfp' src={comment.user.pfpUrl} alt='' />
         <span>{comment.user.username}</span>
       </Link>
       <span>{new Date(comment.timestamp).toLocaleString()}</span>

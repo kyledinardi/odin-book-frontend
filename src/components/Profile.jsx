@@ -110,7 +110,7 @@ function Profile() {
         <p>{posts.length} posts</p>
       </div>
       <div>
-        <img src={user.pfpUrl} alt='' />
+        <img className='pfp' src={user.pfpUrl} alt='' />
         {userId === currentUser.id ? (
           <button>Set up profile</button>
         ) : (

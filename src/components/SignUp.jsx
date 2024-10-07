@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styles from '../style/Login.module.css';
 
 function SignUp() {
   const [errorArray, setErrorArray] = useState(null);
@@ -31,27 +32,37 @@ function SignUp() {
   }
 
   return (
-    <div>
-      <form onSubmit={(e) => submitLogin(e)}>
-        <div>
-          <label htmlFor='username'>Username</label>
-          <input type='text' name='username' id='username' required />
-          <label htmlFor='password'>Password</label>
-          <input type='password' name='password' id='password' required />
-          <label htmlFor='passwordConfirmation'>Confirm Password</label>
-          <input
-            type='password'
-            name='passwordConfirmation'
-            id='passwordConfirmation'
-            required
-          />
-        </div>
-        <div>
-          {errorArray &&
-            errorArray.map((error) => <p key={error.msg}>{error.msg}</p>)}
-        </div>
-        <button>Sign Up</button>
-      </form>
+    <div className={styles.flexWrapper}>
+      <h1>Sign up for FakeSocial</h1>
+      <div className={styles.loginForms}>
+        <form className={styles.flexForm} onSubmit={(e) => submitLogin(e)}>
+          <div>
+            <label htmlFor='username'>Username</label>
+            <input type='text' name='username' id='username' required />
+          </div>
+          <div>
+            <label htmlFor='password'>Password</label>
+            <input type='password' name='password' id='password' required />
+          </div>
+          <div>
+            <label htmlFor='passwordConfirmation'>Confirm Password</label>
+            <input
+              type='password'
+              name='passwordConfirmation'
+              id='passwordConfirmation'
+              required
+            />
+          </div>
+          {errorArray && (
+            <div className={styles.error}>
+              {errorArray.map((error) => (
+                <p key={error.msg}>{error.msg}</p>
+              ))}
+            </div>
+          )}
+          <button>Sign Up</button>
+        </form>
+      </div>
     </div>
   );
 }

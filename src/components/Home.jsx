@@ -68,7 +68,7 @@ function Home() {
   ) : (
     <main>
       <form encType='multipart/form-data' onSubmit={(e) => submitPost(e)}>
-        <img src={currentUser.pfpUrl} alt='' />
+        <img className='pfp' src={currentUser.pfpUrl} alt='' />
         <textarea
           name='postText'
           id='postText'

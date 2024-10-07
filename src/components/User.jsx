@@ -26,7 +26,7 @@ function User({ user, isFollowed, replaceUser }) {
   return (
     <div>
       <Link to={`/users/${user.id}`}>
-        <img src={user.pfpUrl} alt='' />
+        <img className='pfp' src={user.pfpUrl} alt='' />
         <span>{user.username}</span>
       </Link>
       <button onClick={() => follow()}>

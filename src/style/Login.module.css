@@ -1,0 +1,40 @@
+.flexWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.loginForms,
+.flexForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 300px;
+}
+
+.loginForms form,
+.loginForms form * {
+  width: 100%;
+}
+
+.loginForms input {
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.loginForms button {
+  padding: 10px;
+  border-radius: 20px;
+  font-size: medium;
+  font-weight: bold;
+}
+
+.error {
+  background-color: blue;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}

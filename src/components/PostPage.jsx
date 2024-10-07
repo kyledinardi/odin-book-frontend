@@ -56,7 +56,7 @@ function PostPage() {
         replacePost={(updatedPost) => setPost(updatedPost)}
       />
       <form onSubmit={(e) => submitComment(e)}>
-        <img src={currentUser.pfpUrl} alt='' />
+        <img className='pfp' src={currentUser.pfpUrl} alt='' />
         <textarea
           name='commentText'
           id='commentText'
