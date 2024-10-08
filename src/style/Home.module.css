@@ -1,0 +1,66 @@
+.postForm {
+  padding: 20px;
+  border: 1px solid #222;
+  display: grid;
+  grid-template-columns: max-content 1fr 1fr;
+  grid-template-areas:
+    'pfp postText postText'
+    '. imgPreview imgPreview'
+    '. formButtons formButtons';
+}
+
+.currentUserPfp {
+  grid-area: pfp;
+  padding-right: 10px;
+}
+
+.postText {
+  grid-area: postText;
+  background-color: black;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.2rem;
+  padding: 10px;
+  resize: none;
+  border: none;
+  outline: none;
+}
+
+.imgPreview {
+  grid-area: imgPreview;
+  position: relative;
+  padding: 20px 0;
+}
+
+.cancelPreviewButton {
+  position: absolute;
+  padding: 0;
+  border: 1px solid black;
+  height: 30px;
+  width: 30px;
+  background-color: #222;
+  opacity: 0.8;
+  top: 25px;
+  right: 5px;
+  border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formButtons {
+  grid-area: formButtons;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.submitButton {
+  width: max-content;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  background-color: blue;
+  color: white;
+  border: none;
+}

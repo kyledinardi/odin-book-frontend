@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import Post from './Post.jsx';
+import styles from '../style/Home.module.css';
 
 function Home() {
   const [posts, setPosts] = useState(null);
@@ -63,26 +64,38 @@ function Home() {
     setPosts(newPosts);
   }
 
+  function resetTextareaHeight(e) {
+    e.target.style.height = 'auto';
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  }
+
   return !currentUser || !posts ? (
     <h1>Loading...</h1>
   ) : (
     <main>
-      <form encType='multipart/form-data' onSubmit={(e) => submitPost(e)}>
-        <img className='pfp' src={currentUser.pfpUrl} alt='' />
+      <form
+        className={styles.postForm}
+        encType='multipart/form-data'
+        onSubmit={(e) => submitPost(e)}
+      >
+        <Link className={styles.currentUserPfp} to={`/users/${currentUser.id}`}>
+          <img className='pfp' src={currentUser.pfpUrl} alt='' />
+        </Link>
         <textarea
+          className={styles.postText}
           name='postText'
           id='postText'
-          cols='30'
-          rows='10'
+          maxLength={1000}
           placeholder='New Post'
+          onInput={(e) => resetTextareaHeight(e)}
           required
-        ></textarea>{' '}
+        ></textarea>
         {newPostImagesrc !== '' && (
-          <div>
+          <div className={styles.imgPreview}>
             <img src={URL.createObjectURL(newPostImagesrc)} alt='' />
             <button
               type='button'
-              className='svgButton'
+              className={styles.cancelPreviewButton}
               onClick={() => cancelNewPostImage()}
             >
               <svg
@@ -90,24 +103,14 @@ function Home() {
                 height='24px'
                 viewBox='0 -960 960 960'
                 width='24px'
-                fill='#000'
+                fill='#fff'
               >
                 <path d='m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z' />
               </svg>
             </button>
           </div>
         )}
-        <label htmlFor='postImage'>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            height='24px'
-            viewBox='0 -960 960 960'
-            width='24px'
-            fill='#000'
-          >
-            <path d='M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z' />
-          </svg>
-        </label>
+
         <input
           type='file'
           name='postImage'
@@ -117,7 +120,20 @@ function Home() {
           ref={fileInputRef}
           onChange={(e) => handleFileInputChange(e)}
         />
-        <button>Post</button>
+        <div className={styles.formButtons}>
+          <label htmlFor='postImage'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              height='24px'
+              viewBox='0 -960 960 960'
+              width='24px'
+              fill='#6161FF'
+            >
+              <path d='M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z' />
+            </svg>
+          </label>
+          <button className={styles.submitButton}>Post</button>
+        </div>
       </form>
       <div>
         {posts.length === 0 ? (
