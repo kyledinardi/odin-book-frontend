@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
@@ -54,6 +53,7 @@ function PostPage() {
         key={post.id}
         post={post}
         replacePost={(updatedPost) => setPost(updatedPost)}
+        isPostPage={true}
       />
       <form onSubmit={(e) => submitComment(e)}>
         <img className='pfp' src={currentUser.pfpUrl} alt='' />

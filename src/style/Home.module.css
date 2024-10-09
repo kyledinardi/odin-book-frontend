@@ -1,5 +1,5 @@
 .postForm {
-  padding: 20px;
+  padding: 20px 15px;
   border: 1px solid #222;
   display: grid;
   grid-template-columns: max-content 1fr 1fr;

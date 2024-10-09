@@ -1,0 +1,62 @@
+.post {
+  padding: 10px 15px;
+  border: 1px solid #222;
+  position: relative;
+}
+
+.postLink {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.userLink {
+  position: relative;
+  z-index: 2;
+}
+
+.post a {
+  color: white;
+  text-decoration: none;
+}
+
+.heading {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+
+.timestamp {
+  color: #777;
+}
+
+.interact {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+.interact button {
+  background-color: inherit;
+  border: none;
+  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.interactNumber {
+  font-size: 1rem;
+}
+
+.likeButton {
+  position: relative;
+  z-index: 2;
+}
+
+.likeSVG {
+  font-size: 24px;
+}

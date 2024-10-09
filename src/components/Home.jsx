@@ -25,7 +25,7 @@ function Home() {
     e.preventDefault();
     const formData = new FormData();
     formData.append('postText', e.target[0].value);
-    formData.append('postImage', e.target[1].files[0]);
+    formData.append('postImage', e.target[2].files[0]);
 
     const responseStream = await fetch('http://localhost:3000/posts', {
       method: 'POST',
@@ -144,6 +144,7 @@ function Home() {
               key={post.id}
               post={post}
               replacePost={(updatedPost) => replacePost(updatedPost)}
+              isPostPage={false}
             />
           ))
         )}
