@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import formatDate from '../formatDate';
 import styles from '../style/Post.module.css';
 
 function Post({ post, replacePost, isPostPage }) {
@@ -27,45 +28,6 @@ function Post({ post, replacePost, isPostPage }) {
 
     const response = await responseStream.json();
     replacePost({ ...post, likes: response.post.likes });
-  }
-
-  function formatDate(date) {
-    const msPerMinute = 60 * 1000;
-    const msPerHour = msPerMinute * 60;
-    const msPerDay = msPerHour * 24;
-
-    const current = new Date();
-    const timestamp = new Date(date);
-    const elapsed = current.getTime() - timestamp.getTime();
-
-    if (elapsed < 1) {
-      return '0s';
-    }
-
-    if (elapsed < msPerMinute) {
-      return `${Math.round(elapsed / 1000)}s`;
-    }
-
-    if (elapsed < msPerHour) {
-      return `${Math.round(elapsed / msPerMinute)}m`;
-    }
-
-    if (elapsed < msPerDay) {
-      return `${Math.round(elapsed / msPerHour)}h`;
-    }
-
-    if (timestamp.getFullYear() === current.getFullYear()) {
-      return timestamp.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-      });
-    }
-
-    return timestamp.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
   }
 
   return (
