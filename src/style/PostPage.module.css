@@ -1,0 +1,36 @@
+.newCommentForm {
+  padding: 20px 15px;
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  grid-template-areas:
+    'pfp commentText commentText'
+    '. . submitButton';
+}
+
+.currentUserPfp {
+  grid-area: pfp;
+  padding-right: 10px;
+}
+
+.commentText {
+  grid-area: commentText;
+  background-color: black;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.2rem;
+  padding: 10px;
+  resize: none;
+  border: none;
+  outline: none;
+}
+
+.submitButton {
+  grid-area: submitButton;
+  width: max-content;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  background-color: blue;
+  color: white;
+  border: none;
+}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
+import styles from '../style/PostPage.module.css';
 
 function PostPage() {
   const [post, setPost] = useState(null);
@@ -45,6 +46,11 @@ function PostPage() {
     setPost({ ...post, comments: newComments });
   }
 
+  function resetTextareaHeight(e) {
+    e.target.style.height = 'auto';
+    e.target.style.height = `${e.target.scrollHeight}px`;
+  }
+
   return !post ? (
     <h1>Loading...</h1>
   ) : (
@@ -55,17 +61,23 @@ function PostPage() {
         replacePost={(updatedPost) => setPost(updatedPost)}
         isPostPage={true}
       />
-      <form onSubmit={(e) => submitComment(e)}>
-        <img className='pfp' src={currentUser.pfpUrl} alt='' />
+      <form
+        className={styles.newCommentForm}
+        onSubmit={(e) => submitComment(e)}
+      >
+        <Link className={styles.currentUserPfp} to={`/users/${currentUser.id}`}>
+          <img className='pfp' src={currentUser.pfpUrl} alt='' />
+        </Link>
         <textarea
+          className={styles.commentText}
           name='commentText'
           id='commentText'
-          cols='30'
-          rows='10'
           placeholder='New Comment'
+          maxLength={1000}
+          onInput={(e) => resetTextareaHeight(e)}
           required
         ></textarea>
-        <button>Post Comment</button>
+        <button className={styles.submitButton}>Post Comment</button>
       </form>
       <div>
         {post.comments.map((comment) => (
