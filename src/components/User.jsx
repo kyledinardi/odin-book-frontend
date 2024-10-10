@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import styles from '../style/User.module.css';
 
 function User({ user, isFollowed, replaceUser }) {
   async function follow() {
@@ -24,15 +25,17 @@ function User({ user, isFollowed, replaceUser }) {
   }
 
   return (
-    <div>
-      <Link to={`/users/${user.id}`}>
+    <div className={styles.user}>
+      <Link className={styles.userPfp} to={`/users/${user.id}`}>
         <img className='pfp' src={user.pfpUrl} alt='' />
+      </Link>
+      <Link className={styles.username} to={`/users/${user.id}`}>
         <span>{user.username}</span>
       </Link>
-      <button onClick={() => follow()}>
+      <button className={styles.followButton} onClick={() => follow()}>
         {isFollowed ? 'Unfollow' : 'Follow'}
       </button>
-      <p>{user.bio}</p>
+      <p className={styles.bio}>{user.bio}</p>
     </div>
   );
 }

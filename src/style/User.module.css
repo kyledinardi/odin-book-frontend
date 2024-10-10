@@ -1,0 +1,37 @@
+.user {
+  padding: 10px 15px;
+  border: 1px solid #222;
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  gap: 10px;
+  align-items: start;
+  grid-template-areas:
+    'userPfp username followButton'
+    '. bio .';
+}
+
+.user a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.userPfp {
+  grid-area: userPfp;
+}
+
+.username {
+  grid-area: username;
+}
+
+.followButton {
+  grid-area: followButton;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-weight: bold;
+  border: none;
+}
+
+.bio {
+  grid-area: bio;
+  margin: 0;
+}
