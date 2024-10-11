@@ -59,7 +59,6 @@ function PostPage() {
         key={post.id}
         post={post}
         replacePost={(updatedPost) => setPost(updatedPost)}
-        isPostPage={true}
       />
       <form
         className={styles.newCommentForm}

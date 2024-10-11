@@ -231,7 +231,6 @@ function Profile() {
               key={post.id}
               post={post}
               replacePost={(updatedPost) => replacePost(updatedPost)}
-              isPostPage={false}
             />
           ))
         )}

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import formatDate from '../formatDate';
 import styles from '../style/Post.module.css';
 
-function Post({ post, replacePost, isPostPage }) {
+function Post({ post, replacePost }) {
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
@@ -32,11 +32,6 @@ function Post({ post, replacePost, isPostPage }) {
 
   return (
     <div className={styles.post}>
-      {!isPostPage && (
-        <Link to={`/posts/${post.id}`}>
-          <span className={styles.postLink}></span>
-        </Link>
-      )}
       <div className={styles.heading}>
         <Link className={styles.userLink} to={`/users/${post.authorId}`}>
           <img className='pfp' src={post.author.pfpUrl} alt='' />
@@ -44,23 +39,27 @@ function Post({ post, replacePost, isPostPage }) {
         <Link className={styles.userLink} to={`/users/${post.authorId}`}>
           <strong>{post.author.username}</strong>
         </Link>
-        <span className={styles.timestamp}>{formatDate(post.timestamp)}</span>
+        <Link to={`/posts/${post.id}`}>
+          <span className={styles.timestamp}>{formatDate(post.timestamp)}</span>
+        </Link>
       </div>
       <p>{post.text}</p>
       {post.imageUrl && <img src={post.imageUrl} alt='' />}
       <div className={styles.interact}>
-        <button>
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            height='24px'
-            viewBox='0 -960 960 960'
-            width='24px'
-            fill='#777'
-          >
-            <path d='M240-400h480v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM880-80 720-240H160q-33 0-56.5-23.5T80-320v-480q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v720ZM160-320h594l46 45v-525H160v480Zm0 0v-480 480Z' />
-          </svg>
-          <span>{post.comments.length}</span>
-        </button>
+        <Link to={`/posts/${post.id}`}>
+          <button>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              height='24px'
+              viewBox='0 -960 960 960'
+              width='24px'
+              fill='#777'
+            >
+              <path d='M240-400h480v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM880-80 720-240H160q-33 0-56.5-23.5T80-320v-480q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v720ZM160-320h594l46 45v-525H160v480Zm0 0v-480 480Z' />
+            </svg>
+            <span>{post.comments.length}</span>
+          </button>{' '}
+        </Link>
         <button onClick={() => like()}>
           <div
             style={{
@@ -82,7 +81,6 @@ function Post({ post, replacePost, isPostPage }) {
 Post.propTypes = {
   post: PropTypes.object,
   replacePost: PropTypes.func,
-  isPostPage: PropTypes.bool,
 };
 
 export default Post;
