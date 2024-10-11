@@ -33,14 +33,15 @@ function Post({ post, replacePost }) {
   return (
     <div className={styles.post}>
       <div className={styles.heading}>
-        <Link className={styles.userLink} to={`/users/${post.authorId}`}>
+        <Link to={`/users/${post.authorId}`}>
           <img className='pfp' src={post.author.pfpUrl} alt='' />
         </Link>
-        <Link className={styles.userLink} to={`/users/${post.authorId}`}>
-          <strong>{post.author.username}</strong>
+        <Link to={`/users/${post.authorId}`}>
+          <strong>{post.author.displayName}</strong>
+          <span className='gray'>{` @${post.author.username}`}</span>
         </Link>
         <Link to={`/posts/${post.id}`}>
-          <span className={styles.timestamp}>{formatDate(post.timestamp)}</span>
+          <span className='gray'>{formatDate(post.timestamp)}</span>
         </Link>
       </div>
       <p>{post.text}</p>

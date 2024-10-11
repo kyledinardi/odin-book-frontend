@@ -30,7 +30,8 @@ function User({ user, isFollowed, replaceUser }) {
         <img className='pfp' src={user.pfpUrl} alt='' />
       </Link>
       <Link className={styles.username} to={`/users/${user.id}`}>
-        <span>{user.username}</span>
+        <strong>{user.displayName}</strong>
+        <span className='gray'>{` @${user.username}`}</span>
       </Link>
       <button className={styles.followButton} onClick={() => follow()}>
         {isFollowed ? 'Unfollow' : 'Follow'}

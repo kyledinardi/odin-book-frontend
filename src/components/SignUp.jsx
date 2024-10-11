@@ -15,9 +15,10 @@ function SignUp() {
       headers: { 'Content-Type': 'application/json' },
 
       body: JSON.stringify({
-        username: e.target[0].value,
-        password: e.target[1].value,
-        passwordConfirmation: e.target[2].value,
+        displayName: e.target[0].value,
+        username: e.target[1].value,
+        password: e.target[2].value,
+        passwordConfirmation: e.target[3].value,
       }),
     });
 
@@ -36,6 +37,10 @@ function SignUp() {
       <h1>Sign up for FakeSocial</h1>
       <div className={styles.loginForms}>
         <form className={styles.flexForm} onSubmit={(e) => submitLogin(e)}>
+          <div>
+            <label htmlFor="displayName">Display Name (optional)</label>
+            <input type="text" name="displayName" id="displayName" />
+          </div>
           <div>
             <label htmlFor='username'>Username</label>
             <input type='text' name='username' id='username' required />

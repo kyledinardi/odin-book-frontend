@@ -14,7 +14,7 @@ function Sidebar({ currentUser }) {
     <h2>Loading...</h2>
   ) : (
     <aside className={styles.sidebar}>
-      <div>
+      <div className={styles.sidebarButtons}>
         <Link className={styles.sidebarButton} to='/'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -58,7 +58,10 @@ function Sidebar({ currentUser }) {
       <div className={styles.user}>
         <div className={styles.userInfo}>
           <img className='pfp' src={currentUser.pfpUrl} alt='' />
-          <span>{currentUser.username}</span>
+          <div className={styles.names}>
+            <span>{currentUser.displayName}</span>
+            <span className={styles.username}>{`@${currentUser.username}`}</span>
+          </div>
         </div>
         <button className={styles.sidebarButton} onClick={() => logout()}>
           <svg

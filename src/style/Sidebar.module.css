@@ -8,27 +8,27 @@
   position: fixed;
 }
 
+.sidebarButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .sidebarButton {
   display: flex;
   align-items: center;
-  justify-content: end;
   background-color: black;
   color: white;
-  margin: 5px 0;
+  border-radius: 20px;
   width: max-content;
+  gap: 20px;
+  padding: 5px 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .sidebarButton:hover {
-  background-color: #111;
-}
-
-.sidebar span {
-  width: 120px;
-  font-size: 1.2rem;
-  text-align: start;
-  font-weight: bold;
-  width: max-content;
-  padding: 10px 20px;
+  background-color: #222;
 }
 
 .user {
@@ -40,4 +40,15 @@
 .userInfo {
   display: flex;
   align-items: center;
+  gap: 20px;
+}
+
+.names {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.username {
+  color: #777;
 }

@@ -49,7 +49,8 @@ function Profile() {
     e.preventDefault();
     const formData = new FormData();
     formData.append('pfp', e.target[0].files[0]);
-    formData.append('bio', e.target[2].value);
+    formData.append('displayName', e.target[2].value);
+    formData.append('bio', e.target[3].value);
 
     const responseStream = await fetch('http://localhost:3000/users/profile', {
       method: 'PUT',
@@ -69,6 +70,7 @@ function Profile() {
     const newCurrentUser = {
       ...currentUser,
       pfpUrl: response.user.pfpUrl,
+      displayName: response.user.displayName,
       bio: response.user.bio,
     };
 
@@ -148,7 +150,7 @@ function Profile() {
             onChange={(e) => handleFileInputChange(e)}
             hidden
           />
-          <label htmlFor='pfp'>New Profile Picture</label>
+          <label htmlFor='pfp'>Profile Picture</label>
           <div className={styles.newPfpPreview}>
             <label htmlFor='pfp'>
               <img
@@ -177,7 +179,14 @@ function Profile() {
               </svg>
             </button>
           </div>
-          <label htmlFor='bio'>New Bio</label>
+          <label htmlFor='displayName'>Display Name</label>
+          <input
+            type='text'
+            name='displayName'
+            id='displayName'
+            defaultValue={currentUser.displayName}
+          />
+          <label htmlFor='bio'>Bio</label>
           <textarea
             name='bio'
             id='bio'
@@ -189,7 +198,7 @@ function Profile() {
         </form>
       </dialog>
       <div className={styles.heading}>
-        <h2>{user.username}</h2>
+        <h2>{user.displayName}</h2>
         <p>{posts.length} posts</p>
       </div>
       <div className={styles.pfpAndButton}>
@@ -208,7 +217,8 @@ function Profile() {
         )}
       </div>
       <div className={styles.userInfo}>
-        <h2>{user.username}</h2>
+        <h2>{user.displayName}</h2>
+        <span className='gray'>{`@${user.username}`}</span>
         <p>{user.bio}</p>
         <div className={styles.followStats}>
           <span>

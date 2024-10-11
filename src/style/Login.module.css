@@ -23,13 +23,17 @@
 .loginForms input {
   padding: 10px;
   font-size: 1rem;
+  margin-top: 5px;
 }
 
 .loginForms button {
   font-size: medium;
-  font-weight: bold;
-  border-radius: 20px;
   padding: 5px 0;
+}
+
+.loginForms a {
+  color: #6161ff;
+  text-decoration: underline;
 }
 
 .error {

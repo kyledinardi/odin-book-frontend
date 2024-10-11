@@ -11,9 +11,12 @@ function Comment({ comment }) {
           <img className='pfp' src={comment.user.pfpUrl} alt='' />
         </Link>
         <Link to={`/users/${comment.userId}`}>
-          <strong>{comment.user.username}</strong>
+          <strong>{comment.user.displayName}</strong>
+          <span className='gray'>{` @${comment.user.username}`}</span>
         </Link>
-        <span className={styles.timestamp}>{formatDate(comment.timestamp)}</span>
+        <span className='gray'>
+          {formatDate(comment.timestamp)}
+        </span>
       </div>
       <p>{comment.text}</p>
     </div>

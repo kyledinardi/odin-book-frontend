@@ -83,3 +83,7 @@ img {
   border-radius: 20px;
   object-fit: cover;
 }
+
+.gray {
+  color: gray;
+}

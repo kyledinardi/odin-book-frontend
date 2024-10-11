@@ -29,6 +29,10 @@
   padding: 10px 15px;
 }
 
+.userInfo h2 {
+  margin: 5px 0;
+}
+
 .followStats {
   display: flex;
   gap: 20px;
