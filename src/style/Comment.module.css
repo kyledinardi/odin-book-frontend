@@ -1,12 +1,7 @@
 .comment {
-  padding: 10px 15px;
+  padding: 20px;
   border: 1px solid #222;
   position: relative;
-}
-
-.comment a {
-  color: inherit;
-  text-decoration: none;
 }
 
 .heading {
@@ -17,4 +12,8 @@
 
 .timestamp {
   color: #777;
+}
+
+.comment p {
+  margin-bottom: 0;
 }

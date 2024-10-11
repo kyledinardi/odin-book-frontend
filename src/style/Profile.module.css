@@ -1,0 +1,96 @@
+.heading {
+  padding-left: 20px;
+}
+
+.heading * {
+  margin: 5px;
+}
+
+.heading p {
+  color: #777;
+  font-size: 0.8rem;
+}
+
+.pfpAndButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.profilePagePfp {
+  height: 130px;
+  width: 130px;
+  border-radius: 65px;
+  object-fit: cover;
+}
+
+.userInfo {
+  padding: 10px 15px;
+}
+
+.followStats {
+  display: flex;
+  gap: 20px;
+  color: #777;
+}
+
+.followStats strong {
+  color: white;
+}
+
+.postHeading {
+  padding-left: 20px;
+}
+
+.modal {
+  background-color: black;
+  color: white;
+  border: 5px solid #222;
+  border-radius: 10px;
+}
+
+.closeModalButton {
+  position: absolute;
+  padding: 0;
+  border-radius: 16px;
+  border: 0;
+  top: 5px;
+  right: 5px;
+  height: 24px;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: white;
+  align-items: center;
+}
+
+.modal label {
+  font-size: 1.2rem;
+}
+
+.modal textarea {
+  border-radius: 10px;
+  border: 1px solid white;
+}
+
+::backdrop {
+  background-color: black;
+  opacity: 0.8;
+}
+
+.newPfpPreview {
+  position: relative;
+}
+
+.modal .cancelNewPfp {
+  position: absolute;
+  background-color: black;
+  padding: 0;
+  top: -5px;
+  right: -5px;
+  height: 24px;
+}

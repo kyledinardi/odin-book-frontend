@@ -36,17 +36,39 @@ main {
   border: 1px solid #222;
 }
 
+.nothingHere {
+  margin: 0;
+  padding: 30px;
+  border: 1px solid #222;
+}
+
 a {
-  color: #6161ff;
+  color: white;
+  text-decoration: none;
 }
 
 button {
   background-color: white;
+  border: 0;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
 }
 
 button,
 label {
   cursor: pointer;
+}
+
+textarea {
+  background-color: black;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.2rem;
+  padding: 10px;
+  resize: none;
+  border: none;
+  outline: none;
 }
 
 img {
@@ -59,4 +81,5 @@ img {
   width: 40px;
   height: 40px;
   border-radius: 20px;
+  object-fit: cover;
 }
