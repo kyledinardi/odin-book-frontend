@@ -108,6 +108,10 @@ function Profile() {
     setPosts(newPosts);
   }
 
+  function removePost(postId) {
+    setPosts(posts.filter((post) => post.id !== postId));
+  }
+
   function handleFileInputChange(e) {
     const file = e.target.files[0];
 
@@ -241,6 +245,7 @@ function Profile() {
               key={post.id}
               post={post}
               replacePost={(updatedPost) => replacePost(updatedPost)}
+              removePost={(postId) => removePost(postId)}
             />
           ))
         )}

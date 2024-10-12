@@ -67,6 +67,10 @@ function Home() {
     setPosts(newPosts);
   }
 
+  function removePost(postId) {
+    setPosts(posts.filter((post) => post.id !== postId));
+  }
+
   function resetTextareaHeight(e) {
     e.target.style.height = 'auto';
     e.target.style.height = `${e.target.scrollHeight}px`;
@@ -147,6 +151,7 @@ function Home() {
               key={post.id}
               post={post}
               replacePost={(updatedPost) => replacePost(updatedPost)}
+              removePost={(postId) => removePost(postId)}
             />
           ))
         )}

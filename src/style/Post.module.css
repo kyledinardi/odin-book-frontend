@@ -6,14 +6,26 @@
 
 .heading {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.links {
+  display: flex;
   align-items: start;
   gap: 10px;
+}
+
+.postOptions button {
+  background-color: black;
+  padding: 0;
+  margin: 5px;
+  height: 24px;
 }
 
 .interact {
   display: flex;
   justify-content: space-around;
-  margin-top: 10px;
 }
 
 .interact button {
@@ -23,4 +35,23 @@
   align-items: center;
   gap: 5px;
   font-size: 1rem;
+  padding: 0;
+}
+
+dialog {
+  background-color: black;
+  color: white;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 30px;
+}
+
+dialog h2 {
+  margin-top: 0;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }

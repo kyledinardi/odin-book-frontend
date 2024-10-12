@@ -1,5 +1,11 @@
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom';
+
 import { useEffect, useState } from 'react';
-import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import styles from '../style/PostPage.module.css';
@@ -8,6 +14,7 @@ function PostPage() {
   const [post, setPost] = useState(null);
   const { postId } = useParams();
   const [currentUser] = useOutletContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`http://localhost:3000/posts/${postId}`, {
@@ -59,6 +66,7 @@ function PostPage() {
         key={post.id}
         post={post}
         replacePost={(updatedPost) => setPost(updatedPost)}
+        removePost={() => navigate('/')}
       />
       <form
         className={styles.newCommentForm}
