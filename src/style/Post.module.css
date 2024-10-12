@@ -55,3 +55,14 @@ dialog h2 {
   justify-content: center;
   gap: 20px;
 }
+
+.postEditText {
+  border: 1px solid #222;
+  width: 100%;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.editButtons button {
+  margin: 0 10px 10px 0;
+}

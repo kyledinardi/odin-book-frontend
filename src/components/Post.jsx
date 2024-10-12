@@ -6,12 +6,55 @@ import styles from '../style/Post.module.css';
 
 function Post({ post, replacePost, removePost }) {
   const [isLiked, setIsLiked] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const modal = useRef(null);
 
   useEffect(() => {
     const currentUserId = parseInt(localStorage.getItem('userId'), 10);
     setIsLiked(post.likes.some((user) => user.id === currentUserId));
   }, [post]);
+
+  async function deletePost() {
+    await fetch(
+      `http://localhost:3000/posts/${post.id}`,
+
+      {
+        method: 'DELETE',
+        mode: 'cors',
+
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      },
+    );
+
+    removePost(post.id);
+    modal.current.close();
+  }
+
+  async function submitEdit(e) {
+    e.preventDefault();
+
+    const responseStream = await fetch(
+      `http://localhost:3000/posts/${post.id}`,
+
+      {
+        method: 'PUT',
+        mode: 'cors',
+
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({ text: e.target[0].value }),
+      },
+    );
+
+    const response = await responseStream.json();
+    replacePost({ ...post, text: response.post.text });
+    setIsEditing(false);
+  }
 
   async function like() {
     const responseStream = await fetch(
@@ -31,22 +74,9 @@ function Post({ post, replacePost, removePost }) {
     replacePost({ ...post, likes: response.post.likes });
   }
 
-  async function deletePost() {
-    await fetch(
-      `http://localhost:3000/posts/${post.id}`,
-
-      {
-        method: 'DELETE',
-        mode: 'cors',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
-    );
-
-    removePost(post.id);
-    modal.current.close();
+  function resetTextareaHeight(e) {
+    e.target.style.height = 'auto';
+    e.target.style.height = `${e.target.scrollHeight}px`;
   }
 
   return (
@@ -73,7 +103,7 @@ function Post({ post, replacePost, removePost }) {
         </div>
         {post.author.id === parseInt(localStorage.getItem('userId'), 10) && (
           <div className={styles.postOptions}>
-            <button>
+            <button onClick={() => setIsEditing(true)}>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
                 height='24px'
@@ -98,8 +128,28 @@ function Post({ post, replacePost, removePost }) {
           </div>
         )}
       </div>
-
-      <p>{post.text}</p>
+      {isEditing ? (
+        <form onSubmit={(e) => submitEdit(e)}>
+          <textarea
+            className={styles.postEditText}
+            name='postEditText'
+            id='postEditText'
+            defaultValue={post.text}
+            maxLength={1000}
+            placeholder='Edit Post'
+            onInput={(e) => resetTextareaHeight(e)}
+            required
+          ></textarea>
+          <div className={styles.editButtons}>
+            <button>Edit</button>
+            <button type='button' onClick={() => setIsEditing(false)}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <p>{post.text}</p>
+      )}
       {post.imageUrl && <img src={post.imageUrl} alt='' />}
       <div className={styles.interact}>
         <Link to={`/posts/${post.id}`}>
