@@ -58,6 +58,22 @@ function PostPage() {
     e.target.style.height = `${e.target.scrollHeight}px`;
   }
 
+  function replaceComment(updatedComment) {
+    const newComments = post.comments.map((comment) =>
+      comment.id === updatedComment.id ? updatedComment : comment,
+    );
+
+    setPost({ ...post, comments: newComments });
+  }
+
+  function removeComment(commentId) {
+    const newComments = post.comments.filter(
+      (comment) => comment.id !== commentId,
+    );
+    
+    setPost({ ...post, comments: newComments });
+  }
+
   return !post ? (
     <h1>Loading...</h1>
   ) : (
@@ -88,7 +104,12 @@ function PostPage() {
       </form>
       <div>
         {post.comments.map((comment) => (
-          <Comment key={comment.id} comment={comment} />
+          <Comment
+            key={comment.id}
+            comment={comment}
+            replaceComment={(updatedComment) => replaceComment(updatedComment)}
+            removeComment={(commentId) => removeComment(commentId)}
+          />
         ))}
       </div>
     </main>

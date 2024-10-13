@@ -33,7 +33,7 @@ function Profile() {
           setUser(response.user);
         });
 
-      fetch(`http://localhost:3000/posts/user/${userId}`, {
+      fetch(`http://localhost:3000/users/${userId}/posts`, {
         mode: 'cors',
 
         headers: {
