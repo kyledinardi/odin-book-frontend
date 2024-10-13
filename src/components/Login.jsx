@@ -9,7 +9,7 @@ function Login() {
   async function submitLogin(e) {
     e.preventDefault();
 
-    const responseStream = await fetch('http://localhost:3000/users/login', {
+    const responseStream = await fetch('http://localhost:3000/auth/local', {
       method: 'Post',
       mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
