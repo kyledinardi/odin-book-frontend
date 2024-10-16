@@ -5,7 +5,9 @@ import styles from '../style/User.module.css';
 function User({ user, isFollowed, replaceUser }) {
   async function follow() {
     const responseStream = await fetch(
-      `http://localhost:3000/users/${isFollowed ? 'unfollow' : 'follow'}`,
+      `${import.meta.env.VITE_BACKEND_URL}/users/${
+        isFollowed ? 'unfollow' : 'follow'
+      }`,
 
       {
         method: 'Put',

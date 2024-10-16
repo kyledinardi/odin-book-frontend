@@ -9,7 +9,7 @@ function UserList() {
 
   useEffect(() => {
     if (currentUser) {
-      fetch('http://localhost:3000/users', {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
         mode: 'cors',
 
         headers: {

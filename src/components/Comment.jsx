@@ -16,7 +16,7 @@ function Comment({ comment, replaceComment, removeComment }) {
 
   async function deleteComment() {
     await fetch(
-      `http://localhost:3000/comments/${comment.id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}`,
 
       {
         method: 'DELETE',
@@ -36,7 +36,7 @@ function Comment({ comment, replaceComment, removeComment }) {
     e.preventDefault();
 
     const responseStream = await fetch(
-      `http://localhost:3000/comments/${comment.id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}`,
 
       {
         method: 'PUT',
@@ -58,7 +58,7 @@ function Comment({ comment, replaceComment, removeComment }) {
 
   async function like() {
     const responseStream = await fetch(
-      `http://localhost:3000/comments/${comment.id}/${
+      `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}/${
         isLiked ? 'unlike' : 'like'
       }`,
 

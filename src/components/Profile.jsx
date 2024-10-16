@@ -15,7 +15,7 @@ function Profile() {
 
   useEffect(() => {
     if (currentUser) {
-      fetch(`http://localhost:3000/users/${userId}`, {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
         mode: 'cors',
 
         headers: {
@@ -33,7 +33,7 @@ function Profile() {
           setUser(response.user);
         });
 
-      fetch(`http://localhost:3000/users/${userId}/posts`, {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/posts`, {
         mode: 'cors',
 
         headers: {
@@ -52,16 +52,20 @@ function Profile() {
     formData.append('displayName', e.target[2].value);
     formData.append('bio', e.target[3].value);
 
-    const responseStream = await fetch('http://localhost:3000/users/profile', {
-      method: 'PUT',
-      mode: 'cors',
+    const responseStream = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/users/profile`,
 
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      {
+        method: 'PUT',
+        mode: 'cors',
+
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+
+        body: formData,
       },
-
-      body: formData,
-    });
+    );
 
     const response = await responseStream.json();
     e.target.reset();
@@ -79,7 +83,9 @@ function Profile() {
 
   async function follow() {
     const responseStream = await fetch(
-      `http://localhost:3000/users/${isFollowed ? 'unfollow' : 'follow'}`,
+      `${import.meta.env.VITE_BACKEND_URL}/users/${
+        isFollowed ? 'unfollow' : 'follow'
+      }`,
 
       {
         method: 'Put',

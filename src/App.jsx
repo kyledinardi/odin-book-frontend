@@ -6,7 +6,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/users/currentUser', {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/currentUser`, {
       mode: 'cors',
 
       headers: {

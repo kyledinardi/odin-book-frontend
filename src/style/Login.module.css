@@ -27,17 +27,37 @@
 }
 
 .loginForms button {
-  font-size: medium;
-  padding: 5px 0;
+  font-size: 1rem;
 }
 
-.loginForms a {
+.logoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.logoButton {
+  color: black;
+  background-color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.logo {
+  height: 24px;
+}
+
+.signUpLink {
   color: #6161ff;
   text-decoration: underline;
 }
 
 .error {
-  background-color: blue;
+  background-color: #6161ff;
+  border-radius: 5px;
   display: flex;
   justify-content: center;
   padding: 10px;

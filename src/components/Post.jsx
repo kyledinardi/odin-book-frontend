@@ -16,7 +16,7 @@ function Post({ post, replacePost, removePost }) {
 
   async function deletePost() {
     await fetch(
-      `http://localhost:3000/posts/${post.id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}`,
 
       {
         method: 'DELETE',
@@ -36,7 +36,7 @@ function Post({ post, replacePost, removePost }) {
     e.preventDefault();
 
     const responseStream = await fetch(
-      `http://localhost:3000/posts/${post.id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}`,
 
       {
         method: 'PUT',
@@ -58,7 +58,9 @@ function Post({ post, replacePost, removePost }) {
 
   async function like() {
     const responseStream = await fetch(
-      `http://localhost:3000/posts/${post.id}/${isLiked ? 'unlike' : 'like'}`,
+      `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}/${
+        isLiked ? 'unlike' : 'like'
+      }`,
 
       {
         method: 'Put',

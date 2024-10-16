@@ -10,7 +10,7 @@ function Home() {
   const [currentUser] = useOutletContext();
 
   useEffect(() => {
-    fetch('http://localhost:3000/posts/index', {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/index`, {
       mode: 'cors',
 
       headers: {
@@ -30,16 +30,20 @@ function Home() {
       formData.append('postImage', e.target[2].files[0]);
     }
 
-    const responseStream = await fetch('http://localhost:3000/posts', {
-      method: 'POST',
-      mode: 'cors',
+    const responseStream = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/posts`,
+      
+      {
+        method: 'POST',
+        mode: 'cors',
 
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+
+        body: formData,
       },
-
-      body: formData,
-    });
+    );
 
     const response = await responseStream.json();
     e.target.reset();

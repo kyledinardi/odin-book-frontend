@@ -17,7 +17,7 @@ function PostPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:3000/posts/${postId}`, {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/${postId}`, {
       mode: 'cors',
 
       headers: {
@@ -32,7 +32,7 @@ function PostPage() {
     e.preventDefault();
 
     const responseStream = await fetch(
-      `http://localhost:3000/posts/${postId}/comments`,
+      `${import.meta.env.VITE_BACKEND_URL}/posts/${postId}/comments`,
 
       {
         method: 'POST',
@@ -70,7 +70,7 @@ function PostPage() {
     const newComments = post.comments.filter(
       (comment) => comment.id !== commentId,
     );
-    
+
     setPost({ ...post, comments: newComments });
   }
 

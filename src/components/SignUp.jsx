@@ -9,18 +9,22 @@ function SignUp() {
   async function submitLogin(e) {
     e.preventDefault();
 
-    const responseStream = await fetch('http://localhost:3000/users', {
-      method: 'Post',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
+    const responseStream = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/users`,
+      
+      {
+        method: 'Post',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
 
-      body: JSON.stringify({
-        displayName: e.target[0].value,
-        username: e.target[1].value,
-        password: e.target[2].value,
-        passwordConfirmation: e.target[3].value,
-      }),
-    });
+        body: JSON.stringify({
+          displayName: e.target[0].value,
+          username: e.target[1].value,
+          password: e.target[2].value,
+          passwordConfirmation: e.target[3].value,
+        }),
+      },
+    );
 
     const response = await responseStream.json();
 
@@ -38,8 +42,8 @@ function SignUp() {
       <div className={styles.loginForms}>
         <form className={styles.flexForm} onSubmit={(e) => submitLogin(e)}>
           <div>
-            <label htmlFor="displayName">Display Name (optional)</label>
-            <input type="text" name="displayName" id="displayName" />
+            <label htmlFor='displayName'>Display Name (optional)</label>
+            <input type='text' name='displayName' id='displayName' />
           </div>
           <div>
             <label htmlFor='username'>Username</label>
