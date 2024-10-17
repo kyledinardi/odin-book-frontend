@@ -1,9 +1,8 @@
 .user {
-  padding: 20px;
+  padding: 15px;
   border: 1px solid #222;
   display: grid;
   grid-template-columns: max-content 1fr max-content;
-  gap: 10px;
   align-items: start;
   grid-template-areas:
     'userPfp username followButton'
@@ -21,6 +20,7 @@
 
 .username {
   grid-area: username;
+  margin: 0 10px;
 }
 
 .followButton {
@@ -33,5 +33,5 @@
 
 .bio {
   grid-area: bio;
-  margin: 0;
+  margin: 10px 0 0 0;
 }

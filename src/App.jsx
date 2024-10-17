@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
+import UserList from './components/UserList.jsx';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -19,10 +20,12 @@ function App() {
 
   return (
     <div className='app'>
-      <div className='sidebarContainer'>
-        <Sidebar currentUser={currentUser} />
-      </div>
+      <Sidebar currentUser={currentUser} />
       <Outlet context={[currentUser, setCurrentUser]} />
+      <UserList
+        currentUser={currentUser}
+        setCurrentUser={(user) => setCurrentUser(user)}
+      />
     </div>
   );
 }

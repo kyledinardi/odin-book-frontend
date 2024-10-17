@@ -7,6 +7,7 @@ import SignUp from './components/SignUp.jsx';
 import PostPage from './components/PostPage.jsx';
 import UserList from './components/UserList.jsx';
 import Profile from './components/Profile.jsx';
+import Search from './components/Search.jsx';
 
 const routes = [
   {
@@ -20,6 +21,7 @@ const routes = [
       { path: 'posts/:postId', element: <PostPage /> },
       { path: '/users', element: <UserList /> },
       { path: '/users/:userId', element: <Profile /> },
+      { path: '/search', element: <Search /> },
     ],
   },
 

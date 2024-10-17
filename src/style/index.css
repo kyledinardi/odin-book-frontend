@@ -26,11 +26,6 @@ body,
   margin: auto;
 }
 
-.sidebarContainer {
-  display: flex;
-  justify-content: end;
-}
-
 main {
   max-width: 600px;
   border: 1px solid #222;
@@ -53,6 +48,14 @@ button {
   padding: 10px 20px;
   border-radius: 20px;
   font-weight: bold;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+button:active {
+  background-color: #bbb;
 }
 
 button,

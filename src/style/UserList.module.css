@@ -1,0 +1,28 @@
+.userListContainer {
+  width: 350px;
+}
+
+.userList {
+  position: fixed;
+  width: 350px;
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 5px;
+  padding: 0 20px;
+  border: 1px solid #222;
+  border-radius: 20px;
+}
+
+.searchForm input {
+  background-color: black;
+  color: white;
+  font-size: 1rem;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  outline: none;
+}

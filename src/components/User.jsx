@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import styles from '../style/User.module.css';
 
-function User({ user, isFollowed, replaceUser }) {
+function User({ user, bio, isFollowed, replaceUser }) {
   async function follow() {
     const responseStream = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/users/${
@@ -38,13 +38,14 @@ function User({ user, isFollowed, replaceUser }) {
       <button className={styles.followButton} onClick={() => follow()}>
         {isFollowed ? 'Unfollow' : 'Follow'}
       </button>
-      <p className={styles.bio}>{user.bio}</p>
+      {!!bio && <p className={styles.bio}>{user.bio}</p>}
     </div>
   );
 }
 
 User.propTypes = {
   user: PropTypes.object,
+  bio: PropTypes.bool,
   isFollowed: PropTypes.bool,
   replaceUser: PropTypes.func,
 };
