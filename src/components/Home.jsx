@@ -121,7 +121,6 @@ function Home() {
             </button>
           </div>
         )}
-
         <input
           type='file'
           name='postImage'

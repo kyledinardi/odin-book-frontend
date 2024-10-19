@@ -5,9 +5,9 @@ import ErrorPage from './components/ErrorPage.jsx';
 import Login from './components/Login.jsx';
 import SignUp from './components/SignUp.jsx';
 import PostPage from './components/PostPage.jsx';
-import UserList from './components/UserList.jsx';
-import Profile from './components/Profile.jsx';
 import Search from './components/Search.jsx';
+import Profile from './components/Profile.jsx';
+import Follows from './components/Follows.jsx';
 
 const routes = [
   {
@@ -19,9 +19,9 @@ const routes = [
     children: [
       { index: true, element: <Home /> },
       { path: 'posts/:postId', element: <PostPage /> },
-      { path: '/users', element: <UserList /> },
-      { path: '/users/:userId', element: <Profile /> },
       { path: '/search', element: <Search /> },
+      { path: '/users/:userId/follows', element: <Follows /> },
+      { path: '/users/:userId', element: <Profile /> },
     ],
   },
 

@@ -1,0 +1,28 @@
+.heading {
+  padding-left: 20px;
+}
+
+.heading * {
+  margin: 5px;
+}
+
+.heading p {
+  color: #777;
+  font-size: 0.8rem;
+}
+
+.categoryButton {
+  background-color: black;
+  color: white;
+  border-radius: 0;
+  font-size: 1rem;
+}
+
+.categoryButton:hover,
+.openTab {
+  background-color: #222;
+}
+
+.categoryButton:active {
+  background-color: #444;
+}

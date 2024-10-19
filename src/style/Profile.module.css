@@ -37,6 +37,7 @@
   display: flex;
   gap: 20px;
   color: #777;
+  width: max-content;
 }
 
 .followStats strong {

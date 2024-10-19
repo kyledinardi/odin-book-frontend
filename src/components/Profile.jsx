@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import styles from '../style/Profile.module.css';
 
@@ -230,14 +230,14 @@ function Profile() {
         <h2>{user.displayName}</h2>
         <span className='gray'>{`@${user.username}`}</span>
         <p>{user.bio}</p>
-        <div className={styles.followStats}>
+        <Link className={styles.followStats} to={`/users/${user.id}/follows`}>
           <span>
             <strong>{user.following.length}</strong> Following
           </span>
           <span>
             <strong>{user.followers.length}</strong> Followers
           </span>
-        </div>
+        </Link>
       </div>
       <h3 className={styles.postHeading}>Posts</h3>
       <div>
