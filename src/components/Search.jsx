@@ -5,7 +5,7 @@ import User from './User.jsx';
 import styles from '../style/Search.module.css';
 
 function Search() {
-  const [postsOrUsers, setPostsOrUsers] = useState('posts');
+  const [openTab, setOpenTab] = useState('posts');
   const [posts, setPosts] = useState(null);
   const [users, setUsers] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
@@ -45,7 +45,6 @@ function Search() {
         )
           .then((response) => response.json())
           .then((response) => setPosts(response.posts));
-
         fetch(
           `${
             import.meta.env.VITE_BACKEND_URL
@@ -105,12 +104,26 @@ function Search() {
           defaultValue={searchParams.get('query')}
         />
       </form>
-      <div className={styles.categoryButtons}>
-        <button onClick={() => setPostsOrUsers('posts')}>Posts</button>
-        <button onClick={() => setPostsOrUsers('users')}>Users</button>
+      <div>
+        <button
+          className={`${styles.categoryButton} ${
+            openTab === 'posts' ? styles.openTab : null
+          }`}
+          onClick={() => setOpenTab('posts')}
+        >
+          Posts
+        </button>
+        <button
+          className={`${styles.categoryButton} ${
+            openTab === 'users' ? styles.openTab : null
+          }`}
+          onClick={() => setOpenTab('users')}
+        >
+          Users
+        </button>
       </div>
       {posts &&
-        (postsOrUsers === 'posts' ? (
+        (openTab === 'posts' ? (
           <div>
             {posts.map((post) => (
               <Post
@@ -128,7 +141,7 @@ function Search() {
                 key={user.id}
                 user={user}
                 bio={true}
-                isFollowed={!!followedIds.includes(user.id)}
+                isFollowed={followedIds.includes(user.id)}
                 replaceUser={(updatedUser) =>
                   setCurrentUser({
                     ...currentUser,

@@ -21,6 +21,9 @@
 .username {
   grid-area: username;
   margin: 0 10px;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
 }
 
 .followButton {

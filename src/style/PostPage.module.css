@@ -19,6 +19,14 @@
 .submitButton {
   grid-area: submitButton;
   width: max-content;
-  background-color: #6161FF;
+  background-color: #6161ff;
   color: white;
+}
+
+.submitButton:hover {
+  background-color: #4141df;
+}
+
+.submitButton:active {
+  background-color: #2121bf;
 }

@@ -18,13 +18,18 @@
   outline: none;
 }
 
-.categoryButtons button {
+.categoryButton {
   background-color: black;
   color: white;
   border-radius: 0;
   font-size: 1rem;
 }
 
-.categoryButtons button:hover {
+.categoryButton:hover,
+.openTab {
   background-color: #222;
+}
+
+.categoryButton:active {
+  background-color: #444;
 }

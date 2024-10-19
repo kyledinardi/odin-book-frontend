@@ -38,6 +38,14 @@
   padding: 0;
 }
 
+.interact button:hover {
+  background-color: inherit;
+}
+
+.interact button:active {
+  background-color: inherit;
+}
+
 dialog {
   background-color: black;
   color: white;

@@ -35,6 +35,10 @@
   background-color: #222;
 }
 
+.sidebarButton:active {
+  background-color: #444;
+}
+
 .user {
   display: flex;
   align-items: center;

@@ -54,7 +54,7 @@ function UserList({ currentUser, setCurrentUser }) {
               key={user.id}
               user={user}
               bio={false}
-              isFollowed={!!followedIds.includes(user.id)}
+              isFollowed={followedIds.includes(user.id)}
               replaceUser={(updatedUser) =>
                 setCurrentUser({
                   ...currentUser,

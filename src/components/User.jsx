@@ -35,9 +35,11 @@ function User({ user, bio, isFollowed, replaceUser }) {
         <strong>{user.displayName}</strong>
         <span className='gray'>{` @${user.username}`}</span>
       </Link>
-      <button className={styles.followButton} onClick={() => follow()}>
-        {isFollowed ? 'Unfollow' : 'Follow'}
-      </button>
+      {user.id !== parseInt(localStorage.getItem('userId'), 10) && (
+        <button className={styles.followButton} onClick={() => follow()}>
+          {isFollowed ? 'Unfollow' : 'Follow'}
+        </button>
+      )}
       {!!bio && <p className={styles.bio}>{user.bio}</p>}
     </div>
   );
