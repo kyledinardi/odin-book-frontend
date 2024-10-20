@@ -48,13 +48,6 @@
   padding-left: 20px;
 }
 
-.modal {
-  background-color: black;
-  color: white;
-  border: 5px solid #222;
-  border-radius: 10px;
-}
-
 .closeModalButton {
   position: absolute;
   padding: 0;

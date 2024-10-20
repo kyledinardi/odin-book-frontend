@@ -1,5 +1,5 @@
 .post {
-  padding: 10px 15px;
+  padding: 15px;
   border: 1px solid #222;
   position: relative;
 }
@@ -26,6 +26,7 @@
 .interact {
   display: flex;
   justify-content: space-around;
+  margin-top: 15px;
 }
 
 .interact button {
@@ -36,6 +37,7 @@
   gap: 5px;
   font-size: 1rem;
   padding: 0;
+  height: 24px;
 }
 
 .interact button:hover {
@@ -44,14 +46,6 @@
 
 .interact button:active {
   background-color: inherit;
-}
-
-dialog {
-  background-color: black;
-  color: white;
-  border: 1px solid #222;
-  border-radius: 10px;
-  padding: 30px;
 }
 
 dialog h2 {

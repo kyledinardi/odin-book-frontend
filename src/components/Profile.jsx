@@ -8,7 +8,7 @@ function Profile() {
   const [posts, setPosts] = useState(null);
   const [isFollowed, setIsFollowed] = useState(false);
   const [newPfpSrc, setNewPfpSrc] = useState('');
-  const modal = useRef(null);
+  const modalRef = useRef(null);
   const newPfpInput = useRef(null);
   const [currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
@@ -69,7 +69,7 @@ function Profile() {
 
     const response = await responseStream.json();
     e.target.reset();
-    modal.current.close();
+    modalRef.current.close();
 
     const newCurrentUser = {
       ...currentUser,
@@ -135,10 +135,10 @@ function Profile() {
     <h1>Loading...</h1>
   ) : (
     <main>
-      <dialog className={styles.modal} ref={modal}>
+      <dialog className={styles.modal} ref={modalRef}>
         <button
           className={styles.closeModalButton}
-          onClick={() => modal.current.close()}
+          onClick={() => modalRef.current.close()}
         >
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -216,7 +216,7 @@ function Profile() {
         {userId === currentUser.id ? (
           <button
             className={styles.topButton}
-            onClick={() => modal.current.showModal()}
+            onClick={() => modalRef.current.showModal()}
           >
             Set up profile
           </button>

@@ -5,7 +5,18 @@
   grid-template-areas:
     'pfp postText postText'
     '. imgPreview imgPreview'
-    '. formButtons formButtons';
+    '. formButtons formButtons'
+    '. GifPicker GifPicker';
+}
+
+.closeModalButton {
+  position: absolute;
+  padding: 0;
+  border-radius: 16px;
+  border: 0;
+  top: 5px;
+  right: 5px;
+  height: 24px;
 }
 
 .currentUserPfp {
@@ -41,6 +52,16 @@
   align-items: center;
 }
 
+.svgButton,
+.svgButton:hover,
+.svgButton:active {
+  background-color: inherit;
+  padding: 0;
+  border-radius: 0;
+  height: 24px;
+  margin: 0 10px;
+}
+
 .submitButton {
   width: max-content;
   background-color: #6161ff;
@@ -53,4 +74,8 @@
 
 .submitButton:active {
   background-color: #2121bf;
+}
+
+.GifPicker {
+  grid-area: GifPicker;
 }

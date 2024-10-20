@@ -37,6 +37,14 @@ main {
   border: 1px solid #222;
 }
 
+dialog {
+  background-color: black;
+  color: white;
+  border: 1px solid #222;
+  border-radius: 10px;
+  padding: 30px;
+}
+
 a {
   color: white;
   text-decoration: none;
