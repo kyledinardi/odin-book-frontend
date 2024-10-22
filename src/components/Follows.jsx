@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import styles from '../style/Follows.module.css';
-import User from './User.jsx';
+import FollowList from './FollowList.jsx';
 
 function Follows() {
   const [user, setUser] = useState(null);
@@ -29,70 +29,6 @@ function Follows() {
       .then((response) => response.json())
       .then((response) => setUser(response.user));
   }, [userId]);
-
-  function returnUser(returnedUser) {
-    return (
-      <User
-        key={returnedUser.id}
-        user={returnedUser}
-        bio={true}
-        isFollowed={followedIds.includes(returnedUser.id)}
-        replaceUser={(updatedUser) =>
-          setCurrentUser({
-            ...currentUser,
-            following: updatedUser.following,
-          })
-        }
-      />
-    );
-  }
-
-  function renderFollows() {
-    switch (openTab) {
-      case 'following':
-        if (user.following.length === 0) {
-          return (
-            <h2>
-              {user.id === currentUser.id
-                ? 'You are not following anyone'
-                : `${user.displayName} is not following anyone`}
-            </h2>
-          );
-        }
-
-        return user.following.map((followedUser) => returnUser(followedUser));
-
-      case 'followers':
-        if (user.followers.length === 0) {
-          return (
-            <h2>
-              {user.id === currentUser.id
-                ? 'You have no followers'
-                : `${user.displayName} has no followers`}
-            </h2>
-          );
-        }
-
-        return user.followers.map((follower) => returnUser(follower));
-
-      case 'followedFollowers': {
-        const followedFollowers = user.followers.filter((follower) =>
-          followedIds.includes(follower.id),
-        );
-
-        if (followedFollowers.length === 0) {
-          return (
-            <h2>{`You aren't following any of ${user.displayName}'s followers`}</h2>
-          );
-        }
-
-        return followedFollowers.map((follower) => returnUser(follower));
-      }
-
-      default:
-        return null;
-    }
-  }
 
   return !user || !currentUser || !followedIds ? (
     <h1>Loading...</h1>
@@ -130,7 +66,13 @@ function Follows() {
           </button>
         )}
       </div>
-      <div>{renderFollows()}</div>
+      <FollowList
+        openTab={openTab}
+        user={user}
+        currentUser={currentUser}
+        setCurrentUser={() => setCurrentUser}
+        followedIds={followedIds}
+      />
     </main>
   );
 }
