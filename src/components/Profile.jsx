@@ -2,22 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import styles from '../style/Profile.module.css';
+import UpdateProfile from './UpdateProfile.jsx';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
   const [isFollowed, setIsFollowed] = useState(false);
-  const [newPfpSrc, setNewPfpSrc] = useState('');
   const modalRef = useRef(null);
-  const newPfpInput = useRef(null);
   const [currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
 
   useEffect(() => {
     if (currentUser) {
       fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
-        mode: 'cors',
-
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -34,8 +31,6 @@ function Profile() {
         });
 
       fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/posts`, {
-        mode: 'cors',
-
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -45,42 +40,6 @@ function Profile() {
     }
   }, [userId, currentUser]);
 
-  async function submitProfile(e) {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('pfp', e.target[0].files[0]);
-    formData.append('displayName', e.target[2].value);
-    formData.append('bio', e.target[3].value);
-
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/profile`,
-
-      {
-        method: 'PUT',
-        mode: 'cors',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-
-        body: formData,
-      },
-    );
-
-    const response = await responseStream.json();
-    e.target.reset();
-    modalRef.current.close();
-
-    const newCurrentUser = {
-      ...currentUser,
-      pfpUrl: response.user.pfpUrl,
-      displayName: response.user.displayName,
-      bio: response.user.bio,
-    };
-
-    setCurrentUser(newCurrentUser);
-  }
-
   async function follow() {
     const responseStream = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/users/${
@@ -89,14 +48,12 @@ function Profile() {
 
       {
         method: 'Put',
-        mode: 'cors',
+        body: JSON.stringify({ userId: user.id }),
 
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-
-        body: JSON.stringify({ userId: user.id }),
       },
     );
 
@@ -118,95 +75,16 @@ function Profile() {
     setPosts(posts.filter((post) => post.id !== postId));
   }
 
-  function handleFileInputChange(e) {
-    const file = e.target.files[0];
-
-    if (file) {
-      setNewPfpSrc(file);
-    }
-  }
-
-  function cancelNewImage() {
-    newPfpInput.current.value = '';
-    setNewPfpSrc('');
-  }
-
   return !user || !posts || !currentUser ? (
     <h1>Loading...</h1>
   ) : (
     <main>
-      <dialog className={styles.modal} ref={modalRef}>
-        <button
-          className={styles.closeModalButton}
-          onClick={() => modalRef.current.close()}
-        >
-          <svg
-            xmlns='http://www.w3.org/2000/svg'
-            height='24px'
-            viewBox='0 -960 960 960'
-            width='24px'
-            fill='#000'
-          >
-            <path d='m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z' />
-          </svg>
-        </button>
-        <form onSubmit={(e) => submitProfile(e)}>
-          <input
-            type='file'
-            name='pfp'
-            id='pfp'
-            accept='image/*'
-            ref={newPfpInput}
-            onChange={(e) => handleFileInputChange(e)}
-            hidden
-          />
-          <label htmlFor='pfp'>Profile Picture</label>
-          <div className={styles.newPfpPreview}>
-            <label htmlFor='pfp'>
-              <img
-                className={styles.profilePagePfp}
-                src={
-                  newPfpSrc === ''
-                    ? user.pfpUrl
-                    : URL.createObjectURL(newPfpSrc)
-                }
-                alt=''
-              />
-            </label>
-            <button
-              type='button'
-              className={styles.cancelNewPfp}
-              onClick={() => cancelNewImage()}
-            >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                height='24px'
-                viewBox='0 -960 960 960'
-                width='24px'
-                fill='#fff'
-              >
-                <path d='m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z' />
-              </svg>
-            </button>
-          </div>
-          <label htmlFor='displayName'>Display Name</label>
-          <input
-            type='text'
-            name='displayName'
-            id='displayName'
-            defaultValue={currentUser.displayName}
-          />
-          <label htmlFor='bio'>Bio</label>
-          <textarea
-            name='bio'
-            id='bio'
-            cols='30'
-            rows='10'
-            defaultValue={currentUser.bio}
-          ></textarea>
-          <button className={styles.saveProfileButton}>Save Profile</button>
-        </form>
-      </dialog>
+      <UpdateProfile
+        modalRef={modalRef}
+        user={user}
+        currentUser={currentUser}
+        setCurrentUser={(u) => setCurrentUser(u)}
+      />
       <div className={styles.heading}>
         <h2>{user.displayName}</h2>
         <p>{posts.length} posts</p>

@@ -95,6 +95,16 @@ img {
   object-fit: cover;
 }
 
+.material-symbols-outlined,
 .gray {
   color: gray;
+}
+
+.closeButton {
+  color: black;
+}
+
+::backdrop {
+  background-color: black;
+  opacity: 0.8;
 }
