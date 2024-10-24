@@ -58,7 +58,6 @@ function Profile() {
     );
 
     const response = await responseStream.json();
-
     setCurrentUser({ ...currentUser, following: response.user.following });
     setIsFollowed(!isFollowed);
   }

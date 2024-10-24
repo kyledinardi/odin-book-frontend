@@ -38,6 +38,12 @@
   padding: 0;
 }
 
+.interact button,
+.interact button:hover,
+.interact button:active {
+  background-color: black;
+}
+
 .modalButtons {
   display: flex;
   gap: 30px;

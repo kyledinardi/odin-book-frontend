@@ -26,6 +26,10 @@ body,
   margin: auto;
 }
 
+.error {
+  margin: 30px auto;
+}
+
 main {
   max-width: 600px;
   border: 1px solid #222;

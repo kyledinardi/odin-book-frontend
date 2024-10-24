@@ -1,0 +1,38 @@
+.pollChoices {
+  display: grid;
+  grid-template-columns: 1fr max-content;
+  align-items: center;
+  gap: 10px;
+}
+
+.choiceBox {
+  padding: 10px;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  background-color: #222;
+  border-radius: 5px;
+}
+
+.choiceLabel {
+  position: relative;
+  z-index: 2;
+  border-radius: 10px;
+  min-height: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #666;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.pollChoices .voted {
+  color: white;
+}
