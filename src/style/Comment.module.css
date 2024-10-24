@@ -17,10 +17,15 @@
 }
 
 .commentOptions button {
-  background-color: black;
   padding: 0;
   margin: 5px;
   height: 24px;
+}
+
+.commentOptions button,
+.commentOptions button:hover,
+.commentOptions button:active {
+  background-color: black;
 }
 
 .interact button {
@@ -31,4 +36,10 @@
   gap: 5px;
   font-size: 1rem;
   padding: 0;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
 }

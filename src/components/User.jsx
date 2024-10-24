@@ -11,14 +11,12 @@ function User({ user, bio, isFollowed, replaceUser }) {
 
       {
         method: 'Put',
-        mode: 'cors',
+        body: JSON.stringify({ userId: user.id }),
 
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-
-        body: JSON.stringify({ userId: user.id }),
       },
     );
 

@@ -9,8 +9,6 @@ function Home() {
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/index`, {
-      mode: 'cors',
-
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

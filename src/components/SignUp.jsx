@@ -14,7 +14,6 @@ function SignUp() {
       
       {
         method: 'Post',
-        mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
 
         body: JSON.stringify({

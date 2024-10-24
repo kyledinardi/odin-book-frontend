@@ -17,10 +17,16 @@
 }
 
 .postOptions button {
-  background-color: black;
+  background-color: inherit;
   padding: 0;
   margin: 5px;
   height: 24px;
+}
+
+.postOptions button,
+.postOptions button:hover,
+.postOptions button:active {
+  background-color: black;
 }
 
 .interact {

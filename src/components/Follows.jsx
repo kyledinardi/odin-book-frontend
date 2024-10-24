@@ -20,8 +20,6 @@ function Follows() {
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
-      mode: 'cors',
-
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

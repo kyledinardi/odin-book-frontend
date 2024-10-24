@@ -18,8 +18,6 @@ function PostPage() {
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/${postId}`, {
-      mode: 'cors',
-
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -36,14 +34,12 @@ function PostPage() {
 
       {
         method: 'POST',
-        mode: 'cors',
+        body: JSON.stringify({ text: e.target[0].value }),
 
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-
-        body: JSON.stringify({ text: e.target[0].value }),
       },
     );
 
@@ -51,11 +47,6 @@ function PostPage() {
     e.target.reset();
     const newComments = [response.comment, ...post.comments];
     setPost({ ...post, comments: newComments });
-  }
-
-  function resetTextareaHeight(e) {
-    e.target.style.height = 'auto';
-    e.target.style.height = `${e.target.scrollHeight}px`;
   }
 
   function replaceComment(updatedComment) {
@@ -97,7 +88,10 @@ function PostPage() {
           id='commentText'
           placeholder='New Comment'
           maxLength={1000}
-          onInput={(e) => resetTextareaHeight(e)}
+          onInput={(e) => {
+            e.target.style.height = 'auto';
+            e.target.style.height = `${e.target.scrollHeight}px`;
+          }}
           required
         ></textarea>
         <button className={styles.submitButton}>Post Comment</button>

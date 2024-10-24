@@ -1,12 +1,12 @@
-.postForm {
-  padding: 20px 15px;
+.nonModal {
   display: grid;
-  grid-template-columns: max-content 1fr 1fr;
-  grid-template-areas:
-    'pfp postText postText'
-    '. imgPreview imgPreview'
-    '. formButtons formButtons'
-    '. GifPicker GifPicker';
+  grid-template-columns: max-content 1fr;
+  padding: 15px;
+}
+
+.postForm,
+.postForm textarea {
+  width: 100%;
 }
 
 .closeModalButton {
@@ -20,16 +20,10 @@
 }
 
 .currentUserPfp {
-  grid-area: pfp;
-  padding-right: 10px;
-}
-
-.postText {
-  grid-area: postText;
+  padding-right: 15px;
 }
 
 .imgPreview {
-  grid-area: imgPreview;
   position: relative;
   padding: 20px 0;
 }
@@ -39,14 +33,12 @@
   padding: 0;
   height: 30px;
   width: 30px;
-  background-color: #222;
-  opacity: 0.8;
+  background-color: white;
   top: 25px;
   right: 5px;
 }
 
 .formButtons {
-  grid-area: formButtons;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -62,6 +54,10 @@
   margin: 0 10px;
 }
 
+.svgButton span {
+  color: #6161ff;
+}
+
 .submitButton {
   width: max-content;
   background-color: #6161ff;
@@ -74,8 +70,4 @@
 
 .submitButton:active {
   background-color: #2121bf;
-}
-
-.GifPicker {
-  grid-area: GifPicker;
 }
