@@ -1,30 +1,42 @@
-import { useEffect, useState } from 'react';
-import Sidebar from './Sidebar.jsx';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import styles from '../style/ErrorPage.module.css';
 
-function ErrorPage() {
-  const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/currentUser`, {
-      mode: 'cors',
-
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((response) => setCurrentUser(response.user));
-  }, []);
+function ErrorPage({ error, setError }) {
+  const navigate = useNavigate();
 
   return (
-    <div className='app'>
-      <Sidebar currentUser={currentUser} />
-      <div className='error'>
-        <h1>404</h1>
-        <h2>Page not found</h2>
+    <div className={styles.error}>
+      <h1>
+        {error
+          ? `${error.status}: ${
+              Math.floor(error.status / 100) === 5
+                ? 'Internal Server Error'
+                : error.message
+            }`
+          : '404: Page not found'}
+      </h1>
+      <div>
+        <button
+          onClick={() => {
+            setError(null);
+            navigate('/');
+          }}
+        >
+          Go Home
+        </button>
+        <button
+          onClick={() => {
+            setError(null);
+            navigate(-1);
+          }}
+        >
+          Go Back
+        </button>
       </div>
     </div>
   );
 }
 
+ErrorPage.propTypes = { error: PropTypes.object, setError: PropTypes.func };
 export default ErrorPage;

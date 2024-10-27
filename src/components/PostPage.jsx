@@ -12,19 +12,30 @@ import styles from '../style/PostPage.module.css';
 
 function PostPage() {
   const [post, setPost] = useState(null);
-  const { postId } = useParams();
-  const [currentUser] = useOutletContext();
+  const [setError, currentUser] = useOutletContext();
   const navigate = useNavigate();
+  const postId = parseInt(useParams().postId, 10);
 
   useEffect(() => {
+    if (!postId) {
+      setError({ status: 404, message: 'Post not found' });
+      return;
+    }
+
     fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/${postId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
       .then((response) => response.json())
-      .then((response) => setPost(response.post));
-  }, [postId]);
+      .then((response) => {
+        if (response.error) {
+          setError(response.error);
+        }
+
+        setPost(response.post);
+      });
+  }, [postId, setError]);
 
   async function submitComment(e) {
     e.preventDefault();
@@ -44,6 +55,11 @@ function PostPage() {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+    }
+
     e.target.reset();
     const newComments = [response.comment, ...post.comments];
     setPost({ ...post, comments: newComments });

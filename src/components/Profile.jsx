@@ -1,18 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
-import styles from '../style/Profile.module.css';
 import UpdateProfile from './UpdateProfile.jsx';
+import styles from '../style/Profile.module.css';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
   const [isFollowed, setIsFollowed] = useState(false);
   const modalRef = useRef(null);
-  const [currentUser, setCurrentUser] = useOutletContext();
+  const [setError, currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
 
   useEffect(() => {
+    if (!userId) {
+      setError({ status: 404, message: 'User not found' });
+      return;
+    }
+
     if (currentUser) {
       fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
         headers: {
@@ -22,6 +27,11 @@ function Profile() {
         .then((response) => response.json())
 
         .then((response) => {
+          if (response.error) {
+            setError(response.error);
+            return;
+          }
+
           const isFollowedTemp = currentUser.following.some(
             (followedUser) => followedUser.id === userId,
           );
@@ -38,7 +48,7 @@ function Profile() {
         .then((response) => response.json())
         .then((response) => setPosts(response.posts));
     }
-  }, [userId, currentUser]);
+  }, [userId, currentUser, setError]);
 
   async function follow() {
     const responseStream = await fetch(
@@ -58,6 +68,12 @@ function Profile() {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     setCurrentUser({ ...currentUser, following: response.user.following });
     setIsFollowed(!isFollowed);
   }

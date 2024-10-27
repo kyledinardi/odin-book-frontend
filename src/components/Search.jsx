@@ -10,20 +10,11 @@ function Search() {
   const [users, setUsers] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [currentUser, setCurrentUser] = useOutletContext();
+  const [setError, currentUser, setCurrentUser] = useOutletContext();
 
   useEffect(() => {
     if (currentUser) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          setFollowedIds(currentUser.following.map((user) => user.id));
-          setUsers(response.users);
-        });
+      setFollowedIds(currentUser.following.map((user) => user.id));
     }
 
     if (searchParams.has('query')) {
@@ -40,7 +31,16 @@ function Search() {
           },
         )
           .then((response) => response.json())
-          .then((response) => setPosts(response.posts));
+
+          .then((response) => {
+            if (response.error) {
+              setError(response.error);
+              return;
+            }
+
+            setPosts(response.posts);
+          });
+
         fetch(
           `${
             import.meta.env.VITE_BACKEND_URL
@@ -53,13 +53,21 @@ function Search() {
           },
         )
           .then((response) => response.json())
-          .then((response) => setUsers(response.users));
+
+          .then((response) => {
+            if (response.error) {
+              setError(response.error);
+              return;
+            }
+
+            setUsers(response.users);
+          });
       } else {
         setPosts(null);
         setUsers(null);
       }
     }
-  }, [currentUser, searchParams]);
+  }, [currentUser, searchParams, setError]);
 
   function replacePost(updatedPost) {
     const newPosts = posts.map((post) =>
@@ -67,10 +75,6 @@ function Search() {
     );
 
     setPosts(newPosts);
-  }
-
-  function removePost(postId) {
-    setPosts(posts.filter((post) => post.id !== postId));
   }
 
   return (
@@ -117,7 +121,9 @@ function Search() {
                 key={post.id}
                 post={post}
                 replacePost={(updatedPost) => replacePost(updatedPost)}
-                removePost={(postId) => removePost(postId)}
+                removePost={(postId) =>
+                  setPosts(posts.filter((p) => p.id !== postId))
+                }
               />
             ))}
           </div>
@@ -129,11 +135,8 @@ function Search() {
                 user={user}
                 bio={true}
                 isFollowed={followedIds.includes(user.id)}
-                replaceUser={(updatedUser) =>
-                  setCurrentUser({
-                    ...currentUser,
-                    following: updatedUser.following,
-                  })
+                replaceUser={(u) =>
+                  setCurrentUser({ ...currentUser, following: u.following })
                 }
               />
             ))}

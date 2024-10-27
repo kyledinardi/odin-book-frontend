@@ -1,8 +1,19 @@
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import styles from '../style/User.module.css';
 
-function User({ user, bio, isFollowed, replaceUser }) {
+function User({ user, bio, isFollowed, replaceUser, setError }) {
+  const outletContext = useOutletContext();
+
+  function setUserError(err) {
+    if (outletContext) {
+      const [setOutletError] = outletContext;
+      setOutletError(err);
+    } else {
+      setError(err);
+    }
+  }
+
   async function follow() {
     const responseStream = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/users/${
@@ -21,6 +32,12 @@ function User({ user, bio, isFollowed, replaceUser }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setUserError(response.error);
+      return;
+    }
+
     replaceUser(response.user);
   }
 
@@ -48,6 +65,7 @@ User.propTypes = {
   bio: PropTypes.bool,
   isFollowed: PropTypes.bool,
   replaceUser: PropTypes.func,
+  setError: PropTypes.func,
 };
 
 export default User;

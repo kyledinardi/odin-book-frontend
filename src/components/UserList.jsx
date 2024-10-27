@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import User from './User.jsx';
 import styles from '../style/UserList.module.css';
 
-function UserList({ currentUser, setCurrentUser }) {
+function UserList({ currentUser, setCurrentUser, setError }) {
   const [users, setUsers] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const navigate = useNavigate();
@@ -17,12 +17,18 @@ function UserList({ currentUser, setCurrentUser }) {
         },
       })
         .then((response) => response.json())
+
         .then((response) => {
+          if (response.error) {
+            setError(response.error);
+            return;
+          }
+
           setFollowedIds(currentUser.following.map((user) => user.id));
           setUsers(response.users);
         });
     }
-  }, [currentUser]);
+  }, [currentUser, setError]);
 
   return !users || !followedIds ? (
     <h1>Loading...</h1>
@@ -46,12 +52,10 @@ function UserList({ currentUser, setCurrentUser }) {
               user={user}
               bio={false}
               isFollowed={followedIds.includes(user.id)}
-              replaceUser={(updatedUser) =>
-                setCurrentUser({
-                  ...currentUser,
-                  following: updatedUser.following,
-                })
+              replaceUser={(u) =>
+                setCurrentUser({ ...currentUser, following: u.following })
               }
+              setError={(err) => setError(err)}
             />
           ))}
         </div>
@@ -63,6 +67,7 @@ function UserList({ currentUser, setCurrentUser }) {
 UserList.propTypes = {
   currentUser: PropTypes.object,
   setCurrentUser: PropTypes.func,
+  setError: PropTypes.func,
 };
 
 export default UserList;

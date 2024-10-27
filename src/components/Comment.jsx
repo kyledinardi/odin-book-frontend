@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import formatDate from '../formatDate';
 import styles from '../style/Comment.module.css';
@@ -7,6 +7,7 @@ import styles from '../style/Comment.module.css';
 function Comment({ comment, replaceComment, removeComment }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [setError] = useOutletContext();
   const modal = useRef(null);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ function Comment({ comment, replaceComment, removeComment }) {
   }, [comment]);
 
   async function deleteComment() {
-    await fetch(
+    const responseStream = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}`,
 
       {
@@ -26,6 +27,12 @@ function Comment({ comment, replaceComment, removeComment }) {
         },
       },
     );
+
+    const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+    }
 
     removeComment(comment.id);
     modal.current.close();

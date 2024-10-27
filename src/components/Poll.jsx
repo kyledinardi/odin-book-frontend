@@ -1,8 +1,10 @@
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { useOutletContext } from 'react-router-dom';
 import styles from '../style/Poll.module.css';
 
 function Poll({ post, replacePost }) {
+  const [setError] = useOutletContext();
   const userId = parseInt(localStorage.getItem('userId'), 10);
   const totalVoters = post.poll.voters.length;
 
@@ -23,6 +25,12 @@ function Poll({ post, replacePost }) {
       );
 
       const response = await responseStream.json();
+
+      if (response.error) {
+        setError(response.error);
+        return;
+      }
+
       replacePost({ ...post, poll: response.poll });
     }
   }
@@ -73,7 +81,6 @@ function Poll({ post, replacePost }) {
 }
 
 Poll.propTypes = {
-  poll: PropTypes.object,
   post: PropTypes.object,
   replacePost: PropTypes.func,
 };

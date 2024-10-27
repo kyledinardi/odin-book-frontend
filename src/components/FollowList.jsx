@@ -1,25 +1,19 @@
 import PropTypes from 'prop-types';
+import { useOutletContext } from 'react-router-dom';
 import User from './User.jsx';
 
-function FollowList({
-  openTab,
-  user,
-  currentUser,
-  setCurrentUser,
-  followedIds,
-}) {
-  function returnUser(returnedUser) {
+function FollowList({ openTab, user, followedIds }) {
+  const [, currentUser, setCurrentUser] = useOutletContext();
+
+  function returnUser(userToReturn) {
     return (
       <User
-        key={returnedUser.id}
-        user={returnedUser}
+        key={userToReturn.id}
+        user={userToReturn}
         bio={true}
-        isFollowed={followedIds.includes(returnedUser.id)}
-        replaceUser={(updatedUser) =>
-          setCurrentUser({
-            ...currentUser,
-            following: updatedUser.following,
-          })
+        isFollowed={followedIds.includes(userToReturn.id)}
+        replaceUser={(updated) =>
+          setCurrentUser({ ...currentUser, following: updated.following })
         }
       />
     );
@@ -74,8 +68,6 @@ function FollowList({
 FollowList.propTypes = {
   openTab: PropTypes.string,
   user: PropTypes.object,
-  currentUser: PropTypes.object,
-  setCurrentUser: PropTypes.func,
   followedIds: PropTypes.arrayOf(PropTypes.number),
 };
 

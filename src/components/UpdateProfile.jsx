@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styles from '../style/UpdateProfile.module.css';
 
-function UpdateProfile({ modalRef, user, currentUser, setCurrentUser }) {
+function UpdateProfile({ modalRef, user }) {
   const [newPfpSrc, setNewPfpSrc] = useState('');
   const newPfpInput = useRef(null);
+  const [setError, currentUser, setCurrentUser] = useOutletContext();
 
   async function submitProfile(e) {
     e.preventDefault();
@@ -27,6 +29,12 @@ function UpdateProfile({ modalRef, user, currentUser, setCurrentUser }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     e.target.reset();
     modalRef.current.close();
 
@@ -112,8 +120,6 @@ function UpdateProfile({ modalRef, user, currentUser, setCurrentUser }) {
 UpdateProfile.propTypes = {
   modalRef: PropTypes.object,
   user: PropTypes.object,
-  currentUser: PropTypes.object,
-  setCurrentUser: PropTypes.func,
 };
 
 export default UpdateProfile;

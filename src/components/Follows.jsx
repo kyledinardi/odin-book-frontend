@@ -7,7 +7,7 @@ function Follows() {
   const [user, setUser] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const [openTab, setOpenTab] = useState('following');
-  const [currentUser, setCurrentUser] = useOutletContext();
+  const [setError, currentUser]= useOutletContext();
   const userId = parseInt(useParams().userId, 10);
 
   useEffect(() => {
@@ -19,14 +19,26 @@ function Follows() {
   }, [currentUser]);
 
   useEffect(() => {
+    if (!userId) {
+      setError({ status: 404, message: 'User not found' });
+      return;
+    }
+
     fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
       .then((response) => response.json())
-      .then((response) => setUser(response.user));
-  }, [userId]);
+      
+      .then((response) => {
+        if (response.error) {
+          setError(response.error);
+        }
+
+        setUser(response.user);
+      });
+  }, [userId, setError]);
 
   return !user || !currentUser || !followedIds ? (
     <h1>Loading...</h1>
@@ -67,8 +79,6 @@ function Follows() {
       <FollowList
         openTab={openTab}
         user={user}
-        currentUser={currentUser}
-        setCurrentUser={() => setCurrentUser}
         followedIds={followedIds}
       />
     </main>

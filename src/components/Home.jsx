@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import Post from './Post.jsx';
 import NewPostForm from './NewPostForm.jsx';
 
 function Home() {
   const [posts, setPosts] = useState(null);
-  const [currentUser] = useOutletContext();
+  const [setError, currentUser] = useOutletContext();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/index`, {
@@ -14,8 +15,16 @@ function Home() {
       },
     })
       .then((response) => response.json())
-      .then((response) => setPosts(response.posts));
-  }, []);
+
+      .then((response) => {
+        if (response.error) {
+          setError(response.error);
+          return;
+        }
+
+        setPosts(response.posts);
+      });
+  }, [setError, navigate]);
 
   function replacePost(updatedPost) {
     const newPosts = posts.map((post) =>
@@ -34,7 +43,6 @@ function Home() {
   ) : (
     <main>
       <NewPostForm
-        currentUser={currentUser}
         posts={posts}
         setPosts={(p) => setPosts(p)}
       />

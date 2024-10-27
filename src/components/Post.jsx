@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import formatDate from '../formatDate';
 import Poll from './Poll.jsx';
@@ -9,11 +9,12 @@ function Post({ post, replacePost, removePost }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const modal = useRef(null);
+  const [setError] = useOutletContext()
+  const currentUserId = parseInt(localStorage.getItem('userId'), 10);
 
   useEffect(() => {
-    const currentUserId = parseInt(localStorage.getItem('userId'), 10);
     setIsLiked(post.likes.some((user) => user.id === currentUserId));
-  }, [post]);
+  }, [currentUserId, post]);
 
   async function submitEdit(e) {
     e.preventDefault();
@@ -33,12 +34,18 @@ function Post({ post, replacePost, removePost }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     replacePost({ ...post, text: response.post.text });
     setIsEditing(false);
   }
 
   async function deletePost() {
-    await fetch(
+    const responseStream = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}`,
 
       {
@@ -49,6 +56,13 @@ function Post({ post, replacePost, removePost }) {
         },
       },
     );
+
+    const response = responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
 
     removePost(post.id);
     modal.current.close();
@@ -70,6 +84,12 @@ function Post({ post, replacePost, removePost }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     replacePost({ ...post, likes: response.post.likes });
   }
 
@@ -95,7 +115,7 @@ function Post({ post, replacePost, removePost }) {
             <span className='gray'>{formatDate(post.timestamp)}</span>
           </Link>
         </div>
-        {post.author.id === parseInt(localStorage.getItem('userId'), 10) && (
+        {post.author.id === currentUserId && (
           <div className={styles.postOptions}>
             <button onClick={() => setIsEditing(true)}>
               <span className='material-symbols-outlined'>edit</span>
@@ -133,7 +153,10 @@ function Post({ post, replacePost, removePost }) {
       )}
       {post.imageUrl && <img src={post.imageUrl} alt='' />}
       {post.poll && (
-        <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
+        <Poll
+          post={post}
+          replacePost={(newPost) => replacePost(newPost)}
+        />
       )}
       <div className={styles.interact}>
         <Link to={`/posts/${post.id}`}>

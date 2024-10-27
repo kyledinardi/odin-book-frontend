@@ -1,17 +1,18 @@
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
-import styles from '../style/NewPostForm.module.css';
 import PollInputs from './PollInputs.jsx';
+import styles from '../style/NewPostForm.module.css';
 
-function NewPostForm({ currentUser, posts, setPosts }) {
+function NewPostForm({ posts, setPosts }) {
   const [newPostImagesrc, setNewPostImagesrc] = useState('');
   const [gifUrl, setGifUrl] = useState('');
   const [isPoll, setIsPoll] = useState(false);
   const [pollChoiceCount, setPollChoiceCount] = useState(2);
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
+  const [setError, currentUser] = useOutletContext();
 
   function cancelNewPostImage() {
     fileInputRef.current.value = '';
@@ -43,6 +44,12 @@ function NewPostForm({ currentUser, posts, setPosts }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     cancelNewPostImage();
     e.target.reset();
     setPosts([response.post, ...posts]);
@@ -75,6 +82,12 @@ function NewPostForm({ currentUser, posts, setPosts }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     cancelNewPostImage();
     setIsPoll(false);
     e.target.reset();
@@ -210,7 +223,6 @@ function NewPostForm({ currentUser, posts, setPosts }) {
 }
 
 NewPostForm.propTypes = {
-  currentUser: PropTypes.object,
   posts: PropTypes.array,
   setPosts: PropTypes.func,
 };

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ErrorPage from './ErrorPage.jsx';
 import styles from '../style/Login.module.css';
 
 function SignUp() {
+  const [unexpectedError, setUnexpectedError] = useState(null);
   const [errorArray, setErrorArray] = useState(null);
   const navigate = useNavigate();
 
@@ -11,7 +13,7 @@ function SignUp() {
 
     const responseStream = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/users`,
-      
+
       {
         method: 'Post',
         headers: { 'Content-Type': 'application/json' },
@@ -27,18 +29,32 @@ function SignUp() {
 
     const response = await responseStream.json();
 
-    if (!response.user) {
+    if (response.expectedErrors) {
       e.target.reset();
-      setErrorArray(response.errors);
+      setErrorArray(response.expectedErrors);
+    } else if (response.error) {
+      setUnexpectedError(response.error);
     } else {
       navigate('/');
     }
   }
 
-  return (
+  return unexpectedError ? (
+    <ErrorPage
+      error={unexpectedError}
+      setError={(err) => setUnexpectedError(err)}
+    />
+  ) : (
     <div className={styles.flexWrapper}>
       <h1>Sign up for FakeSocial</h1>
       <div className={styles.loginForms}>
+        {errorArray && (
+          <div className={styles.error}>
+            {errorArray.map((error) => (
+              <span key={error.msg}>{error.msg}</span>
+            ))}
+          </div>
+        )}
         <form className={styles.flexForm} onSubmit={(e) => submitLogin(e)}>
           <div>
             <label htmlFor='displayName'>Display Name (optional)</label>
@@ -61,13 +77,7 @@ function SignUp() {
               required
             />
           </div>
-          {errorArray && (
-            <div className={styles.error}>
-              {errorArray.map((error) => (
-                <p key={error.msg}>{error.msg}</p>
-              ))}
-            </div>
-          )}
+
           <button>Sign Up</button>
         </form>
       </div>

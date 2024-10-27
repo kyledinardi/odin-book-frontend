@@ -1,9 +1,11 @@
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import ErrorPage from './ErrorPage.jsx';
 import styles from '../style/Login.module.css';
 import githubLogo from '../assets/github-mark.svg';
 
 function Login() {
+  const [unexpectedError, setUnexpectedError] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,9 +41,11 @@ function Login() {
 
     const response = await responseStream.json();
 
-    if (!response.user) {
+    if (response.expectedError) {
       e.target.reset();
-      setErrorMessage(response.message);
+      setErrorMessage(response.expectedError.message);
+    } else if (response.error) {
+      setUnexpectedError(response.error);
     } else {
       localStorage.setItem('token', response.token);
       localStorage.setItem('userId', response.user.id);
@@ -49,7 +53,12 @@ function Login() {
     }
   }
 
-  return (
+  return unexpectedError ? (
+    <ErrorPage
+      error={unexpectedError}
+      setError={(err) => setUnexpectedError(err)}
+    />
+  ) : (
     <div className={styles.flexWrapper}>
       <h1>Log in to FakeSocial</h1>
       <div className={styles.loginForms}>
