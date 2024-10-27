@@ -1,1 +1,1 @@
-# react-template
+Backend at https://github.com/kyledinardi/odin-book-backend
