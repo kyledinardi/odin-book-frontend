@@ -1,0 +1,19 @@
+.formSection {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  padding: 15px;
+}
+
+.closeModalButton {
+  position: absolute;
+  padding: 0;
+  border-radius: 16px;
+  border: 0;
+  top: 5px;
+  right: 5px;
+  height: 24px;
+}
+
+.currentUserPfp {
+  padding-right: 15px;
+}
