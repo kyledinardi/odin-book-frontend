@@ -40,7 +40,9 @@ function Home() {
   }
 
   return !currentUser || !posts ? (
-    <h1>Loading...</h1>
+    <div className='loaderContainer'>
+      <div className='loader'></div>
+    </div>
   ) : (
     <main>
       <dialog ref={modalRef}>

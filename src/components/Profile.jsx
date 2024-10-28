@@ -91,7 +91,9 @@ function Profile() {
   }
 
   return !user || !posts || !currentUser ? (
-    <h1>Loading...</h1>
+    <div className='loaderContainer'>
+      <div className='loader'></div>
+    </div>
   ) : (
     <main>
       <UpdateProfile

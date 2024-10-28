@@ -31,7 +31,9 @@ function UserList({ currentUser, setCurrentUser, setError }) {
   }, [currentUser, setError]);
 
   return !users || !followedIds ? (
-    <h1>Loading...</h1>
+    <div className='loaderContainer'>
+      <div className='loader'></div>
+    </div>
   ) : (
     <aside className={styles.userListContainer}>
       <div className={styles.userList}>

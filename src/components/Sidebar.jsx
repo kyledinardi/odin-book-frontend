@@ -6,7 +6,9 @@ function Sidebar({ currentUser }) {
   const navigate = useNavigate();
 
   return !currentUser ? (
-    <h2>Loading...</h2>
+    <div className='loaderContainer'>
+      <div className='loader'></div>
+    </div>
   ) : (
     <aside className={styles.sidebarContainer}>
       <div className={styles.sidebar}>

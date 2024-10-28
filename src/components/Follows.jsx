@@ -7,7 +7,7 @@ function Follows() {
   const [user, setUser] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const [openTab, setOpenTab] = useState('following');
-  const [setError, currentUser]= useOutletContext();
+  const [setError, currentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ function Follows() {
       },
     })
       .then((response) => response.json())
-      
+
       .then((response) => {
         if (response.error) {
           setError(response.error);
@@ -41,7 +41,9 @@ function Follows() {
   }, [userId, setError]);
 
   return !user || !currentUser || !followedIds ? (
-    <h1>Loading...</h1>
+    <div className='loaderContainer'>
+      <div className='loader'></div>
+    </div>
   ) : (
     <main>
       <div className={styles.heading}>
@@ -76,11 +78,7 @@ function Follows() {
           </button>
         )}
       </div>
-      <FollowList
-        openTab={openTab}
-        user={user}
-        followedIds={followedIds}
-      />
+      <FollowList openTab={openTab} user={user} followedIds={followedIds} />
     </main>
   );
 }

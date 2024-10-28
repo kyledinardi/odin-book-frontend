@@ -82,7 +82,9 @@ function PostPage() {
   }
 
   return !post ? (
-    <h1>Loading...</h1>
+    <div className='loaderContainer'>
+      <div className='loader'></div>
+    </div>
   ) : (
     <main>
       <Post
