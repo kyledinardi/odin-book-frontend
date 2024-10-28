@@ -1,8 +1,10 @@
 .sidebarContainer {
   width: 250px;
+  position: relative
 }
 
 .sidebar {
+  position: fixed;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

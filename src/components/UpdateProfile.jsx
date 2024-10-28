@@ -101,6 +101,7 @@ function UpdateProfile({ modalRef, user }) {
           type='text'
           name='displayName'
           id='displayName'
+          maxLength={50}
           defaultValue={currentUser.displayName}
         />
         <label htmlFor='bio'>Bio</label>
@@ -109,6 +110,7 @@ function UpdateProfile({ modalRef, user }) {
           id='bio'
           cols='30'
           rows='10'
+          maxLength={200}
           defaultValue={currentUser.bio}
         ></textarea>
         <button className={styles.saveProfileButton}>Save Profile</button>

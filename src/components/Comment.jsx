@@ -79,11 +79,6 @@ function Comment({ comment, replaceComment, removeComment }) {
     replaceComment({ ...comment, likes: response.comment.likes });
   }
 
-  function resetTextareaHeight(e) {
-    e.target.style.height = 'auto';
-    e.target.style.height = `${e.target.scrollHeight}px`;
-  }
-
   return (
     <div className={styles.comment}>
       <dialog ref={modal}>
@@ -122,9 +117,12 @@ function Comment({ comment, replaceComment, removeComment }) {
             name='commentEditText'
             id='commentEditText'
             defaultValue={comment.text}
-            maxLength={1000}
+            maxLength={10000}
             placeholder='Edit Comment'
-            onInput={(e) => resetTextareaHeight(e)}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
             required
           ></textarea>
           <div className={styles.editButtons}>

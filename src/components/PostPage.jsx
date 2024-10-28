@@ -105,7 +105,7 @@ function PostPage() {
           name='commentText'
           id='commentText'
           placeholder='New Comment'
-          maxLength={1000}
+          maxLength={10000}
           onInput={(e) => {
             e.target.style.height = 'auto';
             e.target.style.height = `${e.target.scrollHeight}px`;

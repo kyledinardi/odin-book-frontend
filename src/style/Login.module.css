@@ -55,6 +55,12 @@
   text-decoration: underline;
 }
 
+.flexWrapper .backButton {
+  font-size: 30px;
+  font-variation-settings: 'OPSZ' 30;
+  color: white;
+}
+
 .error {
   background-color: #6161ff;
   border-radius: 5px;

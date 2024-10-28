@@ -68,11 +68,23 @@ function Login() {
         <form className={styles.flexForm} onSubmit={(e) => submitLogin(e)}>
           <div>
             <label htmlFor='username'>Username</label>
-            <input type='text' name='username' id='username' required />
+            <input
+              type='text'
+              name='username'
+              id='username'
+              maxLength={50}
+              required
+            />
           </div>
           <div>
             <label htmlFor='password'>Password</label>
-            <input type='password' name='password' id='password' required />
+            <input
+              type='password'
+              name='password'
+              id='password'
+              maxLength={50}
+              required
+            />
           </div>
           <button>Log In</button>
         </form>

@@ -16,6 +16,7 @@ function PollInputs({ pollChoiceCount, setPollChoiceCount }) {
           name={`choice${i + 1}`}
           id={`choice${i + 1}`}
           placeholder={`Choice ${i + 1}`}
+          maxLength={20}
           required
         />
       );
@@ -26,6 +27,7 @@ function PollInputs({ pollChoiceCount, setPollChoiceCount }) {
           type='text'
           name={`choice${i + 1}`}
           id={`choice${i + 1}`}
+          maxLength={20}
           placeholder={`Choice ${i + 1} (optional)`}
         />
       );

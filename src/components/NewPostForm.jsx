@@ -117,7 +117,7 @@ function NewPostForm({
         className={styles.postText}
         name='postText'
         id='postText'
-        maxLength={1000}
+        maxLength={50000}
         placeholder={!isPoll ? 'New Post' : 'Question'}
         onInput={(e) => {
           e.target.style.height = 'auto';

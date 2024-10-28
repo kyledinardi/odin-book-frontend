@@ -133,7 +133,7 @@ function Post({ post, replacePost, removePost }) {
             name='postEditText'
             id='postEditText'
             defaultValue={post.text}
-            maxLength={1000}
+            maxLength={50000}
             placeholder='Edit Post'
             onInput={(e) => {
               e.target.style.height = 'auto';
