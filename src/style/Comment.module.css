@@ -11,11 +11,11 @@
 }
 
 .links {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
   align-items: start;
   gap: 10px;
 }
-
 .commentOptions button {
   padding: 0;
   margin: 5px;
