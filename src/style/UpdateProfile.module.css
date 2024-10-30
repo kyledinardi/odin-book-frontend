@@ -13,6 +13,7 @@
 .modal textarea {
   border-radius: 10px;
   border: 1px solid white;
+  width: max-content;
 }
 
 .newPfpPreview {

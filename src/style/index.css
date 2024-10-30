@@ -29,6 +29,7 @@ body,
 
 main {
   border: 1px solid #222;
+  max-width: 600px;
 }
 
 h1,
@@ -44,6 +45,16 @@ dialog {
   padding: 30px;
 }
 
+dialog h2 {
+  margin-top: 0;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
 a {
   color: white;
   text-decoration: none;
@@ -51,7 +62,7 @@ a {
 
 button {
   background-color: white;
-  border: 0;
+  border: none;
   padding: 10px 20px;
   border-radius: 20px;
   font-weight: bold;
@@ -145,5 +156,30 @@ img {
 @keyframes l16 {
   100% {
     transform: rotate(1turn);
+  }
+}
+
+@media (max-width: 1200px) {
+  .app {
+    max-width: 850px;
+  }
+}
+
+@media (max-width: 850px) {
+  .app {
+    grid-template-columns: max-content 1fr;
+    max-width: 650px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    grid-template-columns: auto;
+    grid-template-rows: calc(100vh - 60px) max-content;
+  }
+
+  main {
+    order: 1;
+    overflow: auto;
   }
 }

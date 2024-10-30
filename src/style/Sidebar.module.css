@@ -1,16 +1,12 @@
-.sidebarContainer {
-  width: 250px;
-  position: relative
-}
-
 .sidebar {
-  position: fixed;
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 10px;
-  height: 100vh;
-  width: 250px;
 }
 
 .sidebarButtons {
@@ -49,12 +45,6 @@
 .user {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.userInfo {
-  display: flex;
-  align-items: center;
   gap: 10px;
 }
 
@@ -66,4 +56,30 @@
 
 .username {
   color: #777;
+}
+
+@media (max-width: 850px) {
+  .sidebarLabel,
+  .names {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    order: 2;
+    border: 1px solid #222;
+    height: 60px;
+    width: min(100vw, 600px);
+  }
+
+  .sidebarButtons {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 10px;
+  }
+
+  .user {
+    display: none;
+  }
 }

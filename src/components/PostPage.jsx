@@ -92,6 +92,7 @@ function PostPage() {
         post={post}
         replacePost={(updatedPost) => setPost(updatedPost)}
         removePost={() => navigate('/')}
+        isPostPage={true}
       />
       <form
         className={styles.newCommentForm}

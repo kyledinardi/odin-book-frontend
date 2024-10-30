@@ -35,32 +35,30 @@ function UserList({ currentUser, setCurrentUser, setError }) {
       <div className='loader'></div>
     </div>
   ) : (
-    <aside className={styles.userListContainer}>
-      <div className={styles.userList}>
-        <form
-          className={styles.searchForm}
-          onSubmit={(e) => {
-            e.preventDefault();
-            navigate(`/search?query=${e.target[0].value}`);
-          }}
-        >
-          <span className='material-symbols-outlined'>search</span>
-          <input type='search' name='search' id='search' placeholder='Search' />
-        </form>
-        <div>
-          {users.map((user) => (
-            <User
-              key={user.id}
-              user={user}
-              bio={false}
-              isFollowed={followedIds.includes(user.id)}
-              replaceUser={(u) =>
-                setCurrentUser({ ...currentUser, following: u.following })
-              }
-              setError={(err) => setError(err)}
-            />
-          ))}
-        </div>
+    <aside className={styles.userList}>
+      <form
+        className={styles.searchForm}
+        onSubmit={(e) => {
+          e.preventDefault();
+          navigate(`/search?query=${e.target[0].value}`);
+        }}
+      >
+        <span className='material-symbols-outlined'>search</span>
+        <input type='search' name='search' id='search' placeholder='Search' />
+      </form>
+      <div>
+        {users.map((user) => (
+          <User
+            key={user.id}
+            user={user}
+            bio={false}
+            isFollowed={followedIds.includes(user.id)}
+            replaceUser={(u) =>
+              setCurrentUser({ ...currentUser, following: u.following })
+            }
+            setError={(err) => setError(err)}
+          />
+        ))}
       </div>
     </aside>
   );

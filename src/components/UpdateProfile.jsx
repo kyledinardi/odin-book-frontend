@@ -108,8 +108,6 @@ function UpdateProfile({ modalRef, user }) {
         <textarea
           name='bio'
           id='bio'
-          cols='30'
-          rows='10'
           maxLength={200}
           defaultValue={currentUser.bio}
         ></textarea>

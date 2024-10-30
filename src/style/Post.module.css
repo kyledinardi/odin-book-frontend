@@ -55,14 +55,12 @@
   background-color: inherit;
 }
 
-dialog h2 {
-  margin-top: 0;
-}
-
-.modalButtons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+.postText {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 10;
+  line-clamp: 10;
+  overflow: hidden;
+  white-space: pre-wrap;
 }
 
 .postEditText {

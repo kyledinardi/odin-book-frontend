@@ -8,7 +8,7 @@ function Comment({ comment, replaceComment, removeComment }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [setError] = useOutletContext();
-  const modal = useRef(null);
+  const deleteModal = useRef(null);
 
   useEffect(() => {
     const currentUserId = parseInt(localStorage.getItem('userId'), 10);
@@ -35,7 +35,7 @@ function Comment({ comment, replaceComment, removeComment }) {
     }
 
     removeComment(comment.id);
-    modal.current.close();
+    deleteModal.current.close();
   }
 
   async function submitEdit(e) {
@@ -81,11 +81,11 @@ function Comment({ comment, replaceComment, removeComment }) {
 
   return (
     <div className={styles.comment}>
-      <dialog ref={modal}>
+      <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this comment?</h2>
-        <div className={styles.modalButtons}>
+        <div className='modalButtons'>
           <button onClick={() => deleteComment()}>Delete</button>
-          <button onClick={() => modal.current.close()}>Cancel</button>
+          <button onClick={() => deleteModal.current.close()}>Cancel</button>
         </div>
       </dialog>
       <div className={styles.heading}>
@@ -104,7 +104,7 @@ function Comment({ comment, replaceComment, removeComment }) {
             <button onClick={() => setIsEditing(true)}>
               <span className='material-symbols-outlined'>edit</span>
             </button>
-            <button onClick={() => modal.current.showModal()}>
+            <button onClick={() => deleteModal.current.showModal()}>
               <span className='material-symbols-outlined'>delete</span>
             </button>
           </div>

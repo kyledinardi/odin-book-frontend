@@ -5,11 +5,11 @@ import formatDate from '../formatDate';
 import Poll from './Poll.jsx';
 import styles from '../style/Post.module.css';
 
-function Post({ post, replacePost, removePost }) {
+function Post({ post, replacePost, removePost, isPostPage }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const modal = useRef(null);
-  const [setError] = useOutletContext()
+  const deleteModal = useRef(null);
+  const [setError] = useOutletContext();
   const currentUserId = parseInt(localStorage.getItem('userId'), 10);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ function Post({ post, replacePost, removePost }) {
     }
 
     removePost(post.id);
-    modal.current.close();
+    deleteModal.current.close();
   }
 
   async function like() {
@@ -95,11 +95,11 @@ function Post({ post, replacePost, removePost }) {
 
   return (
     <div className={styles.post}>
-      <dialog ref={modal}>
+      <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this post?</h2>
-        <div className={styles.modalButtons}>
+        <div className='modalButtons'>
           <button onClick={() => deletePost()}>Delete</button>
-          <button onClick={() => modal.current.close()}>Cancel</button>
+          <button onClick={() => deleteModal.current.close()}>Cancel</button>
         </div>
       </dialog>
       <div className={styles.heading}>
@@ -120,7 +120,7 @@ function Post({ post, replacePost, removePost }) {
             <button onClick={() => setIsEditing(true)}>
               <span className='material-symbols-outlined'>edit</span>
             </button>
-            <button onClick={() => modal.current.showModal()}>
+            <button onClick={() => deleteModal.current.showModal()}>
               <span className='material-symbols-outlined'>delete</span>
             </button>
           </div>
@@ -149,14 +149,16 @@ function Post({ post, replacePost, removePost }) {
           </div>
         </form>
       ) : (
-        <p>{post.text}</p>
+        <p
+          className={styles.postText}
+          style={{ display: isPostPage ? 'block' : '-webkit-box' }}
+        >
+          {post.text}
+        </p>
       )}
       {post.imageUrl && <img src={post.imageUrl} alt='' />}
       {post.poll && (
-        <Poll
-          post={post}
-          replacePost={(newPost) => replacePost(newPost)}
-        />
+        <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
       )}
       <div className={styles.interact}>
         <Link to={`/posts/${post.id}`}>
@@ -188,6 +190,7 @@ Post.propTypes = {
   post: PropTypes.object,
   replacePost: PropTypes.func,
   removePost: PropTypes.func,
+  isPostPage: PropTypes.bool,
 };
 
 export default Post;

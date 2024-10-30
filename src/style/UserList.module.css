@@ -1,10 +1,8 @@
-.userListContainer {
-  width: 350px;
-}
-
 .userList {
-  position: fixed;
-  width: 350px;
+  position: sticky;
+  top: 0;
+  left: 0;
+  height: 100vh;
 }
 
 .searchForm {
@@ -25,4 +23,10 @@
   width: 100%;
   border: none;
   outline: none;
+}
+
+@media (max-width: 1200px) {
+  .userList {
+    display: none;
+  }
 }

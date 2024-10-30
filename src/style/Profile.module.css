@@ -11,6 +11,10 @@
   font-size: 0.8rem;
 }
 
+.heading h2, .userInfo h2 {
+  text-align: start;
+}
+
 .pfpAndButton {
   display: flex;
   justify-content: space-between;
