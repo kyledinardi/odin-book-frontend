@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
-import UpdateProfile from './UpdateProfile.jsx';
+import UpdateUser from './UpdateUser.jsx';
 import styles from '../style/Profile.module.css';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
   const [isFollowed, setIsFollowed] = useState(false);
-  const modalRef = useRef(null);
+  const [modalType, setModalType] = useState('');
+  const userModal = useRef(null);
   const [setError, currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
 
@@ -96,30 +97,40 @@ function Profile() {
     </div>
   ) : (
     <main>
-      <UpdateProfile
-        modalRef={modalRef}
-        user={user}
-        currentUser={currentUser}
-        setCurrentUser={(u) => setCurrentUser(u)}
-      />
+      <UpdateUser userModal={userModal} modalType={modalType} user={user} />
       <div className={styles.heading}>
         <h2>{user.displayName}</h2>
         <p>{posts.length} posts</p>
       </div>
       <div className={styles.pfpAndButton}>
         <img className={styles.profilePagePfp} src={user.pfpUrl} alt='' />
-        {userId === currentUser.id ? (
-          <button
-            className={styles.topButton}
-            onClick={() => modalRef.current.showModal()}
-          >
-            Set up profile
-          </button>
-        ) : (
-          <button className={styles.topButton} onClick={() => follow()}>
-            {isFollowed ? 'Unfollow' : 'Follow'}
-          </button>
-        )}
+        <div className={styles.topButtons}>
+          {user.userame !== 'Guest' &&
+            (userId === currentUser.id ? (
+              <>
+                <button
+                  onClick={() => {
+                    setModalType('profile');
+                    userModal.current.showModal();
+                  }}
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => {
+                    setModalType('password');
+                    userModal.current.showModal();
+                  }}
+                >
+                  Change Password
+                </button>
+              </>
+            ) : (
+              <button onClick={() => follow()}>
+                {isFollowed ? 'Unfollow' : 'Follow'}
+              </button>
+            ))}
+        </div>
       </div>
       <div className={styles.userInfo}>
         <h2>{user.displayName}</h2>

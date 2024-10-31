@@ -11,7 +11,8 @@
   font-size: 0.8rem;
 }
 
-.heading h2, .userInfo h2 {
+.heading h2,
+.userInfo h2 {
   text-align: start;
 }
 
@@ -27,6 +28,12 @@
   width: 130px;
   border-radius: 65px;
   object-fit: cover;
+}
+
+.topButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .userInfo {

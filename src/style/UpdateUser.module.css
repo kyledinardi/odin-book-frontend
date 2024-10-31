@@ -1,4 +1,4 @@
-.modal form {
+.profileForm {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -6,11 +6,11 @@
   align-items: center;
 }
 
-.modal label {
+.profileForm label {
   font-size: 1.2rem;
 }
 
-.modal textarea {
+.profileForm textarea {
   border-radius: 10px;
   border: 1px solid white;
   width: max-content;
@@ -27,12 +27,25 @@
   object-fit: cover;
 }
 
-.modal .cancelNewPfp {
+.profileForm .cancelNewPfp {
   position: absolute;
   padding: 0;
   top: -5px;
   right: -5px;
   height: 24px;
+}
+
+.passwordFields {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px;
+  text-align: end;
+  margin-bottom: 20px;
+}
+
+.submitPassword {
+  display: block;
+  margin: auto;
 }
 
 .closeModalButton {
@@ -43,4 +56,11 @@
   top: 5px;
   right: 5px;
   height: 24px;
+}
+
+@media (max-width: 600px) {
+  .passwordFields {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
 }

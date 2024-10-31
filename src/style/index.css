@@ -76,6 +76,12 @@ button:active {
   background-color: #bbb;
 }
 
+button:disabled {
+  cursor: default;
+  color: black;
+  background-color: gray;
+}
+
 button,
 label {
   cursor: pointer;

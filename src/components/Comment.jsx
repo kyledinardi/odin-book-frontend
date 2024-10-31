@@ -56,6 +56,12 @@ function Comment({ comment, replaceComment, removeComment }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     replaceComment({ ...comment, text: response.comment.text });
     setIsEditing(false);
   }
@@ -76,6 +82,12 @@ function Comment({ comment, replaceComment, removeComment }) {
     );
 
     const response = await responseStream.json();
+
+    if (response.error) {
+      setError(response.error);
+      return;
+    }
+
     replaceComment({ ...comment, likes: response.comment.likes });
   }
 
