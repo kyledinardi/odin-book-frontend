@@ -1,25 +1,28 @@
 import { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
 import styles from '../style/NewPostForm.module.css';
 
 function NewPostForm({
-  modalRef,
+  gifModal,
   posts,
-  setPosts,
   newPostImagesrc,
   gifUrl,
+  setPosts,
   setNewPostImagesrc,
   setGifUrl,
 }) {
   const [isPoll, setIsPoll] = useState(false);
   const [pollChoiceCount, setPollChoiceCount] = useState(2);
-  const fileInputRef = useRef(null);
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const fileInput = useRef(null);
+  const postTextarea = useRef(null);
   const [setError] = useOutletContext();
 
   function cancelNewPostImage() {
-    fileInputRef.current.value = '';
+    fileInput.current.value = '';
     setNewPostImagesrc('');
     setGifUrl('');
   }
@@ -115,6 +118,7 @@ function NewPostForm({
     >
       <textarea
         className={styles.postText}
+        ref={postTextarea}
         name='postText'
         id='postText'
         maxLength={50000}
@@ -154,7 +158,7 @@ function NewPostForm({
         id='postImage'
         accept='image/*'
         hidden
-        ref={fileInputRef}
+        ref={fileInput}
         onChange={(e) => handleFileInputChange(e)}
       />
       <div className={styles.formButtons}>
@@ -172,7 +176,9 @@ function NewPostForm({
             <button
               className={styles.svgButton}
               type='button'
-              onClick={() => modalRef.current.showModal()}
+              onClick={() => {
+                gifModal.current.showModal();
+              }}
             >
               <span className='material-symbols-outlined'>gif_box</span>
             </button>
@@ -186,20 +192,40 @@ function NewPostForm({
             >
               <span className='material-symbols-outlined'>ballot</span>
             </button>
+
+            <button
+              className={styles.svgButton}
+              type='button'
+              onClick={() => setIsEmojiOpen(!isEmojiOpen)}
+            >
+              <span className='material-symbols-outlined'>add_reaction</span>
+            </button>
           </div>
         )}
         <button className={styles.submitButton}>Post</button>
       </div>
+      {isEmojiOpen && (
+        <div className={styles.emojiPicker}>
+          <EmojiPicker
+            theme='dark'
+            skinTonesDisabled={true}
+            onEmojiClick={(emojiData) => {
+              postTextarea.current.value = `${postTextarea.current.value}${emojiData.emoji}`;
+            }}
+          />
+        </div>
+      )}
     </form>
   );
 }
 
 NewPostForm.propTypes = {
-  modalRef: PropTypes.object,
+  gifModal: PropTypes.object,
   posts: PropTypes.array,
-  setPosts: PropTypes.func,
   newPostImagesrc: PropTypes.string,
   gifUrl: PropTypes.string,
+  setPosts: PropTypes.func,
+  setPickerType: PropTypes.func,
   setNewPostImagesrc: PropTypes.func,
   setGifUrl: PropTypes.func,
 };

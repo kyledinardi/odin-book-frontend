@@ -9,7 +9,7 @@ function Home() {
   const [posts, setPosts] = useState(null);
   const [newPostImagesrc, setNewPostImagesrc] = useState('');
   const [gifUrl, setGifUrl] = useState('');
-  const modalRef = useRef(null);
+  const gifModal = useRef(null);
   const [setError, currentUser] = useOutletContext();
   const navigate = useNavigate();
 
@@ -45,10 +45,10 @@ function Home() {
     </div>
   ) : (
     <main>
-      <dialog ref={modalRef}>
+      <dialog ref={gifModal}>
         <button
           className={styles.closeModalButton}
-          onClick={() => modalRef.current.close()}
+          onClick={() => gifModal.current.close()}
         >
           <span className='material-symbols-outlined closeButton'>close</span>
         </button>
@@ -59,7 +59,7 @@ function Home() {
             onGifClick={(selected) => {
               setGifUrl(selected.url);
               setNewPostImagesrc('');
-              modalRef.current.close();
+              gifModal.current.close();
             }}
           />
         </div>
@@ -71,11 +71,11 @@ function Home() {
           </Link>
         </div>
         <NewPostForm
-          modalRef={modalRef}
+          gifModal={gifModal}
           posts={posts}
-          setPosts={(p) => setPosts(p)}
           newPostImagesrc={newPostImagesrc}
           gifUrl={gifUrl}
+          setPosts={(p) => setPosts(p)}
           setNewPostImagesrc={(src) => setNewPostImagesrc(src)}
           setGifUrl={(url) => setGifUrl(url)}
         />

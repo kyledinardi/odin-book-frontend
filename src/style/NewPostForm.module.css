@@ -51,3 +51,7 @@
 .submitButton:active {
   background-color: #2121bf;
 }
+
+.emojiPicker {
+  margin: 10px 0;
+}
