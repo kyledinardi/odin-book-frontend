@@ -16,6 +16,7 @@
   align-items: start;
   gap: 10px;
 }
+
 .commentOptions button {
   padding: 0;
   margin: 5px;
@@ -26,6 +27,21 @@
 .commentOptions button:hover,
 .commentOptions button:active {
   background-color: black;
+}
+
+.commentText {
+  white-space: pre-wrap;
+}
+
+.comment textarea {
+  border: 1px solid #222;
+  width: 100%;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.editButtons button {
+  margin: 0 10px 10px 0;
 }
 
 .interact button {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ErrorPage from './ErrorPage.jsx';
 import styles from '../style/Login.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function SignUp() {
   const [unexpectedError, setUnexpectedError] = useState(null);
@@ -11,29 +12,21 @@ function SignUp() {
   async function submitLogin(e) {
     e.preventDefault();
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users`,
+    const response = await backendFetch(setUnexpectedError, '/users', {
+      hasBearer: false,
+      method: 'POST',
 
-      {
-        method: 'Post',
-        headers: { 'Content-Type': 'application/json' },
-
-        body: JSON.stringify({
-          displayName: e.target[0].value,
-          username: e.target[1].value,
-          password: e.target[2].value,
-          passwordConfirmation: e.target[3].value,
-        }),
-      },
-    );
-
-    const response = await responseStream.json();
+      body: JSON.stringify({
+        displayName: e.target[0].value,
+        username: e.target[1].value,
+        password: e.target[2].value,
+        passwordConfirmation: e.target[3].value,
+      }),
+    });
 
     if (response.expectedErrors) {
       e.target.reset();
       setErrorArray(response.expectedErrors);
-    } else if (response.error) {
-      setUnexpectedError(response.error);
     } else {
       navigate('/');
     }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import User from './User.jsx';
 import styles from '../style/UserList.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function UserList({ currentUser, setCurrentUser, setError }) {
   const [users, setUsers] = useState(null);
@@ -11,24 +12,17 @@ function UserList({ currentUser, setCurrentUser, setError }) {
 
   useEffect(() => {
     if (currentUser) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-        .then((response) => response.json())
-
-        .then((response) => {
-          if (response.error) {
-            setError(response.error);
-            return;
-          }
-
-          setFollowedIds(currentUser.following.map((user) => user.id));
-          setUsers(response.users);
-        });
+      setFollowedIds(currentUser.following.map((user) => user.id));
     }
-  }, [currentUser, setError]);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      backendFetch(setError, '/users').then((response) => {
+        setUsers(response.users);
+      });
+    }
+  }, [setError]);
 
   return !users || !followedIds ? (
     <div className='loaderContainer'>

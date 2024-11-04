@@ -4,14 +4,15 @@ import PropTypes from 'prop-types';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
 import styles from '../style/NewPostForm.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function NewPostForm({
   gifModal,
   posts,
-  newPostImagesrc,
+  newPostImage,
   gifUrl,
   setPosts,
-  setNewPostImagesrc,
+  setNewPostImage,
   setGifUrl,
 }) {
   const [isPoll, setIsPoll] = useState(false);
@@ -23,12 +24,13 @@ function NewPostForm({
 
   function cancelNewPostImage() {
     fileInput.current.value = '';
-    setNewPostImagesrc('');
+    setNewPostImage(null);
     setGifUrl('');
   }
 
   async function submitPost(e) {
     e.preventDefault();
+
     const formData = new FormData();
     formData.append('postText', e.target[0].value);
     formData.append('gifUrl', gifUrl);
@@ -37,28 +39,15 @@ function NewPostForm({
       formData.append('postImage', e.target[2].files[0]);
     }
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/posts`,
-
-      {
-        method: 'POST',
-        body: formData,
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
+    const response = await backendFetch(setError, '/posts', {
+      method: 'POST',
+      body: formData,
+    });
 
     cancelNewPostImage();
     e.target.reset();
+    e.target[0].style.height = '64px';
+    setIsEmojiOpen(false);
     setPosts([response.post, ...posts]);
   }
 
@@ -70,34 +59,21 @@ function NewPostForm({
       choiceArray.push(e.target[i].value);
     }
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/polls`,
+    const response = await backendFetch(setError, '/polls', {
+      method: 'POST',
 
-      {
-        method: 'POST',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-
-        body: JSON.stringify({
-          question: e.target[0].value,
-          choices: choiceArray,
-        }),
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
+      body: JSON.stringify({
+        question: e.target[0].value,
+        choices: choiceArray,
+      }),
+    });
 
     cancelNewPostImage();
     setIsPoll(false);
     e.target.reset();
+    e.target[0].style.height = '64px';
+    setPollChoiceCount(2);
+    setIsEmojiOpen(false);
     setPosts([response.post, ...posts]);
   }
 
@@ -106,7 +82,7 @@ function NewPostForm({
     setGifUrl('');
 
     if (file) {
-      setNewPostImagesrc(file);
+      setNewPostImage(file);
     }
   }
 
@@ -127,7 +103,7 @@ function NewPostForm({
           e.target.style.height = 'auto';
           e.target.style.height = `${e.target.scrollHeight}px`;
         }}
-        required={!newPostImagesrc && !gifUrl}
+        required={!newPostImage && !gifUrl}
       ></textarea>
       {isPoll && (
         <PollInputs
@@ -135,12 +111,10 @@ function NewPostForm({
           setPollChoiceCount={(n) => setPollChoiceCount(n)}
         />
       )}
-      {(newPostImagesrc !== '' || gifUrl !== '') && (
+      {(newPostImage || gifUrl !== '') && (
         <div className={styles.imgPreview}>
           <img
-            src={
-              newPostImagesrc ? URL.createObjectURL(newPostImagesrc) : gifUrl
-            }
+            src={newPostImage ? URL.createObjectURL(newPostImage) : gifUrl}
             alt=''
           />
           <button
@@ -222,11 +196,11 @@ function NewPostForm({
 NewPostForm.propTypes = {
   gifModal: PropTypes.object,
   posts: PropTypes.array,
-  newPostImagesrc: PropTypes.string,
+  newPostImage: PropTypes.object,
   gifUrl: PropTypes.string,
   setPosts: PropTypes.func,
   setPickerType: PropTypes.func,
-  setNewPostImagesrc: PropTypes.func,
+  setNewPostImage: PropTypes.func,
   setGifUrl: PropTypes.func,
 };
 

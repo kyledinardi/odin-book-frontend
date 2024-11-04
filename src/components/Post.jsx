@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import formatDate from '../formatDate';
 import Poll from './Poll.jsx';
 import styles from '../style/Post.module.css';
+import formatDate from '../../ helpers/formatDate';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Post({ post, replacePost, removePost, isPostPage }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const editTextarea = useRef(null);
   const deleteModal = useRef(null);
   const [setError] = useOutletContext();
   const currentUserId = parseInt(localStorage.getItem('userId'), 10);
@@ -16,79 +18,40 @@ function Post({ post, replacePost, removePost, isPostPage }) {
     setIsLiked(post.likes.some((user) => user.id === currentUserId));
   }, [currentUserId, post]);
 
+  useEffect(() => {
+    if (editTextarea.current) {
+      editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
+      editTextarea.current.style.overflowY = 'hidden';
+    }
+  }, [isEditing]);
+
   async function submitEdit(e) {
     e.preventDefault();
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}`,
-
-      {
-        method: 'PUT',
-        body: JSON.stringify({ text: e.target[0].value }),
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
+    const response = await backendFetch(setError, `/posts/${post.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ text: e.target[0].value }),
+    });
 
     replacePost({ ...post, text: response.post.text });
     setIsEditing(false);
   }
 
   async function deletePost() {
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}`,
-
-      {
-        method: 'DELETE',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
-    );
-
-    const response = responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
+    await backendFetch(setError, `/posts/${post.id}`, {
+      method: 'DELETE',
+    });
 
     removePost(post.id);
     deleteModal.current.close();
   }
 
   async function like() {
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/posts/${post.id}/${
-        isLiked ? 'unlike' : 'like'
-      }`,
-
-      {
-        method: 'PUT',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
+    const response = await backendFetch(
+      setError,
+      `/posts/${post.id}/${isLiked ? 'unlike' : 'like'}`,
+      { method: 'PUT' },
     );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
 
     replacePost({ ...post, likes: response.post.likes });
   }
@@ -129,7 +92,8 @@ function Post({ post, replacePost, removePost, isPostPage }) {
       {isEditing ? (
         <form onSubmit={(e) => submitEdit(e)}>
           <textarea
-            className={styles.postEditText}
+            className={styles.editTextarea}
+            ref={editTextarea}
             name='postEditText'
             id='postEditText'
             defaultValue={post.text}
@@ -149,14 +113,20 @@ function Post({ post, replacePost, removePost, isPostPage }) {
           </div>
         </form>
       ) : (
-        <p
-          className={styles.postText}
-          style={{ display: isPostPage ? 'block' : '-webkit-box' }}
-        >
-          {post.text}
-        </p>
+        post.text !== '' && (
+          <p
+            className={styles.postText}
+            style={{ display: isPostPage ? 'block' : '-webkit-box' }}
+          >
+            {post.text}
+          </p>
+        )
       )}
-      {post.imageUrl && <img src={post.imageUrl} alt='' />}
+      {post.imageUrl && (
+        <div className={styles.imageContainer}>
+          <img src={post.imageUrl} alt='' />
+        </div>
+      )}
       {post.poll && (
         <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
       )}

@@ -3,6 +3,7 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import UpdateUser from './UpdateUser.jsx';
 import styles from '../style/Profile.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Profile() {
   const [user, setUser] = useState(null);
@@ -20,60 +21,27 @@ function Profile() {
     }
 
     if (currentUser) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-        .then((response) => response.json())
+      backendFetch(setError, `/users/${userId}`).then((response) => {
+        const isFollowedTemp = currentUser.following.some(
+          (followedUser) => followedUser.id === userId,
+        );
 
-        .then((response) => {
-          if (response.error) {
-            setError(response.error);
-            return;
-          }
+        setIsFollowed(isFollowedTemp);
+        setUser(response.user);
+      });
 
-          const isFollowedTemp = currentUser.following.some(
-            (followedUser) => followedUser.id === userId,
-          );
-
-          setIsFollowed(isFollowedTemp);
-          setUser(response.user);
-        });
-
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}/posts`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((response) => setPosts(response.posts));
+      backendFetch(setError, `/users/${userId}/posts`).then((response) =>
+        setPosts(response.posts),
+      );
     }
   }, [userId, currentUser, setError]);
 
   async function follow() {
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/${
-        isFollowed ? 'unfollow' : 'follow'
-      }`,
-
-      {
-        method: 'Put',
-        body: JSON.stringify({ userId: user.id }),
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      },
+    const response = await backendFetch(
+      setError,
+      `/users/${isFollowed ? 'unfollow' : 'follow'}`,
+      { method: 'PUT', body: JSON.stringify({ userId: user.id }) },
     );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
 
     setCurrentUser({ ...currentUser, following: response.user.following });
     setIsFollowed(!isFollowed);

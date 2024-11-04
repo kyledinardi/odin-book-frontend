@@ -1,4 +1,4 @@
-function formatDate(date) {
+export default function formatDate(date) {
   const msPerMinute = 60 * 1000;
   const msPerHour = msPerMinute * 60;
   const msPerDay = msPerHour * 24;
@@ -29,12 +29,10 @@ function formatDate(date) {
       day: 'numeric',
     });
   }
-  
+
   return timestamp.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
 }
-
-export default formatDate;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import styles from '../style/Follows.module.css';
 import FollowList from './FollowList.jsx';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Follows() {
   const [user, setUser] = useState(null);
@@ -24,20 +25,9 @@ function Follows() {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((response) => response.json())
-
-      .then((response) => {
-        if (response.error) {
-          setError(response.error);
-        }
-
-        setUser(response.user);
-      });
+    backendFetch(setError, `/users/${userId}`).then((response) =>
+      setUser(response.user),
+    );
   }, [userId, setError]);
 
   return !user || !currentUser || !followedIds ? (
@@ -45,7 +35,7 @@ function Follows() {
       <div className='loader'></div>
     </div>
   ) : (
-    <main>
+    <main className={styles.followContainer}>
       <div className={styles.heading}>
         <h2>{user.displayName}</h2>
         <p>{`@${user.username}`}</p>

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import ErrorPage from './ErrorPage.jsx';
 import styles from '../style/Login.module.css';
 import githubLogo from '../assets/github-mark.svg';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Login() {
   const [unexpectedError, setUnexpectedError] = useState(null);
@@ -25,27 +26,19 @@ function Login() {
   async function submitLogin(e) {
     e.preventDefault();
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/auth/local`,
+    const response = await backendFetch(setUnexpectedError, '/auth/local', {
+      hasBearer: false,
+      method: 'POST',
 
-      {
-        method: 'Post',
-        headers: { 'Content-Type': 'application/json' },
-
-        body: JSON.stringify({
-          username: e.target[0].value,
-          password: e.target[1].value,
-        }),
-      },
-    );
-
-    const response = await responseStream.json();
+      body: JSON.stringify({
+        username: e.target[0].value,
+        password: e.target[1].value,
+      }),
+    });
 
     if (response.expectedError) {
       e.target.reset();
       setErrorMessage(response.expectedError.message);
-    } else if (response.error) {
-      setUnexpectedError(response.error);
     } else {
       localStorage.setItem('token', response.token);
       localStorage.setItem('userId', response.user.id);
@@ -95,7 +88,7 @@ function Login() {
         </form>
         <a
           className={styles.logoButton}
-          href='http://localhost:3000/auth/github'
+          href={`${import.meta.env.VITE_BACKEND_URL}/auth/github`}
         >
           <span>Log in with GitHub</span>
           <img className={styles.logo} src={githubLogo} alt='' />

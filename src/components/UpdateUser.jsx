@@ -2,10 +2,13 @@ import { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styles from '../style/UpdateUser.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function UpdateUser({ userModal, modalType, user }) {
   const [newPfpSrc, setNewPfpSrc] = useState('');
   const [errorArray, setErrorArray] = useState(null);
+  const profileForm = useRef(null);
+  const passwordForm = useRef(null);
   const newPfpInput = useRef(null);
   const [setError, currentUser, setCurrentUser] = useOutletContext();
 
@@ -16,28 +19,10 @@ function UpdateUser({ userModal, modalType, user }) {
     formData.append('displayName', e.target[2].value);
     formData.append('bio', e.target[3].value);
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/profile`,
-
-      {
-        method: 'PUT',
-        body: formData,
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
-
-    e.target.reset();
-    userModal.current.close();
+    const response = await backendFetch(setError, '/users/profile', {
+      method: 'PUT',
+      body: formData,
+    });
 
     const newCurrentUser = {
       ...currentUser,
@@ -47,45 +32,31 @@ function UpdateUser({ userModal, modalType, user }) {
     };
 
     setCurrentUser(newCurrentUser);
+    e.target.reset();
+    userModal.current.close();
   }
 
   async function submitPasswordChange(e) {
     e.preventDefault();
+    
+    const response = await backendFetch(setError, '/users/password', {
+      method: 'PUT',
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/password`,
+      body: JSON.stringify({
+        currentPassword: e.target[0].value,
+        newPassword: e.target[1].value,
+        newPasswordConfirmation: e.target[2].value,
+      }),
+    });
 
-      {
-        method: 'PUT',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-
-        body: JSON.stringify({
-          currentPassword: e.target[0].value,
-          newPassword: e.target[1].value,
-          newPasswordConfirmation: e.target[2].value,
-        }),
-      },
-    );
-
-    const response = await responseStream.json();
+    e.target.reset();
 
     if (response.expectedErrors) {
-      e.target.reset();
       setErrorArray(response.expectedErrors);
-      return;
+    } else {
+      setErrorArray(null);
+      userModal.current.close();
     }
-
-    if (response.error) {
-      setError(response.error);
-    }
-
-    setErrorArray(null);
-    e.target.reset();
-    userModal.current.close();
   }
 
   function handleFileInputChange(e) {
@@ -97,7 +68,15 @@ function UpdateUser({ userModal, modalType, user }) {
   }
 
   return (
-    <dialog className={styles.modal} ref={userModal}>
+    <dialog
+      className={styles.modal}
+      ref={userModal}
+      onClose={() =>
+        profileForm.current
+          ? profileForm.current.reset()
+          : passwordForm.current.reset()
+      }
+    >
       <button
         className={styles.closeModalButton}
         onClick={() => {
@@ -111,6 +90,7 @@ function UpdateUser({ userModal, modalType, user }) {
       {modalType === 'profile' ? (
         <form
           className={styles.profileForm}
+          ref={profileForm}
           onSubmit={(e) => submitProfileChange(e)}
         >
           <input
@@ -155,6 +135,7 @@ function UpdateUser({ userModal, modalType, user }) {
             id='displayName'
             maxLength={50}
             defaultValue={currentUser.displayName}
+            required
           />
           <label htmlFor='bio'>Bio</label>
           <textarea
@@ -172,6 +153,7 @@ function UpdateUser({ userModal, modalType, user }) {
       ) : (
         <form
           className={styles.passwordForm}
+          ref={passwordForm}
           onSubmit={(e) => submitPasswordChange(e)}
         >
           <div className={styles.passwordFields}>

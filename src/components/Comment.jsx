@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import { Link, useOutletContext } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import formatDate from '../formatDate';
 import styles from '../style/Comment.module.css';
+import formatDate from '../../ helpers/formatDate';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Comment({ comment, replaceComment, removeComment }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [setError] = useOutletContext();
+  const editTextarea = useRef(null);
   const deleteModal = useRef(null);
 
   useEffect(() => {
@@ -15,24 +17,17 @@ function Comment({ comment, replaceComment, removeComment }) {
     setIsLiked(comment.likes.some((user) => user.id === currentUserId));
   }, [comment]);
 
-  async function deleteComment() {
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}`,
-
-      {
-        method: 'DELETE',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
+  useEffect(() => {
+    if (editTextarea.current) {
+      editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
+      editTextarea.current.style.overflowY = 'hidden';
     }
+  }, [isEditing]);
+
+  async function deleteComment() {
+    await backendFetch(setError, `/comments/${comment.id}`, {
+      method: 'DELETE',
+    });
 
     removeComment(comment.id);
     deleteModal.current.close();
@@ -41,52 +36,21 @@ function Comment({ comment, replaceComment, removeComment }) {
   async function submitEdit(e) {
     e.preventDefault();
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}`,
-
-      {
-        method: 'PUT',
-        body: JSON.stringify({ text: e.target[0].value }),
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
+    const response = await backendFetch(setError, `/comments/${comment.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ text: e.target[0].value }),
+    });
 
     replaceComment({ ...comment, text: response.comment.text });
     setIsEditing(false);
   }
 
   async function like() {
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/comments/${comment.id}/${
-        isLiked ? 'unlike' : 'like'
-      }`,
-
-      {
-        method: 'Put',
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      },
+    const response = await backendFetch(
+      setError,
+      `/comments/${comment.id}/${isLiked ? 'unlike' : 'like'}`,
+      { method: 'PUT' },
     );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-      return;
-    }
 
     replaceComment({ ...comment, likes: response.comment.likes });
   }
@@ -126,6 +90,7 @@ function Comment({ comment, replaceComment, removeComment }) {
         <form onSubmit={(e) => submitEdit(e)}>
           <textarea
             className={styles.commentEditText}
+            ref={editTextarea}
             name='commentEditText'
             id='commentEditText'
             defaultValue={comment.text}
@@ -145,7 +110,7 @@ function Comment({ comment, replaceComment, removeComment }) {
           </div>
         </form>
       ) : (
-        <p>{comment.text}</p>
+        <p className={styles.commentText}>{comment.text}</p>
       )}
       <div className={styles.interact}>
         <button className={styles.likeButton} onClick={() => like()}>

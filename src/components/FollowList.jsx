@@ -47,6 +47,10 @@ function FollowList({ openTab, user, followedIds }) {
       return user.followers.map((follower) => returnUser(follower));
 
     case 'followedFollowers': {
+      if (user.id === currentUser.id) {
+        return null;
+      }
+
       const followedFollowers = user.followers.filter((follower) =>
         followedIds.includes(follower.id),
       );

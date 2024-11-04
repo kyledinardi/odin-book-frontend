@@ -4,6 +4,7 @@
 
 .heading * {
   margin: 10px;
+  text-align: start;
 }
 
 .heading p {
@@ -25,4 +26,8 @@
 
 .categoryButton:active {
   background-color: #444;
+}
+
+.followContainer h2 {
+  margin: 20px;
 }

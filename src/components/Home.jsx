@@ -1,35 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import GifPicker from 'gif-picker-react';
 import Post from './Post.jsx';
 import NewPostForm from './NewPostForm.jsx';
 import styles from '../style/Home.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Home() {
   const [posts, setPosts] = useState(null);
-  const [newPostImagesrc, setNewPostImagesrc] = useState('');
+  const [newPostImage, setNewPostImage] = useState(null);
   const [gifUrl, setGifUrl] = useState('');
   const gifModal = useRef(null);
   const [setError, currentUser] = useOutletContext();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/index`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((response) => response.json())
-
-      .then((response) => {
-        if (response.error) {
-          setError(response.error);
-          return;
-        }
-
-        setPosts(response.posts);
-      });
-  }, [setError, navigate]);
+    backendFetch(setError, '/posts/index').then((response) =>
+      setPosts(response.posts),
+    );
+  }, [setError]);
 
   function replacePost(updatedPost) {
     const newPosts = posts.map((post) =>
@@ -58,7 +46,7 @@ function Home() {
             theme='dark'
             onGifClick={(selected) => {
               setGifUrl(selected.url);
-              setNewPostImagesrc('');
+              setNewPostImage(null);
               gifModal.current.close();
             }}
           />
@@ -73,16 +61,16 @@ function Home() {
         <NewPostForm
           gifModal={gifModal}
           posts={posts}
-          newPostImagesrc={newPostImagesrc}
+          newPostImage={newPostImage}
           gifUrl={gifUrl}
           setPosts={(p) => setPosts(p)}
-          setNewPostImagesrc={(src) => setNewPostImagesrc(src)}
+          setNewPostImage={(src) => setNewPostImage(src)}
           setGifUrl={(url) => setGifUrl(url)}
         />
       </div>
       <div>
         {posts.length === 0 ? (
-          <h2 className='nothingHere'>You and your followers have no posts.</h2>
+          <h2 className='nothingHere'>You and your followers have no posts</h2>
         ) : (
           posts.map((post) => (
             <Post

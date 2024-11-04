@@ -3,6 +3,7 @@ import { useOutletContext, useSearchParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import User from './User.jsx';
 import styles from '../style/Search.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Search() {
   const [openTab, setOpenTab] = useState('posts');
@@ -19,49 +20,15 @@ function Search() {
 
     if (searchParams.has('query')) {
       if (searchParams.get('query') !== '') {
-        fetch(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/posts/search?query=${searchParams.get('query')}`,
+        backendFetch(
+          setError,
+          `/posts/search?query=${searchParams.get('query')}`,
+        ).then((response) => setPosts(response.posts));
 
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          },
-        )
-          .then((response) => response.json())
-
-          .then((response) => {
-            if (response.error) {
-              setError(response.error);
-              return;
-            }
-
-            setPosts(response.posts);
-          });
-
-        fetch(
-          `${
-            import.meta.env.VITE_BACKEND_URL
-          }/users/search?query=${searchParams.get('query')}`,
-
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          },
-        )
-          .then((response) => response.json())
-
-          .then((response) => {
-            if (response.error) {
-              setError(response.error);
-              return;
-            }
-
-            setUsers(response.users);
-          });
+        backendFetch(
+          setError,
+          `/users/search?query=${searchParams.get('query')}`,
+        ).then((response) => setUsers(response.users));
       } else {
         setPosts(null);
         setUsers(null);

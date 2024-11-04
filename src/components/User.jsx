@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Link, useOutletContext } from 'react-router-dom';
 import styles from '../style/User.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function User({ user, bio, isFollowed, replaceUser, setError }) {
   const outletContext = useOutletContext();
@@ -15,28 +16,11 @@ function User({ user, bio, isFollowed, replaceUser, setError }) {
   }
 
   async function follow() {
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/users/${
-        isFollowed ? 'unfollow' : 'follow'
-      }`,
-
-      {
-        method: 'Put',
-        body: JSON.stringify({ userId: user.id }),
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      },
+    const response = await backendFetch(
+      setUserError,
+      `/users/${isFollowed ? 'unfollow' : 'follow'}`,
+      { method: 'PUT', body: JSON.stringify({ userId: user.id }) },
     );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setUserError(response.error);
-      return;
-    }
 
     replaceUser(response.user);
   }

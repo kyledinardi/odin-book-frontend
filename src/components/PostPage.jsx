@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import styles from '../style/PostPage.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function PostPage() {
   const [post, setPost] = useState(null);
@@ -22,45 +23,21 @@ function PostPage() {
       return;
     }
 
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/posts/${postId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.error) {
-          setError(response.error);
-        }
-
-        setPost(response.post);
-      });
+    backendFetch(setError, `/posts/${postId}`).then((response) =>
+      setPost(response.post),
+    );
   }, [postId, setError]);
 
   async function submitComment(e) {
     e.preventDefault();
 
-    const responseStream = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/posts/${postId}/comments`,
-
-      {
-        method: 'POST',
-        body: JSON.stringify({ text: e.target[0].value }),
-
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-
-    const response = await responseStream.json();
-
-    if (response.error) {
-      setError(response.error);
-    }
+    const response = await backendFetch(setError, `/posts/${postId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ text: e.target[0].value }),
+    });
 
     e.target.reset();
+    e.target[0].style.height = '64px';
     const newComments = [response.comment, ...post.comments];
     setPost({ ...post, comments: newComments });
   }
@@ -81,7 +58,7 @@ function PostPage() {
     setPost({ ...post, comments: newComments });
   }
 
-  return !post ? (
+  return !post || !currentUser ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>

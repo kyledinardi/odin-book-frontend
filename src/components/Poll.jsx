@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { useOutletContext } from 'react-router-dom';
 import styles from '../style/Poll.module.css';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Poll({ post, replacePost }) {
   const [setError] = useOutletContext();
@@ -10,26 +11,10 @@ function Poll({ post, replacePost }) {
 
   async function vote(choiceNumber) {
     if (!post.poll.voters.includes(userId)) {
-      const responseStream = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/polls/${post.poll.id}`,
-
-        {
-          method: 'PUT',
-          body: JSON.stringify({ choiceNumber }),
-
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      const response = await responseStream.json();
-
-      if (response.error) {
-        setError(response.error);
-        return;
-      }
+      const response = await backendFetch(setError, `/polls/${post.poll.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ choiceNumber }),
+      });
 
       replacePost({ ...post, poll: response.poll });
     }

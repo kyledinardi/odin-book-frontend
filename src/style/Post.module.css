@@ -8,6 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 15px;
 }
 
 .links {
@@ -63,7 +64,7 @@
   white-space: pre-wrap;
 }
 
-.postEditText {
+.editTextarea {
   border: 1px solid #222;
   width: 100%;
   overflow: hidden;
@@ -72,4 +73,9 @@
 
 .editButtons button {
   margin: 0 10px 10px 0;
+}
+
+.imageContainer {
+  display: flex;
+  justify-content: center;
 }

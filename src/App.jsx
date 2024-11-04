@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
+import backendFetch from '../ helpers/backendFetch';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -11,28 +12,12 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/currentUser`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((response) => response.json())
-
-      .then((response) => {
-        if (response.error) {
-          if (response.error.status === 401) {
-            localStorage.clear();
-            navigate('/login');
-          } else {
-            setError(response.error);
-          }
-
-          return;
-        }
-
-        setCurrentUser(response.user);
-      });
-  }, [navigate]);
+    if (!error) {
+      backendFetch(setError, '/users/currentUser').then((response) =>
+        setCurrentUser(response.user),
+      );
+    }
+  }, [error]);
 
   return error ? (
     <ErrorPage error={error} setError={(err) => setError(err)} />
@@ -47,7 +32,7 @@ function App() {
       />
       <dialog ref={logoutModal}>
         <h2>Are you sure you want to log out?</h2>
-        <div className="modalButtons">
+        <div className='modalButtons'>
           <button
             onClick={() => {
               logoutModal.current.close();
