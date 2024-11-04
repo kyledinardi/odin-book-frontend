@@ -70,7 +70,7 @@ function Home() {
       </div>
       <div>
         {posts.length === 0 ? (
-          <h2 className='nothingHere'>You and your followers have no posts</h2>
+          <h2>You and your followers have no posts</h2>
         ) : (
           posts.map((post) => (
             <Post

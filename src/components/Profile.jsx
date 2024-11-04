@@ -8,8 +8,10 @@ import backendFetch from '../../ helpers/backendFetch';
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
+  const [imagePosts, setImagePosts] = useState(null);
   const [isFollowed, setIsFollowed] = useState(false);
   const [modalType, setModalType] = useState('');
+  const [openTab, setOpenTab] = useState('posts');
   const userModal = useRef(null);
   const [setError, currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
@@ -30,9 +32,10 @@ function Profile() {
         setUser(response.user);
       });
 
-      backendFetch(setError, `/users/${userId}/posts`).then((response) =>
-        setPosts(response.posts),
-      );
+      backendFetch(setError, `/users/${userId}/posts`).then((response) => {
+        setPosts(response.posts);
+        setImagePosts(response.posts.filter((post) => post.imageUrl));
+      });
     }
   }, [userId, currentUser, setError]);
 
@@ -52,11 +55,54 @@ function Profile() {
       post.id === updatedPost.id ? updatedPost : post,
     );
 
+    const newImagePosts = imagePosts.map((post) =>
+      post.id === updatedPost.id ? updatedPost : post,
+    );
+
     setPosts(newPosts);
+    setImagePosts(newImagePosts);
   }
 
   function removePost(postId) {
     setPosts(posts.filter((post) => post.id !== postId));
+    setImagePosts(imagePosts.filter((post) => post.id !== postId));
+  }
+
+  function renderPosts() {
+    const noPostsMessageTemplate =
+      userId === currentUser.id ? 'You have' : `${user.username} has`;
+
+    if (openTab === 'posts') {
+      if (posts.length === 0) {
+        return <h2>{`${noPostsMessageTemplate} no posts.`}</h2>;
+      }
+
+      return posts.map((post) => (
+        <Post
+          key={post.id}
+          post={post}
+          replacePost={(updatedPost) => replacePost(updatedPost)}
+          removePost={(postId) => removePost(postId)}
+        />
+      ));
+    }
+
+    if (openTab === 'images') {
+      if (imagePosts.length === 0) {
+        return <h2>{`${noPostsMessageTemplate} no images.`}</h2>;
+      }
+
+      return imagePosts.map((post) => (
+        <Post
+          key={post.id}
+          post={post}
+          replacePost={(updatedPost) => replacePost(updatedPost)}
+          removePost={(postId) => removePost(postId)}
+        />
+      ));
+    }
+
+    return null;
   }
 
   return !user || !posts || !currentUser ? (
@@ -113,23 +159,19 @@ function Profile() {
           </span>
         </Link>
       </div>
-      <h3 className={styles.postHeading}>Posts</h3>
-      <div>
-        {posts.length === 0 ? (
-          <h2 className='nothingHere'>{`${
-            userId === currentUser.id ? 'You have' : `${user.username} has`
-          } no posts.`}</h2>
-        ) : (
-          posts.map((post) => (
-            <Post
-              key={post.id}
-              post={post}
-              replacePost={(updatedPost) => replacePost(updatedPost)}
-              removePost={(postId) => removePost(postId)}
-            />
-          ))
-        )}
-      </div>
+      <button
+        className={`categoryButton ${openTab === 'posts' ? 'openTab' : null}`}
+        onClick={() => setOpenTab('posts')}
+      >
+        Posts
+      </button>
+      <button
+        className={`categoryButton ${openTab === 'images' ? 'openTab' : null}`}
+        onClick={() => setOpenTab('images')}
+      >
+        Images
+      </button>
+      <div>{renderPosts()}</div>
     </main>
   );
 }

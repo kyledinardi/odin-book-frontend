@@ -60,6 +60,11 @@ a {
   text-decoration: none;
 }
 
+button,
+label {
+  cursor: pointer;
+}
+
 button {
   background-color: white;
   border: none;
@@ -82,9 +87,20 @@ button:disabled {
   background-color: gray;
 }
 
-button,
-label {
-  cursor: pointer;
+.categoryButton {
+  background-color: black;
+  color: white;
+  border-radius: 0;
+  font-size: 1rem;
+}
+
+.categoryButton:hover,
+.openTab {
+  background-color: #222;
+}
+
+.categoryButton:active {
+  background-color: #444;
 }
 
 textarea {
