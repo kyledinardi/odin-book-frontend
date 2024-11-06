@@ -10,6 +10,7 @@ function Search() {
   const [posts, setPosts] = useState(null);
   const [users, setUsers] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [setError, currentUser, setCurrentUser] = useOutletContext();
 

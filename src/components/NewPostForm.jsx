@@ -7,17 +7,18 @@ import styles from '../style/NewPostForm.module.css';
 import backendFetch from '../../ helpers/backendFetch';
 
 function NewPostForm({
-  gifModal,
   posts,
   newPostImage,
   gifUrl,
   setPosts,
   setNewPostImage,
+  setIsModal,
   setGifUrl,
 }) {
   const [isPoll, setIsPoll] = useState(false);
   const [pollChoiceCount, setPollChoiceCount] = useState(2);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  
   const fileInput = useRef(null);
   const postTextarea = useRef(null);
   const [setError] = useOutletContext();
@@ -151,7 +152,7 @@ function NewPostForm({
               className={styles.svgButton}
               type='button'
               onClick={() => {
-                gifModal.current.showModal();
+                setIsModal(true);
               }}
             >
               <span className='material-symbols-outlined'>gif_box</span>
@@ -194,13 +195,13 @@ function NewPostForm({
 }
 
 NewPostForm.propTypes = {
-  gifModal: PropTypes.object,
   posts: PropTypes.array,
   newPostImage: PropTypes.object,
   gifUrl: PropTypes.string,
   setPosts: PropTypes.func,
   setPickerType: PropTypes.func,
   setNewPostImage: PropTypes.func,
+  setIsModal: PropTypes.func,
   setGifUrl: PropTypes.func,
 };
 

@@ -11,6 +11,7 @@ function Post({ post, replacePost, removePost, isPostPage }) {
   const [isEditing, setIsEditing] = useState(false);
   const editTextarea = useRef(null);
   const deleteModal = useRef(null);
+  
   const [setError] = useOutletContext();
   const currentUserId = parseInt(localStorage.getItem('userId'), 10);
 

@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import Post from './Post.jsx';
-import UpdateUser from './UpdateUser.jsx';
 import styles from '../style/Profile.module.css';
 import backendFetch from '../../ helpers/backendFetch';
+import UpdateProfileForm from './UpdateProfileForm.jsx';
+import UpdatePasswordForm from './UpdatePasswordForm.jsx';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
   const [imagePosts, setImagePosts] = useState(null);
+  
   const [isFollowed, setIsFollowed] = useState(false);
+  const [isModal, setIsModal] = useState(false);
+  const [isModalRendered, setIsModalRendered] = useState(false);
   const [modalType, setModalType] = useState('');
   const [openTab, setOpenTab] = useState('posts');
+
   const userModal = useRef(null);
   const [setError, currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
@@ -38,6 +43,16 @@ function Profile() {
       });
     }
   }, [userId, currentUser, setError]);
+
+  useEffect(() => {
+    if (isModal) {
+      setIsModalRendered(true);
+
+      if (isModalRendered) {
+        userModal.current.showModal();
+      }
+    }
+  }, [isModal, isModalRendered]);
 
   async function follow() {
     const response = await backendFetch(
@@ -111,11 +126,33 @@ function Profile() {
     </div>
   ) : (
     <main>
-      <UpdateUser userModal={userModal} modalType={modalType} user={user} />
+      {isModal && (
+        <dialog
+          className={styles.modal}
+          ref={userModal}
+          onClose={() => {
+            setIsModal(false);
+            setIsModalRendered(false);
+          }}
+        >
+          <button
+            className={styles.closeModalButton}
+            onClick={() => userModal.current.close()}
+          >
+            <span className='material-symbols-outlined closeButton'>close</span>
+          </button>
+          {modalType === 'profile' ? (
+            <UpdateProfileForm userModal={userModal} />
+          ) : (
+            <UpdatePasswordForm userModal={userModal} />
+          )}
+        </dialog>
+      )}
       <div className={styles.heading}>
         <h2>{user.displayName}</h2>
         <p>{posts.length} posts</p>
       </div>
+      <img className={styles.headerImage} src={user.headerUrl} alt='' />
       <div className={styles.pfpAndButton}>
         <img className={styles.profilePagePfp} src={user.pfpUrl} alt='' />
         <div className={styles.topButtons}>
@@ -125,7 +162,7 @@ function Profile() {
                 <button
                   onClick={() => {
                     setModalType('profile');
-                    userModal.current.showModal();
+                    setIsModal(true);
                   }}
                 >
                   Edit Profile
@@ -133,7 +170,7 @@ function Profile() {
                 <button
                   onClick={() => {
                     setModalType('password');
-                    userModal.current.showModal();
+                    setIsModal(true);
                   }}
                 >
                   Change Password

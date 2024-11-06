@@ -1,0 +1,44 @@
+.profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: white;
+  align-items: center;
+}
+
+.profileForm label {
+  font-size: 1.2rem;
+}
+
+.profileForm textarea {
+  border-radius: 10px;
+  border: 1px solid white;
+  width: max-content;
+}
+
+.profileForm .cancelNewImage {
+  border: 1px solid black;
+  position: absolute;
+  padding: 0;
+  top: -5px;
+  right: -5px;
+  height: 24px;
+}
+
+.newImagePreview {
+  position: relative;
+}
+
+.headerPreview {
+  position: relative;
+  width: 240px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.profilePagePfp {
+  height: 80px;
+  width: 80px;
+  border-radius: 40px;
+  object-fit: cover;
+}
