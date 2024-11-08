@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import GifPicker from 'gif-picker-react';
-import Post from './Post.jsx';
 import NewPostForm from './NewPostForm.jsx';
+import Post from './Post.jsx';
 import styles from '../style/Home.module.css';
 import backendFetch from '../../ helpers/backendFetch';
 
@@ -48,6 +48,7 @@ function Home() {
     <main>
       {isModal && (
         <dialog
+          className={styles.gifModal}
           ref={gifModal}
           onClose={() => {
             setIsModal(false);
@@ -55,22 +56,21 @@ function Home() {
           }}
         >
           <button
-            className={styles.closeModalButton}
+            className='closeButton'
             onClick={() => gifModal.current.close()}
           >
-            <span className='material-symbols-outlined closeButton'>close</span>
+            <span className='material-symbols-outlined closeIcon'>close</span>
           </button>
-          <div>
-            <GifPicker
-              tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
-              theme='dark'
-              onGifClick={(selected) => {
-                setGifUrl(selected.url);
-                setNewPostImage(null);
-                gifModal.current.close();
-              }}
-            />
-          </div>
+          <GifPicker
+            tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
+            theme={localStorage.getItem('theme')}
+            width={'100%'}
+            onGifClick={(selected) => {
+              setGifUrl(selected.url);
+              setNewPostImage(null);
+              gifModal.current.close();
+            }}
+          />
         </dialog>
       )}
       <div className={styles.formSection}>

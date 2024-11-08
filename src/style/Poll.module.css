@@ -10,7 +10,7 @@
   position: relative;
   z-index: 1;
   cursor: pointer;
-  background-color: #222;
+  background-color: var(--color-near-background);
   border-radius: 5px;
 }
 
@@ -28,11 +28,11 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: #666;
+  background-color: #757575;
   height: 100%;
   border-radius: 5px;
 }
 
 .pollChoices .voted {
-  color: white;
+  color: var(--color-foreground);
 }

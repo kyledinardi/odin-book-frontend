@@ -39,11 +39,21 @@
 }
 
 .logoButton {
-  color: black;
-  background-color: white;
+  background-color: var(--color-foreground);
+  color: var(--color-background);
   padding: 10px 20px;
   border-radius: 20px;
   font-weight: bold;
+}
+
+.logoContainer {
+  height: 30px;
+  width: 30px;
+  background-color: white;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .logo {
@@ -58,7 +68,7 @@
 .flexWrapper .backButton {
   font-size: 30px;
   font-variation-settings: 'OPSZ' 30;
-  color: white;
+  color: var(--color-foreground);
 }
 
 .error {

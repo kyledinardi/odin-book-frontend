@@ -91,7 +91,9 @@ function Login() {
           href={`${import.meta.env.VITE_BACKEND_URL}/auth/github`}
         >
           <span>Log in with GitHub</span>
-          <img className={styles.logo} src={githubLogo} alt='' />
+          <span className={styles.logoContainer}>
+            <img className={styles.logo} src={githubLogo} alt='' />
+          </span>
         </a>
         <div>
           <p>

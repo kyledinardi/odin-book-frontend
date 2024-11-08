@@ -5,12 +5,13 @@ import styles from '../style/Profile.module.css';
 import backendFetch from '../../ helpers/backendFetch';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
+import ThemeSwitch from './ThemeSwitch.jsx';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
   const [imagePosts, setImagePosts] = useState(null);
-  
+
   const [isFollowed, setIsFollowed] = useState(false);
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
@@ -18,8 +19,10 @@ function Profile() {
   const [openTab, setOpenTab] = useState('posts');
 
   const userModal = useRef(null);
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
+
+  const [setError, currentUser, setCurrentUser, theme, setTheme] =
+    useOutletContext();
 
   useEffect(() => {
     if (!userId) {
@@ -136,10 +139,10 @@ function Profile() {
           }}
         >
           <button
-            className={styles.closeModalButton}
+            className='closeButton'
             onClick={() => userModal.current.close()}
           >
-            <span className='material-symbols-outlined closeButton'>close</span>
+            <span className='material-symbols-outlined closeIcon'>close</span>
           </button>
           {modalType === 'profile' ? (
             <UpdateProfileForm userModal={userModal} />
@@ -149,10 +152,17 @@ function Profile() {
         </dialog>
       )}
       <div className={styles.heading}>
-        <h2>{user.displayName}</h2>
-        <p>{posts.length} posts</p>
+        <div>
+          <h2>{user.displayName}</h2>
+          <p>{posts.length} posts</p>
+        </div>
+        <div className={styles.switch}>
+          <ThemeSwitch theme={theme} setTheme={(t) => setTheme(t)} />
+        </div>
       </div>
-      <img className={styles.headerImage} src={user.headerUrl} alt='' />
+      {user.headerUrl && (
+        <img className={styles.headerImage} src={user.headerUrl} alt='' />
+      )}
       <div className={styles.pfpAndButton}>
         <img className={styles.profilePagePfp} src={user.pfpUrl} alt='' />
         <div className={styles.topButtons}>

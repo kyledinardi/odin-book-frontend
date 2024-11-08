@@ -20,7 +20,7 @@
   grid-area: submitButton;
   width: max-content;
   background-color: #6161ff;
-  color: white;
+  color: var(--color-background);
 }
 
 .submitButton:hover {

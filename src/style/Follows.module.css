@@ -3,7 +3,7 @@
 }
 
 .heading * {
-  margin: 10px;
+  margin: 5px;
   text-align: start;
 }
 
@@ -13,21 +13,17 @@
 }
 
 .categoryButton {
-  background-color: black;
-  color: white;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   border-radius: 0;
   font-size: 1rem;
 }
 
 .categoryButton:hover,
 .openTab {
-  background-color: #222;
+  background-color: var(--color-near-background);
 }
 
 .categoryButton:active {
-  background-color: #444;
-}
-
-.followContainer h2 {
-  margin: 20px;
+  background-color: var(--color-far-background);
 }

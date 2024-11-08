@@ -69,13 +69,13 @@ function UpdateProfileForm({ userModal }) {
         </label>
         <button
           type='button'
-          className={styles.cancelNewImage}
+          className={`closeButton ${styles.pfpResetButton}`}
           onClick={() => {
             newPfpInput.current.value = '';
             setNewPfp(null);
           }}
         >
-          <span className='material-symbols-outlined closeButton'>close</span>
+          <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
         <input
           type='file'
@@ -102,13 +102,13 @@ function UpdateProfileForm({ userModal }) {
         </label>
         <button
           type='button'
-          className={styles.cancelNewImage}
+          className='closeButton'
           onClick={() => {
             newHeaderImageInput.current.value = '';
             setNewHeaderImage(null);
           }}
         >
-          <span className='material-symbols-outlined closeButton'>close</span>
+          <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
         <input
           type='file'

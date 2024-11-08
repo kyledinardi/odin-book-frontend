@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+// import Switch from 'react-switch';
+import ThemeSwitch from './ThemeSwitch.jsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({ currentUser, logoutModal }) {
+function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
   return !currentUser ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
@@ -47,11 +49,19 @@ function Sidebar({ currentUser, logoutModal }) {
           <span className={styles.sidebarLabel}>Log Out</span>
         </button>
       </div>
-      <div className={styles.user}>
-        <img className='pfp' src={currentUser.pfpUrl} alt='' />
-        <div className={styles.names}>
-          <span>{currentUser.displayName}</span>
-          <span className={styles.username}>{`@${currentUser.username}`}</span>
+      <div className={styles.bottom}>
+        <label htmlFor='theme' className={styles.sidebarButton}>
+          <span className={styles.themeLabel}>Dark Mode</span>
+          <ThemeSwitch theme={theme} setTheme={setTheme} />
+        </label>
+        <div className={styles.user}>
+          <img className='pfp' src={currentUser.pfpUrl} alt='' />
+          <div className={styles.names}>
+            <span>{currentUser.displayName}</span>
+            <span
+              className={styles.username}
+            >{`@${currentUser.username}`}</span>
+          </div>
         </div>
       </div>
     </aside>
@@ -61,6 +71,8 @@ function Sidebar({ currentUser, logoutModal }) {
 Sidebar.propTypes = {
   currentUser: PropTypes.object,
   logoutModal: PropTypes.object,
+  theme: PropTypes.string,
+  setTheme: PropTypes.func,
 };
 
 export default Sidebar;

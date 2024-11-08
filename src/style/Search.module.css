@@ -4,13 +4,13 @@
   gap: 5px;
   margin: 5px;
   padding: 0 20px;
-  border: 1px solid #222;
+  border: 1px solid var(--color-near-background);
   border-radius: 20px;
 }
 
 .searchForm input {
-  background-color: black;
-  color: white;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   font-size: 1rem;
   padding: 10px;
   width: 100%;
@@ -19,17 +19,17 @@
 }
 
 .categoryButton {
-  background-color: black;
-  color: white;
+  background-color: var(--color-background);;
+  color: var(--color-foreground);
   border-radius: 0;
   font-size: 1rem;
 }
 
 .categoryButton:hover,
 .openTab {
-  background-color: #222;
+  background-color: var(--color-near-background);
 }
 
 .categoryButton:active {
-  background-color: #444;
+  background-color: var(--color-far-background);
 }

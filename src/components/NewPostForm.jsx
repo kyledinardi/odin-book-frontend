@@ -18,7 +18,7 @@ function NewPostForm({
   const [isPoll, setIsPoll] = useState(false);
   const [pollChoiceCount, setPollChoiceCount] = useState(2);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
-  
+
   const fileInput = useRef(null);
   const postTextarea = useRef(null);
   const [setError] = useOutletContext();
@@ -120,10 +120,10 @@ function NewPostForm({
           />
           <button
             type='button'
-            className={styles.cancelPreviewButton}
+            className='closeButton'
             onClick={() => cancelNewPostImage()}
           >
-            <span className='material-symbols-outlined closeButton'>close</span>
+            <span className='material-symbols-outlined closeIcon'>close</span>
           </button>
         </div>
       )}
@@ -182,8 +182,9 @@ function NewPostForm({
       {isEmojiOpen && (
         <div className={styles.emojiPicker}>
           <EmojiPicker
-            theme='dark'
+            theme={localStorage.getItem('theme')}
             skinTonesDisabled={true}
+            width={'100%'}
             onEmojiClick={(emojiData) => {
               postTextarea.current.value = `${postTextarea.current.value}${emojiData.emoji}`;
             }}

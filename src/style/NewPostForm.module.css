@@ -5,26 +5,16 @@
 
 .imgPreview {
   position: relative;
-  padding: 20px 0;
-}
-
-.cancelPreviewButton {
-  position: absolute;
-  padding: 0;
-  height: 30px;
-  width: 30px;
-  background-color: white;
-  top: 25px;
-  right: 5px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin: 20px 0;
+  width: 100%;
+  max-width: max-content;
 }
 
 .formButtons {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 10px 0
 }
 
 .svgButton,
@@ -44,7 +34,6 @@
 .submitButton {
   width: max-content;
   background-color: #6161ff;
-  color: white;
 }
 
 .submitButton:hover {
@@ -55,6 +44,14 @@
   background-color: #2121bf;
 }
 
-.emojiPicker {
-  margin: 10px 0;
+@media (max-width: 600px) {
+  .formButtons {
+    flex-direction: column;
+    align-items: start;
+    gap: 10px;
+  }
+
+  .emojiPicker {
+    width: calc(100vw - 30px)
+  }
 }

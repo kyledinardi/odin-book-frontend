@@ -8,8 +8,21 @@ import backendFetch from '../ helpers/backendFetch';
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
+  const [theme, setTheme] = useState('');
   const logoutModal = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let themeName = localStorage.getItem('theme');
+
+    if (!themeName) {
+      const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+      themeName = isDark ? 'dark' : 'light';
+      localStorage.setItem('theme', themeName);
+    }
+
+    setTheme(themeName);
+  }, []);
 
   useEffect(() => {
     if (!error) {
@@ -22,29 +35,38 @@ function App() {
   return error ? (
     <ErrorPage error={error} setError={(err) => setError(err)} />
   ) : (
-    <div className='app'>
-      <Sidebar currentUser={currentUser} logoutModal={logoutModal} />
-      <Outlet context={[setError, currentUser, setCurrentUser]} />
-      <UserList
-        currentUser={currentUser}
-        setCurrentUser={(user) => setCurrentUser(user)}
-        setError={(err) => setError(err)}
-      />
-      <dialog ref={logoutModal}>
-        <h2>Are you sure you want to log out?</h2>
-        <div className='modalButtons'>
-          <button
-            onClick={() => {
-              logoutModal.current.close();
-              localStorage.clear();
-              navigate('/login');
-            }}
-          >
-            Log Out
-          </button>
-          <button onClick={() => logoutModal.current.close()}>Cancel</button>
-        </div>
-      </dialog>
+    <div className='themeWrapper' data-theme={theme}>
+      <div className='app' data-theme={theme}>
+        <Sidebar
+          currentUser={currentUser}
+          logoutModal={logoutModal}
+          theme={theme}
+          setTheme={(t) => setTheme(t)}
+        />
+        <Outlet
+          context={[setError, currentUser, setCurrentUser, theme, setTheme]}
+        />
+        <UserList
+          currentUser={currentUser}
+          setCurrentUser={(user) => setCurrentUser(user)}
+          setError={(err) => setError(err)}
+        />
+        <dialog ref={logoutModal}>
+          <h2>Are you sure you want to log out?</h2>
+          <div className='modalButtons'>
+            <button
+              onClick={() => {
+                logoutModal.current.close();
+                localStorage.clear();
+                navigate('/login');
+              }}
+            >
+              Log Out
+            </button>
+            <button onClick={() => logoutModal.current.close()}>Cancel</button>
+          </div>
+        </dialog>
+      </div>
     </div>
   );
 }

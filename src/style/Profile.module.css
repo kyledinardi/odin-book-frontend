@@ -1,19 +1,28 @@
 .heading {
-  padding-left: 20px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.heading * {
+.heading h2,
+.heading p {
   margin: 5px;
 }
 
 .heading p {
-  color: #777;
+  color: gray;
   font-size: 0.8rem;
 }
 
 .heading h2,
 .userInfo h2 {
   text-align: start;
+}
+
+.switch {
+  height: 100%;
+  display: none;
 }
 
 .headerImage {
@@ -55,20 +64,16 @@
 .followStats {
   display: flex;
   gap: 20px;
-  color: #777;
+  color: gray;
   width: max-content;
 }
 
 .followStats strong {
-  color: white;
+  color: var(--color-foreground);
 }
 
-.closeModalButton {
-  position: absolute;
-  padding: 0;
-  border-radius: 16px;
-  border: 0;
-  top: 5px;
-  right: 5px;
-  height: 24px;
+@media (max-width: 600px) {
+  .switch {
+    display: block;
+  }
 }
