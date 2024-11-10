@@ -32,41 +32,49 @@ function App() {
     }
   }, [error]);
 
-  return error ? (
-    <ErrorPage error={error} setError={(err) => setError(err)} />
-  ) : (
+  return (
     <div className='themeWrapper' data-theme={theme}>
-      <div className='app' data-theme={theme}>
-        <Sidebar
-          currentUser={currentUser}
-          logoutModal={logoutModal}
-          theme={theme}
-          setTheme={(t) => setTheme(t)}
-        />
-        <Outlet
-          context={[setError, currentUser, setCurrentUser, theme, setTheme]}
-        />
-        <UserList
-          currentUser={currentUser}
-          setCurrentUser={(user) => setCurrentUser(user)}
+      {error ? (
+        <ErrorPage
+          data-theme={theme}
+          error={error}
           setError={(err) => setError(err)}
         />
-        <dialog ref={logoutModal}>
-          <h2>Are you sure you want to log out?</h2>
-          <div className='modalButtons'>
-            <button
-              onClick={() => {
-                logoutModal.current.close();
-                localStorage.clear();
-                navigate('/login');
-              }}
-            >
-              Log Out
-            </button>
-            <button onClick={() => logoutModal.current.close()}>Cancel</button>
-          </div>
-        </dialog>
-      </div>
+      ) : (
+        <div className='app' data-theme={theme}>
+          <Sidebar
+            currentUser={currentUser}
+            logoutModal={logoutModal}
+            theme={theme}
+            setTheme={(t) => setTheme(t)}
+          />
+          <Outlet
+            context={[setError, currentUser, setCurrentUser, theme, setTheme]}
+          />
+          <UserList
+            currentUser={currentUser}
+            setCurrentUser={(user) => setCurrentUser(user)}
+            setError={(err) => setError(err)}
+          />
+          <dialog ref={logoutModal}>
+            <h2>Are you sure you want to log out?</h2>
+            <div className='modalButtons'>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('userId');
+                  navigate('/login');
+                }}
+              >
+                Log Out
+              </button>
+              <button onClick={() => logoutModal.current.close()}>
+                Cancel
+              </button>
+            </div>
+          </dialog>
+        </div>
+      )}
     </div>
   );
 }
