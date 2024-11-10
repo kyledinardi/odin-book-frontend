@@ -197,6 +197,18 @@ function Profile() {
         <h2>{user.displayName}</h2>
         <span className='gray'>{`@${user.username}`}</span>
         <p>{user.bio}</p>
+        <p className={styles.joinDate}>
+          <span className={`material-symbols-outlined ${styles.calendarIcon}`}>
+            calendar_month
+          </span>
+          <span>
+            <span className=''>Joined </span>
+            {new Date(user.joinDate).toLocaleDateString(undefined, {
+              month: 'long',
+              year: 'numeric',
+            })}
+          </span>
+        </p>
         <Link className={styles.followStats} to={`/users/${user.id}/follows`}>
           <span>
             <strong>{user.following.length}</strong> Following

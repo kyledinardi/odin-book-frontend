@@ -61,6 +61,17 @@
   margin: 5px 0;
 }
 
+.joinDate {
+  color: gray;
+  display: flex;
+  gap: 10px;
+}
+
+.calendarIcon {
+  font-size: 16px;
+  font-variation-settings: 'OPSZ' 16;
+}
+
 .followStats {
   display: flex;
   gap: 20px;
