@@ -57,7 +57,14 @@ function Follows() {
         >
           Followers
         </button>
-        {userId !== currentUser.id && (
+        {userId === currentUser.id ? (
+          <button
+            className={`${styles.categoryButton} ${
+              openTab === 'mutuals' ? styles.openTab : null
+            }`}
+            onClick={() => setOpenTab('mutuals')}
+          >Mutuals</button>
+        ) : (
           <button
             className={`${styles.categoryButton} ${
               openTab === 'followedFollowers' ? styles.openTab : null

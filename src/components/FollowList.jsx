@@ -46,11 +46,20 @@ function FollowList({ openTab, user, followedIds }) {
 
       return user.followers.map((follower) => returnUser(follower));
 
-    case 'followedFollowers': {
-      if (user.id === currentUser.id) {
-        return null;
+    case 'mutuals': {
+      const mutuals = user.followers.filter((follower) =>
+        // user.following.some((following) => follower.id === following.id),
+        followedIds.includes(follower.id),
+      );
+
+      if (mutuals.length === 0) {
+        return <h2>You have no mutuals</h2>;
       }
 
+      return mutuals.map((mutual) => returnUser(mutual));
+    }
+
+    case 'followedFollowers': {
       const followedFollowers = user.followers.filter((follower) =>
         followedIds.includes(follower.id),
       );
