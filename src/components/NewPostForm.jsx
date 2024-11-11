@@ -70,11 +70,11 @@ function NewPostForm({
     });
 
     cancelNewPostImage();
-    setIsPoll(false);
     e.target.reset();
     e.target[0].style.height = '64px';
-    setPollChoiceCount(2);
     setIsEmojiOpen(false);
+    setIsPoll(false);
+    setPollChoiceCount(2);
     setPosts([response.post, ...posts]);
   }
 
@@ -167,7 +167,6 @@ function NewPostForm({
             >
               <span className='material-symbols-outlined'>ballot</span>
             </button>
-
             <button
               className={styles.svgButton}
               type='button'

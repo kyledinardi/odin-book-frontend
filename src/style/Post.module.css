@@ -4,6 +4,10 @@
   position: relative;
 }
 
+.imageModal {
+  padding: 0;
+}
+
 .heading {
   display: flex;
   align-items: center;
@@ -78,4 +82,5 @@
 .imageContainer {
   display: flex;
   justify-content: center;
+  cursor: pointer;
 }

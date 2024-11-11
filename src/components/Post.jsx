@@ -11,7 +11,8 @@ function Post({ post, replacePost, removePost, isPostPage }) {
   const [isEditing, setIsEditing] = useState(false);
   const editTextarea = useRef(null);
   const deleteModal = useRef(null);
-  
+  const imageModal = useRef(null);
+
   const [setError] = useOutletContext();
   const currentUserId = parseInt(localStorage.getItem('userId'), 10);
 
@@ -65,6 +66,15 @@ function Post({ post, replacePost, removePost, isPostPage }) {
           <button onClick={() => deletePost()}>Delete</button>
           <button onClick={() => deleteModal.current.close()}>Cancel</button>
         </div>
+      </dialog>
+      <dialog ref={imageModal} className={styles.imageModal}>
+        <button
+          className='closeButton'
+          onClick={() => imageModal.current.close()}
+        >
+          <span className='material-symbols-outlined closeIcon'>close</span>
+        </button>
+        <img src={post.imageUrl} alt='' />
       </dialog>
       <div className={styles.heading}>
         <div className={styles.links}>
@@ -125,7 +135,11 @@ function Post({ post, replacePost, removePost, isPostPage }) {
       )}
       {post.imageUrl && (
         <div className={styles.imageContainer}>
-          <img src={post.imageUrl} alt='' />
+          <img
+            src={post.imageUrl}
+            alt=''
+            onClick={() => imageModal.current.showModal()}
+          />
         </div>
       )}
       {post.poll && (
