@@ -5,7 +5,8 @@ import {
   useParams,
 } from 'react-router-dom';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import EmojiPicker from 'emoji-picker-react';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import styles from '../style/PostPage.module.css';
@@ -13,6 +14,9 @@ import backendFetch from '../../ helpers/backendFetch';
 
 function PostPage() {
   const [post, setPost] = useState(null);
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const commentTextarea = useRef(null);
+
   const [setError, currentUser] = useOutletContext();
   const navigate = useNavigate();
   const postId = parseInt(useParams().postId, 10);
@@ -38,8 +42,8 @@ function PostPage() {
 
     e.target.reset();
     e.target[0].style.height = '64px';
-    const newComments = [response.comment, ...post.comments];
-    setPost({ ...post, comments: newComments });
+    setIsEmojiOpen(false);
+    setPost({ ...post, comments: [response.comment, ...post.comments] });
   }
 
   function replaceComment(updatedComment) {
@@ -71,27 +75,48 @@ function PostPage() {
         removePost={() => navigate('/')}
         isPostPage={true}
       />
-      <form
-        className={styles.newCommentForm}
-        onSubmit={(e) => submitComment(e)}
-      >
+      <div className={styles.formSection}>
         <Link className={styles.currentUserPfp} to={`/users/${currentUser.id}`}>
           <img className='pfp' src={currentUser.pfpUrl} alt='' />
         </Link>
-        <textarea
-          className={styles.commentText}
-          name='commentText'
-          id='commentText'
-          placeholder='New Comment'
-          maxLength={10000}
-          onInput={(e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
-          required
-        ></textarea>
-        <button className={styles.submitButton}>Post Comment</button>
-      </form>
+        <form onSubmit={(e) => submitComment(e)}>
+          <textarea
+            ref={commentTextarea}
+            className={styles.commentText}
+            name='commentText'
+            id='commentText'
+            placeholder='New Comment'
+            maxLength={10000}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            required
+          ></textarea>
+          <div className={styles.formButtons}>
+            <button
+              className={styles.svgButton}
+              type='button'
+              onClick={() => setIsEmojiOpen(!isEmojiOpen)}
+            >
+              <span className='material-symbols-outlined'>add_reaction</span>
+            </button>
+            <button className={styles.submitButton}>Post Comment</button>
+          </div>
+          {isEmojiOpen && (
+            <div className={styles.emojiPicker}>
+              <EmojiPicker
+                theme={localStorage.getItem('theme')}
+                skinTonesDisabled={true}
+                width={'100%'}
+                onEmojiClick={(emojiData) => {
+                  commentTextarea.current.value = `${commentTextarea.current.value}${emojiData.emoji}`;
+                }}
+              />
+            </div>
+          )}
+        </form>
+      </div>
       <div>
         {post.comments.map((comment) => (
           <Comment
