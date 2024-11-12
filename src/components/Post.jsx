@@ -58,6 +58,20 @@ function Post({ post, replacePost, removePost, isPostPage }) {
     replacePost({ ...post, likes: response.post.likes });
   }
 
+  function renderPostPageTimestamp() {
+    const timestamp = new Date(post.timestamp);
+
+    const time = Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
+      timestamp,
+    );
+
+    const date = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
+      timestamp,
+    );
+
+    return `${time}, ${date}`
+  }
+
   return (
     <div className={styles.post}>
       <dialog ref={deleteModal}>
@@ -145,6 +159,7 @@ function Post({ post, replacePost, removePost, isPostPage }) {
       {post.poll && (
         <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
       )}
+      {isPostPage && <p className='gray'>{renderPostPageTimestamp()}</p>}
       <div className={styles.interact}>
         <Link to={`/posts/${post.id}`}>
           <button>

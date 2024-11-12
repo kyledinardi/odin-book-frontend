@@ -24,15 +24,15 @@ export default function formatDate(date) {
   }
 
   if (timestamp.getFullYear() === current.getFullYear()) {
-    return timestamp.toLocaleDateString(undefined, {
+    return Intl.DateTimeFormat(undefined, {
       month: 'short',
       day: 'numeric',
-    });
+    }).format(timestamp);
   }
 
-  return timestamp.toLocaleDateString(undefined, {
+  return Intl.DateTimeFormat(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  });
+  }).format(timestamp);
 }

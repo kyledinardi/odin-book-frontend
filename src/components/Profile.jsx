@@ -232,10 +232,10 @@ function Profile() {
           </span>
           <span>
             <span className=''>Joined </span>
-            {new Date(user.joinDate).toLocaleDateString(undefined, {
+            {Intl.DateTimeFormat(undefined, {
               month: 'long',
               year: 'numeric',
-            })}
+            }).format(new Date(user.joinDate))}
           </span>
         </p>
         <Link className={styles.followStats} to={`/users/${user.id}/follows`}>

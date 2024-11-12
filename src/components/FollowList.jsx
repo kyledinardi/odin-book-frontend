@@ -48,7 +48,6 @@ function FollowList({ openTab, user, followedIds }) {
 
     case 'mutuals': {
       const mutuals = user.followers.filter((follower) =>
-        // user.following.some((following) => follower.id === following.id),
         followedIds.includes(follower.id),
       );
 
