@@ -35,31 +35,6 @@
   background-color: var(--color-background);
 }
 
-.interact {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 15px;
-}
-
-.interact button {
-  background-color: inherit;
-  color: gray;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 1rem;
-  padding: 0;
-  height: 24px;
-}
-
-.interact button:hover {
-  background-color: inherit;
-}
-
-.interact button:active {
-  background-color: inherit;
-}
-
 .postText {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 10;
@@ -83,4 +58,29 @@
   display: flex;
   justify-content: center;
   cursor: pointer;
+}
+
+.interact {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+
+.interact button {
+  background-color: inherit;
+  color: gray;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 1rem;
+  padding: 0;
+  height: 24px;
+}
+
+.interact button:hover {
+  background-color: inherit;
+}
+
+.interact button:active {
+  background-color: inherit;
 }

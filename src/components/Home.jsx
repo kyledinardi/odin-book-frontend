@@ -1,19 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import GifPicker from 'gif-picker-react';
-import NewPostForm from './NewPostForm.jsx';
 import Post from './Post.jsx';
 import styles from '../style/Home.module.css';
 import backendFetch from '../../ helpers/backendFetch';
+import NewContentForm from './NewContentForm.jsx';
 
 function Home() {
   const [posts, setPosts] = useState(null);
-  const [newPostImage, setNewPostImage] = useState(null);
-  const [isModal, setIsModal] = useState(false);
-  const [isModalRendered, setIsModalRendered] = useState(false);
-  const [gifUrl, setGifUrl] = useState('');
-
-  const gifModal = useRef(null);
   const [setError, currentUser] = useOutletContext();
 
   useEffect(() => {
@@ -21,16 +14,6 @@ function Home() {
       setPosts(response.posts),
     );
   }, [setError]);
-
-  useEffect(() => {
-    if (isModal) {
-      setIsModalRendered(true);
-
-      if (isModalRendered) {
-        gifModal.current.showModal();
-      }
-    }
-  }, [isModal, isModalRendered]);
 
   function replacePost(updatedPost) {
     const newPosts = posts.map((post) =>
@@ -46,47 +29,15 @@ function Home() {
     </div>
   ) : (
     <main>
-      {isModal && (
-        <dialog
-          className={styles.gifModal}
-          ref={gifModal}
-          onClose={() => {
-            setIsModal(false);
-            setIsModalRendered(false);
-          }}
-        >
-          <button
-            className='closeButton'
-            onClick={() => gifModal.current.close()}
-          >
-            <span className='material-symbols-outlined closeIcon'>close</span>
-          </button>
-          <GifPicker
-            tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
-            theme={localStorage.getItem('theme')}
-            width={'100%'}
-            onGifClick={(selected) => {
-              setGifUrl(selected.url);
-              setNewPostImage(null);
-              gifModal.current.close();
-            }}
-          />
-        </dialog>
-      )}
       <div className={styles.formSection}>
         <div className={styles.currentUserPfp}>
           <Link to={`/users/${currentUser.id}`}>
             <img className='pfp' src={currentUser.pfpUrl} alt='' />
           </Link>
         </div>
-        <NewPostForm
-          posts={posts}
-          newPostImage={newPostImage}
-          gifUrl={gifUrl}
-          setPosts={(p) => setPosts(p)}
-          setNewPostImage={(src) => setNewPostImage(src)}
-          setIsModal={(b) => setIsModal(b)}
-          setGifUrl={(url) => setGifUrl(url)}
+        <NewContentForm
+          contentType={'post'}
+          setContent={(post) => setPosts([post, ...posts])}
         />
       </div>
       <div>

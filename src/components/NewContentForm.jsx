@@ -1,59 +1,73 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import EmojiPicker from 'emoji-picker-react';
+import GifPicker from 'gif-picker-react';
 import PollInputs from './PollInputs.jsx';
-import styles from '../style/NewPostForm.module.css';
+import styles from '../style/NewContentForm.module.css';
 import backendFetch from '../../ helpers/backendFetch';
 
-function NewPostForm({
-  posts,
-  newPostImage,
-  gifUrl,
-  setPosts,
-  setNewPostImage,
-  setIsModal,
-  setGifUrl,
-}) {
-  const [isPoll, setIsPoll] = useState(false);
-  const [pollChoiceCount, setPollChoiceCount] = useState(2);
+function NewContentForm({ contentType, setContent, postId }) {
+  const [isModal, setIsModal] = useState(false);
+  const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const [isPoll, setIsPoll] = useState(false);
 
+  const [pollChoiceCount, setPollChoiceCount] = useState(2);
+  const [gifUrl, setGifUrl] = useState('');
+  const [newImage, setNewImage] = useState(null);
+
+  const gifModal = useRef(null);
   const fileInput = useRef(null);
-  const postTextarea = useRef(null);
+  const textarea = useRef(null);
   const [setError] = useOutletContext();
 
-  function cancelNewPostImage() {
+  useEffect(() => {
+    if (isModal) {
+      setIsModalRendered(true);
+
+      if (isModalRendered) {
+        gifModal.current.showModal();
+      }
+    }
+  }, [isModal, isModalRendered]);
+
+  function cancelNewImage() {
     fileInput.current.value = '';
-    setNewPostImage(null);
+    setNewImage(null);
     setGifUrl('');
   }
 
-  async function submitPost(e) {
+  async function submitPostOrComment(e) {
     e.preventDefault();
-
     const formData = new FormData();
-    formData.append('postText', e.target[0].value);
+    formData.append('text', e.target[0].value);
     formData.append('gifUrl', gifUrl);
 
     if (e.target[2].files) {
-      formData.append('postImage', e.target[2].files[0]);
+      formData.append('image', e.target[2].files[0]);
     }
 
-    const response = await backendFetch(setError, '/posts', {
-      method: 'POST',
-      body: formData,
-    });
+    const response = await backendFetch(
+      setError,
+      contentType === 'post' ? '/posts' : `/posts/${postId}/comments`,
 
-    cancelNewPostImage();
+      {
+        method: 'POST',
+        body: formData,
+      },
+    );
+
+    cancelNewImage();
     e.target.reset();
     e.target[0].style.height = '64px';
     setIsEmojiOpen(false);
-    setPosts([response.post, ...posts]);
+    setContent(contentType === 'post' ? response.post : response.comment);
   }
 
-  async function sumbitPoll(e) {
+  async function submitPoll(e) {
     e.preventDefault();
+
     const choiceArray = [];
 
     for (let i = 1; i <= pollChoiceCount; i += 1) {
@@ -69,13 +83,25 @@ function NewPostForm({
       }),
     });
 
-    cancelNewPostImage();
+    cancelNewImage();
     e.target.reset();
     e.target[0].style.height = '64px';
     setIsEmojiOpen(false);
     setIsPoll(false);
     setPollChoiceCount(2);
-    setPosts([response.post, ...posts]);
+    setContent(response.post);
+  }
+
+  function handlePlaceholder() {
+    if (contentType === 'post') {
+      if (isPoll) {
+        return 'Question';
+      }
+
+      return 'New Post';
+    }
+
+    return 'New Comment';
   }
 
   function handleFileInputChange(e) {
@@ -83,28 +109,55 @@ function NewPostForm({
     setGifUrl('');
 
     if (file) {
-      setNewPostImage(file);
+      setNewImage(file);
     }
   }
 
   return (
     <form
-      className={styles.postForm}
+      className={styles.contentForm}
       encType='multipart/form-data'
-      onSubmit={(e) => (isPoll ? sumbitPoll(e) : submitPost(e))}
+      onSubmit={(e) => (isPoll ? submitPoll(e) : submitPostOrComment(e))}
     >
+      {isModal && (
+        <dialog
+          className={styles.gifModal}
+          ref={gifModal}
+          onClose={() => {
+            setIsModal(false);
+            setIsModalRendered(false);
+          }}
+        >
+          <button
+            type='button'
+            className='closeButton'
+            onClick={() => gifModal.current.close()}
+          >
+            <span className='material-symbols-outlined closeIcon'>close</span>
+          </button>
+          <GifPicker
+            tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
+            theme={localStorage.getItem('theme')}
+            width={'100%'}
+            onGifClick={(selected) => {
+              setGifUrl(selected.url);
+              setNewImage(null);
+              gifModal.current.close();
+            }}
+          />
+        </dialog>
+      )}
       <textarea
-        className={styles.postText}
-        ref={postTextarea}
-        name='postText'
-        id='postText'
+        ref={textarea}
+        name='text'
+        id='text'
         maxLength={50000}
-        placeholder={!isPoll ? 'New Post' : 'Question'}
+        placeholder={handlePlaceholder()}
         onInput={(e) => {
           e.target.style.height = 'auto';
           e.target.style.height = `${e.target.scrollHeight}px`;
         }}
-        required={!newPostImage && !gifUrl}
+        required={!newImage && !gifUrl}
       ></textarea>
       {isPoll && (
         <PollInputs
@@ -112,16 +165,13 @@ function NewPostForm({
           setPollChoiceCount={(n) => setPollChoiceCount(n)}
         />
       )}
-      {(newPostImage || gifUrl !== '') && (
+      {(newImage || gifUrl !== '') && (
         <div className={styles.imgPreview}>
-          <img
-            src={newPostImage ? URL.createObjectURL(newPostImage) : gifUrl}
-            alt=''
-          />
+          <img src={newImage ? URL.createObjectURL(newImage) : gifUrl} alt='' />
           <button
             type='button'
             className='closeButton'
-            onClick={() => cancelNewPostImage()}
+            onClick={() => cancelNewImage()}
           >
             <span className='material-symbols-outlined closeIcon'>close</span>
           </button>
@@ -129,8 +179,8 @@ function NewPostForm({
       )}
       <input
         type='file'
-        name='postImage'
-        id='postImage'
+        name='image'
+        id='image'
         accept='image/*'
         hidden
         ref={fileInput}
@@ -144,7 +194,7 @@ function NewPostForm({
         ) : (
           <div className={styles.svgButtons}>
             <button className={styles.svgButton} type='button'>
-              <label htmlFor='postImage'>
+              <label htmlFor='image'>
                 <span className='material-symbols-outlined'>image</span>
               </label>
             </button>
@@ -157,16 +207,18 @@ function NewPostForm({
             >
               <span className='material-symbols-outlined'>gif_box</span>
             </button>
-            <button
-              className={styles.svgButton}
-              type='button'
-              onClick={() => {
-                setIsPoll(true);
-                cancelNewPostImage();
-              }}
-            >
-              <span className='material-symbols-outlined'>ballot</span>
-            </button>
+            {contentType === 'post' && (
+              <button
+                className={styles.svgButton}
+                type='button'
+                onClick={() => {
+                  setIsPoll(true);
+                  cancelNewImage();
+                }}
+              >
+                <span className='material-symbols-outlined'>ballot</span>
+              </button>
+            )}
             <button
               className={styles.svgButton}
               type='button'
@@ -185,7 +237,7 @@ function NewPostForm({
             skinTonesDisabled={true}
             width={'100%'}
             onEmojiClick={(emojiData) => {
-              postTextarea.current.value = `${postTextarea.current.value}${emojiData.emoji}`;
+              textarea.current.value = `${textarea.current.value}${emojiData.emoji}`;
             }}
           />
         </div>
@@ -194,15 +246,10 @@ function NewPostForm({
   );
 }
 
-NewPostForm.propTypes = {
-  posts: PropTypes.array,
-  newPostImage: PropTypes.object,
-  gifUrl: PropTypes.string,
-  setPosts: PropTypes.func,
-  setPickerType: PropTypes.func,
-  setNewPostImage: PropTypes.func,
-  setIsModal: PropTypes.func,
-  setGifUrl: PropTypes.func,
+NewContentForm.propTypes = {
+  contentType: PropTypes.string,
+  setContent: PropTypes.func,
+  postId: PropTypes.number,
 };
 
-export default NewPostForm;
+export default NewContentForm;

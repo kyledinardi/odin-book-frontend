@@ -4,6 +4,10 @@
   position: relative;
 }
 
+.imageModal {
+  padding: 0;
+}
+
 .heading {
   display: flex;
   align-items: center;
@@ -42,6 +46,16 @@
 
 .editButtons button {
   margin: 0 10px 10px 0;
+}
+
+.imageContainer {
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.interact {
+  margin-top: 15px;
 }
 
 .interact button {

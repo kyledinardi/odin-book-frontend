@@ -9,8 +9,10 @@ function Comment({ comment, replaceComment, removeComment }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [setError] = useOutletContext();
+
   const editTextarea = useRef(null);
   const deleteModal = useRef(null);
+  const imageModal = useRef(null);
 
   useEffect(() => {
     const currentUserId = parseInt(localStorage.getItem('userId'), 10);
@@ -64,6 +66,15 @@ function Comment({ comment, replaceComment, removeComment }) {
           <button onClick={() => deleteModal.current.close()}>Cancel</button>
         </div>
       </dialog>
+      <dialog ref={imageModal} className={styles.imageModal}>
+        <button
+          className='closeButton'
+          onClick={() => imageModal.current.close()}
+        >
+          <span className='material-symbols-outlined closeIcon'>close</span>
+        </button>
+        <img src={comment.imageUrl} alt='' />
+      </dialog>
       <div className={styles.heading}>
         <div className={styles.links}>
           <Link to={`/users/${comment.userId}`}>
@@ -111,6 +122,15 @@ function Comment({ comment, replaceComment, removeComment }) {
         </form>
       ) : (
         <p className={styles.commentText}>{comment.text}</p>
+      )}
+      {comment.imageUrl && (
+        <div className={styles.imageContainer}>
+          <img
+            src={comment.imageUrl}
+            alt=''
+            onClick={() => imageModal.current.showModal()}
+          />
+        </div>
       )}
       <div className={styles.interact}>
         <button className={styles.likeButton} onClick={() => like()}>
