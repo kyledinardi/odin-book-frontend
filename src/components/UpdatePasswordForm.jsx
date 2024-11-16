@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import styles from '../style/UpdatePasswordForm.module.css';
 import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/UpdatePasswordForm.module.css';
 
 function UpdatePasswordForm({ userModal }) {
   const [errorArray, setErrorArray] = useState(null);

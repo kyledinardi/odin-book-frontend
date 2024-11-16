@@ -72,7 +72,7 @@
 .joinDate {
   color: gray;
   display: flex;
-  gap: 10px;
+  gap: 15px;
 }
 
 .calendarIcon {

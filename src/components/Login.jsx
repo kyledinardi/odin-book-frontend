@@ -1,9 +1,9 @@
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ErrorPage from './ErrorPage.jsx';
-import styles from '../style/Login.module.css';
-import githubLogo from '../assets/github-mark.svg';
 import backendFetch from '../../ helpers/backendFetch';
+import githubLogo from '../assets/github-mark.svg';
+import styles from '../style/Login.module.css';
 
 function Login() {
   const [unexpectedError, setUnexpectedError] = useState(null);

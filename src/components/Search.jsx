@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import Post from './Post.jsx';
 import User from './User.jsx';
-import styles from '../style/Search.module.css';
 import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/Search.module.css';
 
 function Search() {
   const [openTab, setOpenTab] = useState('posts');

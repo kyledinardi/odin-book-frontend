@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import EmojiPicker from 'emoji-picker-react';
 import GifPicker from 'gif-picker-react';
+import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
-import styles from '../style/NewContentForm.module.css';
 import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/NewContentForm.module.css';
 
-function NewContentForm({ contentType, setContent, postId }) {
+function NewContentForm({ contentType, setContent, currentUser, parentId }) {
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
@@ -40,6 +40,7 @@ function NewContentForm({ contentType, setContent, postId }) {
 
   async function submitPostOrComment(e) {
     e.preventDefault();
+    let path;
     const formData = new FormData();
     formData.append('text', e.target[0].value);
     formData.append('gifUrl', gifUrl);
@@ -48,15 +49,25 @@ function NewContentForm({ contentType, setContent, postId }) {
       formData.append('image', e.target[2].files[0]);
     }
 
-    const response = await backendFetch(
-      setError,
-      contentType === 'post' ? '/posts' : `/posts/${postId}/comments`,
+    switch (contentType) {
+      case 'post':
+        path = '/posts';
+        break;
+      case 'comment':
+        path = `/posts/${parentId}/comments`;
+        break;
+      case 'reply':
+        path = `/comments/${parentId}`;
+        break;
+      default:
+        setError({ status: '400', message: 'Cannot submit' });
+        break;
+    }
 
-      {
-        method: 'POST',
-        body: formData,
-      },
-    );
+    const response = await backendFetch(setError, path, {
+      method: 'POST',
+      body: formData,
+    });
 
     cancelNewImage();
     e.target.reset();
@@ -114,142 +125,153 @@ function NewContentForm({ contentType, setContent, postId }) {
   }
 
   return (
-    <form
-      className={styles.contentForm}
-      encType='multipart/form-data'
-      onSubmit={(e) => (isPoll ? submitPoll(e) : submitPostOrComment(e))}
-    >
-      {isModal && (
-        <dialog
-          className={styles.gifModal}
-          ref={gifModal}
-          onClose={() => {
-            setIsModal(false);
-            setIsModalRendered(false);
-          }}
-        >
-          <button
-            type='button'
-            className='closeButton'
-            onClick={() => gifModal.current.close()}
-          >
-            <span className='material-symbols-outlined closeIcon'>close</span>
-          </button>
-          <GifPicker
-            tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
-            theme={localStorage.getItem('theme')}
-            width={'100%'}
-            onGifClick={(selected) => {
-              setGifUrl(selected.url);
-              setNewImage(null);
-              gifModal.current.close();
+    <div className={styles.formSection}>
+      <div className={styles.currentUserPfp}>
+        <Link to={`/users/${currentUser.id}`}>
+          <img className='pfp' src={currentUser.pfpUrl} alt='' />
+        </Link>
+      </div>
+      <form
+        className={styles.contentForm}
+        encType='multipart/form-data'
+        onSubmit={(e) => (isPoll ? submitPoll(e) : submitPostOrComment(e))}
+      >
+        {isModal && (
+          <dialog
+            className={styles.gifModal}
+            ref={gifModal}
+            onClose={() => {
+              setIsModal(false);
+              setIsModalRendered(false);
             }}
-          />
-        </dialog>
-      )}
-      <textarea
-        ref={textarea}
-        name='text'
-        id='text'
-        maxLength={50000}
-        placeholder={handlePlaceholder()}
-        onInput={(e) => {
-          e.target.style.height = 'auto';
-          e.target.style.height = `${e.target.scrollHeight}px`;
-        }}
-        required={!newImage && !gifUrl}
-      ></textarea>
-      {isPoll && (
-        <PollInputs
-          pollChoiceCount={pollChoiceCount}
-          setPollChoiceCount={(n) => setPollChoiceCount(n)}
-        />
-      )}
-      {(newImage || gifUrl !== '') && (
-        <div className={styles.imgPreview}>
-          <img src={newImage ? URL.createObjectURL(newImage) : gifUrl} alt='' />
-          <button
-            type='button'
-            className='closeButton'
-            onClick={() => cancelNewImage()}
           >
-            <span className='material-symbols-outlined closeIcon'>close</span>
-          </button>
-        </div>
-      )}
-      <input
-        type='file'
-        name='image'
-        id='image'
-        accept='image/*'
-        hidden
-        ref={fileInput}
-        onChange={(e) => handleFileInputChange(e)}
-      />
-      <div className={styles.formButtons}>
-        {isPoll ? (
-          <button type='button' onClick={() => setIsPoll(false)}>
-            Cancel Poll
-          </button>
-        ) : (
-          <div className={styles.svgButtons}>
-            <button className={styles.svgButton} type='button'>
-              <label htmlFor='image'>
-                <span className='material-symbols-outlined'>image</span>
-              </label>
-            </button>
             <button
-              className={styles.svgButton}
               type='button'
-              onClick={() => {
-                setIsModal(true);
-              }}
+              className='closeButton'
+              onClick={() => gifModal.current.close()}
             >
-              <span className='material-symbols-outlined'>gif_box</span>
+              <span className='material-symbols-outlined closeIcon'>close</span>
             </button>
-            {contentType === 'post' && (
+            <GifPicker
+              tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
+              theme={localStorage.getItem('theme')}
+              width={'100%'}
+              onGifClick={(selected) => {
+                setGifUrl(selected.url);
+                setNewImage(null);
+                gifModal.current.close();
+              }}
+            />
+          </dialog>
+        )}
+        <textarea
+          ref={textarea}
+          name='text'
+          id='text'
+          maxLength={50000}
+          placeholder={handlePlaceholder()}
+          onInput={(e) => {
+            e.target.style.height = 'auto';
+            e.target.style.height = `${e.target.scrollHeight}px`;
+          }}
+          required={!newImage && !gifUrl}
+        ></textarea>
+        {isPoll && (
+          <PollInputs
+            pollChoiceCount={pollChoiceCount}
+            setPollChoiceCount={(n) => setPollChoiceCount(n)}
+          />
+        )}
+        {(newImage || gifUrl !== '') && (
+          <div className={styles.imgPreview}>
+            <img
+              src={newImage ? URL.createObjectURL(newImage) : gifUrl}
+              alt=''
+            />
+            <button
+              type='button'
+              className='closeButton'
+              onClick={() => cancelNewImage()}
+            >
+              <span className='material-symbols-outlined closeIcon'>close</span>
+            </button>
+          </div>
+        )}
+        <input
+          type='file'
+          name='image'
+          id='image'
+          accept='image/*'
+          hidden
+          ref={fileInput}
+          onChange={(e) => handleFileInputChange(e)}
+        />
+        <div className={styles.formButtons}>
+          {isPoll ? (
+            <button type='button' onClick={() => setIsPoll(false)}>
+              Cancel Poll
+            </button>
+          ) : (
+            <div className={styles.svgButtons}>
+              <button className={styles.svgButton} type='button'>
+                <label htmlFor='image'>
+                  <span className='material-symbols-outlined'>image</span>
+                </label>
+              </button>
               <button
                 className={styles.svgButton}
                 type='button'
                 onClick={() => {
-                  setIsPoll(true);
-                  cancelNewImage();
+                  setIsModal(true);
                 }}
               >
-                <span className='material-symbols-outlined'>ballot</span>
+                <span className='material-symbols-outlined'>gif_box</span>
               </button>
-            )}
-            <button
-              className={styles.svgButton}
-              type='button'
-              onClick={() => setIsEmojiOpen(!isEmojiOpen)}
-            >
-              <span className='material-symbols-outlined'>add_reaction</span>
-            </button>
+              {contentType === 'post' && (
+                <button
+                  className={styles.svgButton}
+                  type='button'
+                  onClick={() => {
+                    setIsPoll(true);
+                    cancelNewImage();
+                  }}
+                >
+                  <span className='material-symbols-outlined'>ballot</span>
+                </button>
+              )}
+              <button
+                className={styles.svgButton}
+                type='button'
+                onClick={() => setIsEmojiOpen(!isEmojiOpen)}
+              >
+                <span className='material-symbols-outlined'>add_reaction</span>
+              </button>
+            </div>
+          )}
+          <button className={styles.submitButton}>Post</button>
+        </div>
+        {isEmojiOpen && (
+          <div className={styles.emojiPicker}>
+            <EmojiPicker
+              theme={localStorage.getItem('theme')}
+              skinTonesDisabled={true}
+              width={'100%'}
+              onEmojiClick={(emojiData) => {
+                textarea.current.value = `${textarea.current.value}${emojiData.emoji}`;
+              }}
+            />
           </div>
         )}
-        <button className={styles.submitButton}>Post</button>
-      </div>
-      {isEmojiOpen && (
-        <div className={styles.emojiPicker}>
-          <EmojiPicker
-            theme={localStorage.getItem('theme')}
-            skinTonesDisabled={true}
-            width={'100%'}
-            onEmojiClick={(emojiData) => {
-              textarea.current.value = `${textarea.current.value}${emojiData.emoji}`;
-            }}
-          />
-        </div>
-      )}
-    </form>
+      </form>
+    </div>
   );
 }
 
 NewContentForm.propTypes = {
   contentType: PropTypes.string,
   setContent: PropTypes.func,
-  postId: PropTypes.number,
+  currentUser: PropTypes.object,
+  parentId: PropTypes.number,
 };
 
 export default NewContentForm;

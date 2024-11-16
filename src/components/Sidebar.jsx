@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-// import Switch from 'react-switch';
 import ThemeSwitch from './ThemeSwitch.jsx';
 import styles from '../style/Sidebar.module.css';
 

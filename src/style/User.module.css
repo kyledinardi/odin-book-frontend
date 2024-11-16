@@ -20,7 +20,7 @@
 
 .username {
   grid-area: username;
-  margin: 0 10px;
+  margin: 0 15px;
   display: flex;
   flex-direction: column;
 }
@@ -35,5 +35,5 @@
 
 .bio {
   grid-area: bio;
-  margin: 10px 0 0 0;
+  margin: 15px 0 0 0;
 }

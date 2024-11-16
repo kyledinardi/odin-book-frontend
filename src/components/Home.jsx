@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
-import Post from './Post.jsx';
-import styles from '../style/Home.module.css';
-import backendFetch from '../../ helpers/backendFetch';
+import { useOutletContext } from 'react-router-dom';
 import NewContentForm from './NewContentForm.jsx';
+import Post from './Post.jsx';
+import backendFetch from '../../ helpers/backendFetch';
 
 function Home() {
   const [posts, setPosts] = useState(null);
@@ -29,17 +28,11 @@ function Home() {
     </div>
   ) : (
     <main>
-      <div className={styles.formSection}>
-        <div className={styles.currentUserPfp}>
-          <Link to={`/users/${currentUser.id}`}>
-            <img className='pfp' src={currentUser.pfpUrl} alt='' />
-          </Link>
-        </div>
-        <NewContentForm
-          contentType={'post'}
-          setContent={(post) => setPosts([post, ...posts])}
-        />
-      </div>
+      <NewContentForm
+        contentType={'post'}
+        setContent={(post) => setPosts([post, ...posts])}
+        currentUser={currentUser}
+      />
       <div>
         {posts.length === 0 ? (
           <h2>You and your followers have no posts</h2>

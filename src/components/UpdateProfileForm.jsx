@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import backendFetch from '../../ helpers/backendFetch';
 import headerPlaceholder from '../assets/header-placeholder.webp';
 import styles from '../style/UpdateProfileForm.module.css';
-import backendFetch from '../../ helpers/backendFetch';
 
 function UpdateProfileForm({ userModal }) {
   const [newPfp, setNewPfp] = useState(null);

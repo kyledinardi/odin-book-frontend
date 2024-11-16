@@ -5,6 +5,7 @@ import Login from './components/Login.jsx';
 import SignUp from './components/SignUp.jsx';
 import Home from './components/Home.jsx';
 import PostPage from './components/PostPage.jsx';
+import CommentPage from './components/CommentPage.jsx';
 import Search from './components/Search.jsx';
 import Profile from './components/Profile.jsx';
 import Follows from './components/Follows.jsx';
@@ -21,6 +22,7 @@ const routes = [
     children: [
       { index: true, element: <Home /> },
       { path: 'posts/:postId', element: <PostPage /> },
+      { path: 'comments/:commentId', element: <CommentPage /> },
       { path: '/search', element: <Search /> },
       { path: '/users/:userId', element: <Profile /> },
       { path: '/users/:userId/follows', element: <Follows /> },

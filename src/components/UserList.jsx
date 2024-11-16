@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import User from './User.jsx';
-import styles from '../style/UserList.module.css';
 import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/UserList.module.css';
 
 function UserList({ currentUser, setCurrentUser, setError }) {
   const [users, setUsers] = useState(null);

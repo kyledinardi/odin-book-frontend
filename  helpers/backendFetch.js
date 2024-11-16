@@ -1,4 +1,4 @@
-export default async function backendFetch(setError, path, options) {
+async function backendFetch(setError, path, options) {
   function isJsonString(str) {
     try {
       JSON.parse(str);
@@ -49,3 +49,5 @@ export default async function backendFetch(setError, path, options) {
 
   return null;
 }
+
+export default backendFetch;

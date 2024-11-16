@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
-import styles from '../style/Follows.module.css';
 import FollowList from './FollowList.jsx';
 import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/Follows.module.css';
 
 function Follows() {
   const [user, setUser] = useState(null);
@@ -63,7 +63,9 @@ function Follows() {
               openTab === 'mutuals' ? styles.openTab : null
             }`}
             onClick={() => setOpenTab('mutuals')}
-          >Mutuals</button>
+          >
+            Mutuals
+          </button>
         ) : (
           <button
             className={`${styles.categoryButton} ${

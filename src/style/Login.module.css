@@ -34,11 +34,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
   width: 100%;
-}
-
-.logoButton {
   background-color: var(--color-foreground);
   color: var(--color-background);
   padding: 10px 20px;

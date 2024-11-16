@@ -1,8 +1,8 @@
 import { Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { useOutletContext } from 'react-router-dom';
-import styles from '../style/Poll.module.css';
+import PropTypes from 'prop-types';
 import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/Poll.module.css';
 
 function Poll({ post, replacePost }) {
   const [setError] = useOutletContext();

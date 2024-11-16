@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
-import Post from './Post.jsx';
-import styles from '../style/Profile.module.css';
-import backendFetch from '../../ helpers/backendFetch';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
+import Post from './Post.jsx';
 import ThemeSwitch from './ThemeSwitch.jsx';
+import backendFetch from '../../ helpers/backendFetch';
+import styles from '../style/Profile.module.css';
 
 function Profile() {
   const [user, setUser] = useState(null);
