@@ -10,13 +10,11 @@ import Search from './components/Search.jsx';
 import Profile from './components/Profile.jsx';
 import Follows from './components/Follows.jsx';
 
-const errorElement = <ErrorPage />;
-
 const routes = [
   {
     path: '/',
     element: <App />,
-    errorElement,
+    errorElement: <ErrorPage />,
     loader: () => (localStorage.getItem('token') ? null : redirect('/login')),
 
     children: [
@@ -32,14 +30,14 @@ const routes = [
   {
     path: '/login',
     element: <Login />,
-    errorElement,
+    errorElement: <ErrorPage />,
     loader: () => (localStorage.getItem('token') ? redirect('/') : null),
   },
 
   {
     path: '/sign-up',
     element: <SignUp />,
-    errorElement,
+    errorElement: <ErrorPage />,
     loader: () => (localStorage.getItem('token') ? redirect('/') : null),
   },
 ];

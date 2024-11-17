@@ -11,6 +11,7 @@ function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
   const [imagePosts, setImagePosts] = useState(null);
+  const [likedPosts, setLikedPosts] = useState(null);
 
   const [isFollowed, setIsFollowed] = useState(false);
   const [isUserModal, setIsUserModal] = useState(false);
@@ -47,6 +48,10 @@ function Profile() {
         setPosts(response.posts);
         setImagePosts(response.posts.filter((post) => post.imageUrl));
       });
+
+      backendFetch(setError, `/users/${userId}/likes`).then((response) =>
+        setLikedPosts(response.posts),
+      );
     }
   }, [userId, currentUser, setError]);
 
@@ -89,41 +94,47 @@ function Profile() {
     setImagePosts(imagePosts.filter((post) => post.id !== postId));
   }
 
+  function returnPost(postToReturn) {
+    return (
+      <Post
+        key={postToReturn.id}
+        post={postToReturn}
+        replacePost={(updatedPost) => replacePost(updatedPost)}
+        removePost={(postId) => removePost(postId)}
+      />
+    );
+  }
+
   function renderPosts() {
     const noPostsMessageTemplate =
-      userId === currentUser.id ? 'You have' : `${user.username} has`;
+      userId === currentUser.id ? 'You have' : `${user.displayName} has`;
 
-    if (openTab === 'posts') {
-      if (posts.length === 0) {
-        return <h2>{`${noPostsMessageTemplate} no posts.`}</h2>;
+    switch (openTab) {
+      case 'posts':
+        if (posts.length === 0) {
+          return <h2>{`${noPostsMessageTemplate} no posts.`}</h2>;
+        }
+
+        return posts.map((post) => returnPost(post));
+
+      case 'images':
+        if (imagePosts.length === 0) {
+          return <h2>{`${noPostsMessageTemplate} no images.`}</h2>;
+        }
+
+        return imagePosts.map((post) => returnPost(post));
+
+      case 'likes': {
+        if (likedPosts.length === 0) {
+          return <h2>{`${noPostsMessageTemplate} not liked any posts`}</h2>;
+        }
+
+        return likedPosts.map((post) => returnPost(post));
       }
 
-      return posts.map((post) => (
-        <Post
-          key={post.id}
-          post={post}
-          replacePost={(updatedPost) => replacePost(updatedPost)}
-          removePost={(postId) => removePost(postId)}
-        />
-      ));
+      default:
+        return null;
     }
-
-    if (openTab === 'images') {
-      if (imagePosts.length === 0) {
-        return <h2>{`${noPostsMessageTemplate} no images.`}</h2>;
-      }
-
-      return imagePosts.map((post) => (
-        <Post
-          key={post.id}
-          post={post}
-          replacePost={(updatedPost) => replacePost(updatedPost)}
-          removePost={(postId) => removePost(postId)}
-        />
-      ));
-    }
-
-    return null;
   }
 
   return !user || !posts || !currentUser ? (
@@ -248,16 +259,22 @@ function Profile() {
         </Link>
       </div>
       <button
-        className={`categoryButton ${openTab === 'posts' ? 'openTab' : null}`}
+        className={`categoryButton ${openTab === 'posts' ? 'openTab' : ''}`}
         onClick={() => setOpenTab('posts')}
       >
         Posts
       </button>
       <button
-        className={`categoryButton ${openTab === 'images' ? 'openTab' : null}`}
+        className={`categoryButton ${openTab === 'images' ? 'openTab' : ''}`}
         onClick={() => setOpenTab('images')}
       >
         Images
+      </button>
+      <button
+        className={`categoryButton ${openTab === 'likes' ? 'openTab' : ''}`}
+        onClick={() => setOpenTab('likes')}
+      >
+        Likes
       </button>
       <div>{renderPosts()}</div>
     </main>

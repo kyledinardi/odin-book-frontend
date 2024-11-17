@@ -78,9 +78,7 @@ function CommentPage() {
       ))}
       <Comment
         comment={comment}
-        replaceComment={(updated) =>
-          setComment({ ...comment, likes: updated.likes, text: updated.text })
-        }
+        replaceComment={(updatedComment) => setComment(updatedComment)}
         removeComment={() => removeChainComment(comment)}
         isCommentPage={true}
         displayType='focused'

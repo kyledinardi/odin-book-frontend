@@ -32,6 +32,15 @@ function App() {
     }
   }, [error]);
 
+  useEffect(() => {
+    function handleNavigation() {
+      setError(null);
+    }
+
+    window.addEventListener('popstate', handleNavigation);
+    return () => window.removeEventListener('popstate', handleNavigation);
+  }, []);
+
   return (
     <div className='themeWrapper' data-theme={theme}>
       {error ? (
@@ -46,7 +55,7 @@ function App() {
             currentUser={currentUser}
             logoutModal={logoutModal}
             theme={theme}
-            setTheme={(t) => setTheme(t)}
+            setTheme={(newTheme) => setTheme(newTheme)}
           />
           <Outlet
             context={[setError, currentUser, setCurrentUser, theme, setTheme]}
