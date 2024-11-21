@@ -44,6 +44,7 @@ async function backendFetch(setError, path, options) {
       return response;
     }
   } catch (err) {
+    console.error(err);
     setError({ status: 'Error', message: 'An unexpected error has occured' });
   }
 

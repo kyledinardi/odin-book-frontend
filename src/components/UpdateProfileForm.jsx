@@ -8,7 +8,7 @@ import styles from '../style/UpdateProfileForm.module.css';
 function UpdateProfileForm({ userModal }) {
   const [newPfp, setNewPfp] = useState(null);
   const [newHeaderImage, setNewHeaderImage] = useState(null);
-  
+
   const profileForm = useRef(null);
   const newPfpInput = useRef(null);
   const newHeaderImageInput = useRef(null);
@@ -23,7 +23,7 @@ function UpdateProfileForm({ userModal }) {
     formData.append('displayName', e.target[4].value);
     formData.append('bio', e.target[5].value);
 
-    const response = await backendFetch(setError, '/users/profile', {
+    const response = await backendFetch(setError, '/users', {
       method: 'PUT',
       body: formData,
     });

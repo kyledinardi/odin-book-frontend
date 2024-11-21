@@ -3,6 +3,7 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
 import Post from './Post.jsx';
+import Comment from './Comment.jsx';
 import ThemeSwitch from './ThemeSwitch.jsx';
 import backendFetch from '../../ helpers/backendFetch';
 import styles from '../style/Profile.module.css';
@@ -77,9 +78,17 @@ function Profile() {
   }
 
   function replacePost(updatedPost) {
-    const newPosts = posts.map((post) =>
-      post.id === updatedPost.id ? updatedPost : post,
-    );
+    const newPosts = posts.map((post) => {
+      if (post.postId === updatedPost.id) {
+        return { ...post, post: updatedPost };
+      }
+
+      if (post.id === updatedPost.id) {
+        return updatedPost;
+      }
+
+      return post;
+    });
 
     const newImagePosts = imagePosts.map((post) =>
       post.id === updatedPost.id ? updatedPost : post,
@@ -90,17 +99,21 @@ function Profile() {
   }
 
   function removePost(postId) {
-    setPosts(posts.filter((post) => post.id !== postId));
+    setPosts(
+      posts.filter((post) => post.postId !== postId && post.id !== postId),
+    );
+
     setImagePosts(imagePosts.filter((post) => post.id !== postId));
   }
 
-  function returnPost(postToReturn) {
+  function returnPost(post) {
     return (
       <Post
-        key={postToReturn.id}
-        post={postToReturn}
+        key={post.id}
+        post={post}
         replacePost={(updatedPost) => replacePost(updatedPost)}
         removePost={(postId) => removePost(postId)}
+        repostedBy=''
       />
     );
   }
@@ -115,7 +128,34 @@ function Profile() {
           return <h2>{`${noPostsMessageTemplate} no posts.`}</h2>;
         }
 
-        return posts.map((post) => returnPost(post));
+        return posts.map((post) => {
+          if (post.postId) {
+            return (
+              <Post
+                key={`repost${post.id}`}
+                post={post.post}
+                replacePost={(updatedPost) => replacePost(updatedPost)}
+                removePost={(postId) => removePost(postId)}
+                repost={post}
+              />
+            );
+          }
+
+          if (post.commentId) {
+            return (
+              <Comment
+                key={`repost${post.id}`}
+                comment={post.comment}
+                replaceComment={(updatedComment) => replacePost(updatedComment)}
+                removeComment={(commentId) => removePost(commentId)}
+                displayType='focused'
+                repostedBy={post.user.username}
+              />
+            );
+          }
+
+          return returnPost(post);
+        });
 
       case 'images':
         if (imagePosts.length === 0) {
@@ -179,7 +219,9 @@ function Profile() {
       <div className={styles.heading}>
         <div>
           <h2>{user.displayName}</h2>
-          <p>{posts.length} posts</p>
+          <p>
+            {posts.length} post{posts.length === 1 ? '' : 's'}
+          </p>
         </div>
         <div className={styles.switch}>
           <ThemeSwitch theme={theme} setTheme={(t) => setTheme(t)} />
@@ -251,10 +293,12 @@ function Profile() {
         </p>
         <Link className={styles.followStats} to={`/users/${user.id}/follows`}>
           <span>
-            <strong>{user.following.length}</strong> Following
+            <strong>{user.following.length}</strong>
+            <span> Following</span>
           </span>
           <span>
-            <strong>{user.followers.length}</strong> Followers
+            <strong>{user.followers.length}</strong>
+            <span> Follower{user.followers.length === 1 ? '' : 's'}</span>
           </span>
         </Link>
       </div>
