@@ -8,6 +8,7 @@ import styles from '../style/UpdateProfileForm.module.css';
 function UpdateProfileForm({ userModal }) {
   const [newPfp, setNewPfp] = useState(null);
   const [newHeaderImage, setNewHeaderImage] = useState(null);
+  const [errorArray, setErrorArray] = useState(null);
 
   const profileForm = useRef(null);
   const newPfpInput = useRef(null);
@@ -21,23 +22,20 @@ function UpdateProfileForm({ userModal }) {
     formData.append('pfp', e.target[1].files[0]);
     formData.append('headerImage', e.target[3].files[0]);
     formData.append('displayName', e.target[4].value);
-    formData.append('bio', e.target[5].value);
+    formData.append('website', e.target[5].value);
+    formData.append('bio', e.target[6].value);
 
     const response = await backendFetch(setError, '/users', {
       method: 'PUT',
       body: formData,
     });
-
-    const newCurrentUser = {
-      ...currentUser,
-      pfpUrl: response.user.pfpUrl,
-      headerUrl: response.user.headerUrl,
-      displayName: response.user.displayName,
-      bio: response.user.bio,
-    };
-
-    setCurrentUser(newCurrentUser);
-    userModal.current.close();
+    
+    if (response.expectedErrors) {
+      setErrorArray(response.expectedErrors);
+    } else {
+      setCurrentUser(response.user);
+      userModal.current.close();
+    }
   }
 
   function handleFileInputChange(e, imageType) {
@@ -129,6 +127,21 @@ function UpdateProfileForm({ userModal }) {
         defaultValue={currentUser.displayName}
         required
       />
+      <label htmlFor='website'>Website</label>
+      <input
+        type='text'
+        name='website'
+        id='website'
+        maxLength={50}
+        defaultValue={currentUser.website}
+      />
+      {errorArray && (
+        <div className={styles.error}>
+          {errorArray.map((error, i) => (
+            <span key={i}>{error.msg}</span>
+          ))}
+        </div>
+      )}
       <label htmlFor='bio'>Bio</label>
       <textarea
         name='bio'

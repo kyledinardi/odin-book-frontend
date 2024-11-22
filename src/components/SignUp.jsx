@@ -67,8 +67,8 @@ function SignUp() {
           <div className={styles.loginForms}>
             {errorArray && (
               <div className={styles.error}>
-                {errorArray.map((error) => (
-                  <span key={error.msg}>{error.msg}</span>
+                {errorArray.map((error, i) => (
+                  <span key={i}>{error.msg}</span>
                 ))}
               </div>
             )}

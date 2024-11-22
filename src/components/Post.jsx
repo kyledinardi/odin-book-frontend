@@ -201,8 +201,9 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
           </Link>
           <button onClick={() => repost()}>
             <span
-              className='material-symbols-outlined'
-              style={{ color: repostId > 0 ? '#008A00' : 'gray' }}
+              className={`material-symbols-outlined ${
+                repostId !== 0 ? styles.reposted : ''
+              }`}
             >
               repeat
             </span>
@@ -211,11 +212,9 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
           <button onClick={() => like()}>
             <div>
               <span
-                className='material-symbols-outlined'
-                style={{
-                  fontVariationSettings: `'FILL' ${isLiked ? 1 : 0}`,
-                  color: isLiked ? '#f0f' : 'gray',
-                }}
+                className={`material-symbols-outlined ${
+                  isLiked ? styles.liked : ''
+                }`}
               >
                 favorite
               </span>

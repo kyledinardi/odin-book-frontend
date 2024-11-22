@@ -29,7 +29,8 @@
   display: none;
 }
 
-.headerImage, .profilePagePfp {
+.headerImage,
+.profilePagePfp {
   cursor: pointer;
 }
 
@@ -69,13 +70,26 @@
   margin: 5px 0;
 }
 
-.joinDate {
+.linkAndJoinDate {
   color: gray;
   display: flex;
-  gap: 15px;
+  gap: 10px;
 }
 
-.calendarIcon {
+.websiteLink {
+  color: #6161ff;
+  text-decoration: underline;
+}
+
+.websiteLink:hover {
+  color: #6161ff;
+}
+
+.websiteLink:active {
+  color: #6161ff;
+}
+
+.profileIcon {
   font-size: 16px;
   font-variation-settings: 'OPSZ' 16;
 }

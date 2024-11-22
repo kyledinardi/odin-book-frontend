@@ -62,13 +62,17 @@
 .namesAndTimestamp {
   display: flex;
   flex-wrap: wrap;
-  column-gap: 15px;
+  column-gap: 10px;
 }
 
 .options button {
   padding: 0;
   margin: 5px;
   height: 24px;
+}
+
+.options span {
+  background-color: var(--color-background);
 }
 
 .options button,
@@ -82,7 +86,7 @@
 }
 
 .replyLink {
-  color: #6161ff
+  color: #6161ff;
 }
 
 .text {
@@ -123,10 +127,22 @@
   height: 24px;
 }
 
-.interact button:hover {
+.interact button:hover,
+.interact button:active {
   background-color: inherit;
 }
 
-.interact button:active {
-  background-color: inherit;
+.interact a:hover,
+.interact a:active {
+  text-decoration: none;
+}
+
+.interact .reposted {
+  font-variation-settings: 'wght' 700;
+  color: #008a00;
+}
+
+.interact .liked {
+  font-variation-settings: 'FILL' 1, 'wght' 700;
+  color: #f0f;
 }

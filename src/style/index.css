@@ -80,6 +80,16 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+  color: var(--color-near-foreground);
+  text-decoration: underline;
+}
+
+a:active {
+  color: var(--color-far-foreground);
+  text-decoration: underline;
+}
+
 textarea {
   background-color: var(--color-background);
   color: var(--color-foreground);
@@ -167,7 +177,7 @@ button:disabled {
   right: 5px;
   height: 30px;
   z-index: 1;
-  opacity: .8;
+  opacity: 0.8;
 }
 
 .closeIcon {

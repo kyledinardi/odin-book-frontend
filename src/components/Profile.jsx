@@ -279,12 +279,32 @@ function Profile() {
         <h2>{user.displayName}</h2>
         <span className='gray'>{`@${user.username}`}</span>
         <p>{user.bio}</p>
-        <p className={styles.joinDate}>
-          <span className={`material-symbols-outlined ${styles.calendarIcon}`}>
+        {user.website && (
+          <p className={styles.linkAndJoinDate}>
+            <span className={`material-symbols-outlined ${styles.profileIcon}`}>
+              link
+            </span>
+            <a
+              className={styles.websiteLink}
+              href={
+                user.website.startsWith('http://') ||
+                user.website.startsWith('https://')
+                  ? user.website
+                  : `https://${user.website}`
+              }
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              {user.website}
+            </a>
+          </p>
+        )}
+        <p className={styles.linkAndJoinDate}>
+          <span className={`material-symbols-outlined ${styles.profileIcon}`}>
             calendar_month
           </span>
           <span>
-            <span className=''>Joined </span>
+            <span>Joined </span>
             {Intl.DateTimeFormat(undefined, {
               month: 'long',
               year: 'numeric',

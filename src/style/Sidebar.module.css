@@ -37,6 +37,12 @@
   background-color: var(--color-far-background);
 }
 
+.sidebarButton:hover,
+.sidebarButton:active {
+  color: white;
+  text-decoration: none;
+}
+
 .sidebar .menuSvg {
   font-size: 30px;
   font-variation-settings: 'OPSZ' 30;
