@@ -279,38 +279,52 @@ function Profile() {
         <h2>{user.displayName}</h2>
         <span className='gray'>{`@${user.username}`}</span>
         <p>{user.bio}</p>
-        {user.website && (
-          <p className={styles.linkAndJoinDate}>
+        <div className={styles.userDetails}>
+          {user.location && (
+            <div className={styles.detail}>
+              <span
+                className={`material-symbols-outlined ${styles.profileIcon}`}
+              >
+                location_on
+              </span>
+              <span>{user.location}</span>
+            </div>
+          )}
+          {user.website && (
+            <div className={styles.detail}>
+              <span
+                className={`material-symbols-outlined ${styles.profileIcon}`}
+              >
+                link
+              </span>
+              <a
+                className={styles.websiteLink}
+                href={
+                  user.website.startsWith('http://') ||
+                  user.website.startsWith('https://')
+                    ? user.website
+                    : `https://${user.website}`
+                }
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                {user.website}
+              </a>
+            </div>
+          )}
+          <div className={styles.detail}>
             <span className={`material-symbols-outlined ${styles.profileIcon}`}>
-              link
+              calendar_month
             </span>
-            <a
-              className={styles.websiteLink}
-              href={
-                user.website.startsWith('http://') ||
-                user.website.startsWith('https://')
-                  ? user.website
-                  : `https://${user.website}`
-              }
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              {user.website}
-            </a>
-          </p>
-        )}
-        <p className={styles.linkAndJoinDate}>
-          <span className={`material-symbols-outlined ${styles.profileIcon}`}>
-            calendar_month
-          </span>
-          <span>
-            <span>Joined </span>
-            {Intl.DateTimeFormat(undefined, {
-              month: 'long',
-              year: 'numeric',
-            }).format(new Date(user.joinDate))}
-          </span>
-        </p>
+            <span>
+              <span>Joined </span>
+              {Intl.DateTimeFormat(undefined, {
+                month: 'long',
+                year: 'numeric',
+              }).format(new Date(user.joinDate))}
+            </span>
+          </div>
+        </div>
         <Link className={styles.followStats} to={`/users/${user.id}/follows`}>
           <span>
             <strong>{user.following.length}</strong>

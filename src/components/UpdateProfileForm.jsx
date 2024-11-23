@@ -22,8 +22,9 @@ function UpdateProfileForm({ userModal }) {
     formData.append('pfp', e.target[1].files[0]);
     formData.append('headerImage', e.target[3].files[0]);
     formData.append('displayName', e.target[4].value);
-    formData.append('website', e.target[5].value);
-    formData.append('bio', e.target[6].value);
+    formData.append('location', e.target[5].value);
+    formData.append('website', e.target[6].value);
+    formData.append('bio', e.target[7].value);
 
     const response = await backendFetch(setError, '/users', {
       method: 'PUT',
@@ -126,6 +127,14 @@ function UpdateProfileForm({ userModal }) {
         maxLength={50}
         defaultValue={currentUser.displayName}
         required
+      />
+      <label htmlFor='location'>Location</label>
+      <input
+        type='text'
+        name='location'
+        id='location'
+        maxLength={50}
+        defaultValue={currentUser.location}
       />
       <label htmlFor='website'>Website</label>
       <input

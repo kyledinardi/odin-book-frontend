@@ -3,7 +3,7 @@
 }
 
 .heading {
-  padding: 0 20px;
+  margin: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -46,7 +46,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
+  margin: 15px;
 }
 
 .profilePagePfp {
@@ -63,17 +63,23 @@
 }
 
 .userInfo {
-  padding: 10px 15px;
+  margin: 15px;
 }
 
 .userInfo h2 {
   margin: 5px 0;
 }
 
-.linkAndJoinDate {
+.userDetails {
   color: gray;
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.detail {
+  display: flex;
+  gap: 5px;
 }
 
 .websiteLink {

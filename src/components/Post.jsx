@@ -7,7 +7,7 @@ import formatDate from '../../ helpers/formatDate';
 import styles from '../style/Content.module.css';
 
 function Post({ post, replacePost, removePost, page, repostedBy }) {
-  const [repostId, setRepostId] = useState(0);
+  const [currentUserRepostId, setCurrentUserRepostId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -21,7 +21,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
       (repostObj) => repostObj.userId === currentUser.id,
     );
 
-    setRepostId(repostTemp ? repostTemp.id : 0);
+    setCurrentUserRepostId(repostTemp ? repostTemp.id : null);
 
     setIsLiked(post.likes.some((user) => user.id === currentUser.id));
   }, [currentUser, post]);
@@ -55,7 +55,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
   }
 
   async function repost() {
-    if (repostId === 0) {
+    if (!currentUserRepostId) {
       const response = await backendFetch(setError, '/reposts', {
         method: 'Post',
         body: JSON.stringify({ contentType: 'post', id: post.id }),
@@ -65,7 +65,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
     } else {
       const response = await backendFetch(setError, '/reposts', {
         method: 'Delete',
-        body: JSON.stringify({ id: repostId }),
+        body: JSON.stringify({ id: currentUserRepostId }),
       });
 
       const newReposts = post.reposts.filter(
@@ -202,7 +202,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
           <button onClick={() => repost()}>
             <span
               className={`material-symbols-outlined ${
-                repostId !== 0 ? styles.reposted : ''
+                currentUserRepostId ? styles.reposted : ''
               }`}
             >
               repeat

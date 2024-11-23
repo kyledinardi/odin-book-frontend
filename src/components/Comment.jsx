@@ -12,7 +12,7 @@ function Comment({
   displayType,
   repostedBy,
 }) {
-  const [repostId, setRepostId] = useState(0);
+  const [currentUserRepostId, setCurrentUserRepostId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -26,7 +26,7 @@ function Comment({
       (repostObj) => repostObj.userId === currentUser.id,
     );
 
-    setRepostId(repostTemp ? repostTemp.id : 0);
+    setCurrentUserRepostId(repostTemp ? repostTemp.id : null);
     setIsLiked(comment.likes.some((user) => user.id === currentUser.id));
   }, [comment, currentUser]);
 
@@ -59,7 +59,7 @@ function Comment({
   }
 
   async function repost() {
-    if (repostId === 0) {
+    if (!currentUserRepostId) {
       const response = await backendFetch(setError, '/reposts', {
         method: 'Post',
         body: JSON.stringify({ contentType: 'comment', id: comment.id }),
@@ -74,7 +74,7 @@ function Comment({
     } else {
       const response = await backendFetch(setError, '/reposts', {
         method: 'Delete',
-        body: JSON.stringify({ id: repostId }),
+        body: JSON.stringify({ id: currentUserRepostId }),
       });
 
       const newReposts = comment.reposts.filter(
@@ -217,7 +217,7 @@ function Comment({
           <button onClick={() => repost()}>
             <span
               className={`material-symbols-outlined ${
-                repostId !== 0 ? styles.reposted : ''
+                currentUserRepostId ? styles.reposted : ''
               }`}
             >
               repeat

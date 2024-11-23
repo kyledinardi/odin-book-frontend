@@ -34,7 +34,10 @@ function ErrorPage({ error, setError }) {
         <div>
           <button
             onClick={() => {
-              setError(null);
+              if (setError) {
+                setError(null);
+              }
+              
               navigate('/');
             }}
           >
@@ -42,7 +45,10 @@ function ErrorPage({ error, setError }) {
           </button>
           <button
             onClick={() => {
-              setError(null);
+              if (setError) {
+                setError(null);
+              }
+
               navigate(-1);
             }}
           >
