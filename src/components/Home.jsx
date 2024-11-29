@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import NewContentForm from './NewContentForm.jsx';
 import Post from './Post.jsx';
-import backendFetch from '../../ helpers/backendFetch';
 import Comment from './Comment.jsx';
+import backendFetch from '../../ helpers/backendFetch';
+import editFeed from '../../ helpers/feedEdit';
 
 function Home() {
   const [posts, setPosts] = useState(null);
@@ -15,57 +16,47 @@ function Home() {
     });
   }, [setError]);
 
-  function replacePost(updatedPost) {
-    const newPosts = posts.map((post) => {
-      switch (updatedPost.id) {
-        case post.postId:
-          return { ...post, post: updatedPost };
-        case post.commentId:
-          return { ...post, comment: updatedPost };
-        case post.id:
-          return updatedPost;
-        default:
-          return post;
-      }
-    });
-
-    setPosts(newPosts);
-  }
-
-  function removePost(postId) {
-    setPosts(
-      posts.filter(
-        (post) =>
-          post.postId !== postId &&
-          post.commentId !== postId &&
-          post.id !== postId,
-      ),
-    );
-  }
-
   function renderPost(post) {
     if (post.postId) {
       return (
-        <Post
-          key={`repost${post.id}`}
-          post={post.post}
-          replacePost={(updatedPost) => replacePost(updatedPost)}
-          removePost={(postId) => removePost(postId)}
-          repostedBy={post.user.username}
-        />
+        <div key={`repost${post.id}`}>
+          <p className='repostHeading'>
+            <span className='material-symbols-outlined'>repeat</span>
+            <span>{post.user.displayName} reposted</span>
+          </p>
+          <Post
+            post={post.post}
+            replacePost={(updatedPost) =>
+              setPosts(editFeed.replace(updatedPost, posts))
+            }
+            removePost={(deletedPostId) =>
+              setPosts(editFeed.remove(deletedPostId, 'post', posts))
+            }
+            displayType='repost'
+          />
+        </div>
       );
     }
 
     if (post.commentId) {
       return (
-        <Comment
-          key={`repost${post.id}`}
-          comment={post.comment}
-          replaceComment={(updatedComment) => replacePost(updatedComment)}
-          removeComment={(commentId) => removePost(commentId)}
-          displayType='focused'
-          repostedBy={post.user.username}
-        />
+        <div key={`repost${post.id}`}>
+          <p className='repostHeading'>
+            <span className='material-symbols-outlined'>repeat</span>
+            <span>{post.user.displayName} reposted</span>
+          </p>
+          <Comment
+            comment={post.comment}
+            replaceComment={(updatedComment) =>
+              setPosts(editFeed.replace(updatedComment, posts))
+            }
+            removeComment={(deletedCommentId) =>
+              setPosts(editFeed.remove(deletedCommentId, 'comment', posts))
+            }
+            displayType='repost'
+            repostedBy={post.user.username}
+          />
+        </div>
       );
     }
 
@@ -73,9 +64,13 @@ function Home() {
       <Post
         key={post.id}
         post={post}
-        replacePost={(updatedPost) => replacePost(updatedPost)}
-        removePost={(postId) => removePost(postId)}
-        repostedBy=''
+        replacePost={(updatedPost) =>
+          setPosts(editFeed.replace(updatedPost, posts))
+        }
+        removePost={(deletedPostId) =>
+          setPosts(editFeed.remove(deletedPostId, 'post', posts))
+        }
+        displayType='feed'
       />
     );
   }

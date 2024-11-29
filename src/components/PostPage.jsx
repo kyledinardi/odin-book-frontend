@@ -47,7 +47,7 @@ function PostPage() {
         post={post}
         replacePost={(updatedPost) => setPost(updatedPost)}
         removePost={() => navigate('/')}
-        page='PostPage'
+        displayType='focused'
       />
       <NewContentForm
         contentType='comment'

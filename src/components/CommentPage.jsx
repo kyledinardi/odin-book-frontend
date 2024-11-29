@@ -65,7 +65,7 @@ function CommentPage() {
         post={comment.post}
         replacePost={(updated) => setComment({ ...comment, post: updated })}
         removePost={() => navigate('/')}
-        page='comment'
+        displayType='ancestor'
       />
       {comment.commentChain.map((ancestor) => (
         <Comment

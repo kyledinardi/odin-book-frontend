@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
-import Post from './Post.jsx';
-import Comment from './Comment.jsx';
 import ThemeSwitch from './ThemeSwitch.jsx';
+import ProfilePostList from './ProfilePostList.jsx';
 import backendFetch from '../../ helpers/backendFetch';
 import styles from '../style/Profile.module.css';
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState(null);
+  const [comments, setComments] = useState(null);
   const [imagePosts, setImagePosts] = useState(null);
   const [likedPosts, setLikedPosts] = useState(null);
 
@@ -36,23 +36,24 @@ function Profile() {
     }
 
     if (currentUser) {
-      backendFetch(setError, `/users/${userId}`).then((response) => {
+      Promise.all([
+        backendFetch(setError, `/users/${userId}`),
+        backendFetch(setError, `/users/${userId}/posts`),
+        backendFetch(setError, `/users/${userId}/comments`),
+        backendFetch(setError, `/users/${userId}/posts/images`),
+        backendFetch(setError, `/users/${userId}/posts/likes`),
+      ]).then((responses) => {
         const isFollowedTemp = currentUser.following.some(
           (followedUser) => followedUser.id === userId,
         );
 
         setIsFollowed(isFollowedTemp);
-        setUser(response.user);
+        setUser(responses[0].user);
+        setPosts(responses[1].posts);
+        setComments(responses[2].comments);
+        setImagePosts(responses[3].posts);
+        setLikedPosts(responses[4].posts);
       });
-
-      backendFetch(setError, `/users/${userId}/posts`).then((response) => {
-        setPosts(response.posts);
-        setImagePosts(response.posts.filter((post) => post.imageUrl));
-      });
-
-      backendFetch(setError, `/users/${userId}/likes`).then((response) =>
-        setLikedPosts(response.posts),
-      );
     }
   }, [userId, currentUser, setError]);
 
@@ -75,106 +76,6 @@ function Profile() {
 
     setCurrentUser({ ...currentUser, following: response.user.following });
     setIsFollowed(!isFollowed);
-  }
-
-  function replacePost(updatedPost) {
-    const newPosts = posts.map((post) => {
-      if (post.postId === updatedPost.id) {
-        return { ...post, post: updatedPost };
-      }
-
-      if (post.id === updatedPost.id) {
-        return updatedPost;
-      }
-
-      return post;
-    });
-
-    const newImagePosts = imagePosts.map((post) =>
-      post.id === updatedPost.id ? updatedPost : post,
-    );
-
-    setPosts(newPosts);
-    setImagePosts(newImagePosts);
-  }
-
-  function removePost(postId) {
-    setPosts(
-      posts.filter((post) => post.postId !== postId && post.id !== postId),
-    );
-
-    setImagePosts(imagePosts.filter((post) => post.id !== postId));
-  }
-
-  function returnPost(post) {
-    return (
-      <Post
-        key={post.id}
-        post={post}
-        replacePost={(updatedPost) => replacePost(updatedPost)}
-        removePost={(postId) => removePost(postId)}
-        repostedBy=''
-      />
-    );
-  }
-
-  function renderPosts() {
-    const noPostsMessageTemplate =
-      userId === currentUser.id ? 'You have' : `${user.displayName} has`;
-
-    switch (openTab) {
-      case 'posts':
-        if (posts.length === 0) {
-          return <h2>{`${noPostsMessageTemplate} no posts.`}</h2>;
-        }
-
-        return posts.map((post) => {
-          if (post.postId) {
-            return (
-              <Post
-                key={`repost${post.id}`}
-                post={post.post}
-                replacePost={(updatedPost) => replacePost(updatedPost)}
-                removePost={(postId) => removePost(postId)}
-                repost={post}
-              />
-            );
-          }
-
-          if (post.commentId) {
-            return (
-              <Comment
-                key={`repost${post.id}`}
-                comment={post.comment}
-                replaceComment={(updatedComment) => replacePost(updatedComment)}
-                removeComment={(commentId) => removePost(commentId)}
-                displayType='focused'
-                repostedBy={post.user.username}
-              />
-            );
-          }
-
-          return returnPost(post);
-        });
-
-      case 'images':
-        if (imagePosts.length === 0) {
-          return <h2>{`${noPostsMessageTemplate} no images.`}</h2>;
-        }
-
-        return imagePosts.map((post) => returnPost(post));
-
-      case 'likes': {
-        if (likedPosts.length === 0) {
-          return <h2>{`${noPostsMessageTemplate} not liked any posts`}</h2>;
-        }
-
-        return likedPosts.map((post) => returnPost(post));
-      }
-
-      default:
-        return null;
-    }
   }
 
   return !user || !posts || !currentUser ? (
@@ -336,25 +237,46 @@ function Profile() {
           </span>
         </Link>
       </div>
-      <button
-        className={`categoryButton ${openTab === 'posts' ? 'openTab' : ''}`}
-        onClick={() => setOpenTab('posts')}
-      >
-        Posts
-      </button>
-      <button
-        className={`categoryButton ${openTab === 'images' ? 'openTab' : ''}`}
-        onClick={() => setOpenTab('images')}
-      >
-        Images
-      </button>
-      <button
-        className={`categoryButton ${openTab === 'likes' ? 'openTab' : ''}`}
-        onClick={() => setOpenTab('likes')}
-      >
-        Likes
-      </button>
-      <div>{renderPosts()}</div>
+      <div className='categoryButtons'>
+        <button
+          className={`categoryButton ${openTab === 'posts' ? 'openTab' : ''}`}
+          onClick={() => setOpenTab('posts')}
+        >
+          Posts
+        </button>
+        <button
+          className={`categoryButton ${
+            openTab === 'comments' ? 'openTab' : ''
+          }`}
+          onClick={() => setOpenTab('comments')}
+        >
+          Comments
+        </button>
+        <button
+          className={`categoryButton ${openTab === 'images' ? 'openTab' : ''}`}
+          onClick={() => setOpenTab('images')}
+        >
+          Images
+        </button>
+        <button
+          className={`categoryButton ${openTab === 'likes' ? 'openTab' : ''}`}
+          onClick={() => setOpenTab('likes')}
+        >
+          Likes
+        </button>
+      </div>
+      <ProfilePostList
+        user={user}
+        posts={posts}
+        comments={comments}
+        imagePosts={imagePosts}
+        likedPosts={likedPosts}
+        setPosts={(newPosts) => setPosts(newPosts)}
+        setComments={(newComments) => setComments(newComments)}
+        setImagePosts={(newPosts) => setImagePosts(newPosts)}
+        setLikedPosts={(newPosts) => setLikedPosts(newPosts)}
+        openTab={openTab}
+      />
     </main>
   );
 }

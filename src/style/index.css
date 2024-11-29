@@ -152,6 +152,10 @@ button:disabled {
   background-color: gray;
 }
 
+.categoryButtons {
+  border-bottom: 1px solid var(--color-near-background);
+}
+
 .categoryButton {
   background-color: var(--color-background);
   color: var(--color-foreground);
@@ -182,6 +186,14 @@ button:disabled {
 
 .closeIcon {
   color: var(--color-background);
+}
+
+.repostHeading {
+  color: gray;
+  margin: 15px 0 0 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .loaderContainer {

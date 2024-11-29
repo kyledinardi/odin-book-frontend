@@ -5,13 +5,7 @@ import backendFetch from '../../ helpers/backendFetch';
 import formatDate from '../../ helpers/formatDate';
 import styles from '../style/Content.module.css';
 
-function Comment({
-  comment,
-  replaceComment,
-  removeComment,
-  displayType,
-  repostedBy,
-}) {
+function Comment({ comment, replaceComment, removeComment, displayType }) {
   const [currentUserRepostId, setCurrentUserRepostId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -113,12 +107,6 @@ function Comment({
         </button>
         <img src={comment.imageUrl} alt='' />
       </dialog>
-      {repostedBy && (
-        <p className={`gray ${styles.repostHeading}`}>
-          <span className='material-symbols-outlined'>repeat</span>
-          <span>{repostedBy} reposted</span>
-        </p>
-      )}
       <div className={`${styles.content} ${styles[displayType]}`}>
         <Link className={styles.pfp} to={`/users/${comment.userId}`}>
           <img className='pfp' src={comment.user.pfpUrl} alt='' />
@@ -131,7 +119,11 @@ function Comment({
             <Link to={`/users/${comment.userId}`}>
               <span className='gray'>{` @${comment.user.username}`}</span>
             </Link>
-            <span className='gray'>{formatDate.short(comment.timestamp)}</span>
+            <Link to={`/comments/${comment.id}`} className='gray'>
+              <span className='gray'>
+                {formatDate.short(comment.timestamp)}
+              </span>
+            </Link>
           </div>
           {comment.user.id === parseInt(localStorage.getItem('userId'), 10) && (
             <div className={styles.options}>
@@ -144,9 +136,9 @@ function Comment({
             </div>
           )}
         </div>
-        <div className={styles.line}></div>
+        {displayType === 'ancestor' && <div className={styles.line}></div>}
         <div className={styles.mainContent}>
-          {repostedBy && (
+          {displayType === 'repost' && (
             <p>
               <span>Replying to </span>
               <Link
@@ -203,7 +195,7 @@ function Comment({
               />
             </div>
           )}
-          {displayType === 'focused' && !repostedBy && (
+          {displayType === 'focused' && (
             <p className='gray'>{formatDate.long(comment.timestamp)}</p>
           )}
         </div>
@@ -247,7 +239,6 @@ Comment.propTypes = {
   replaceComment: PropTypes.func,
   removeComment: PropTypes.func,
   displayType: PropTypes.string,
-  repostedBy: PropTypes.string,
 };
 
 export default Comment;

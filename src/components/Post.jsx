@@ -6,7 +6,7 @@ import backendFetch from '../../ helpers/backendFetch';
 import formatDate from '../../ helpers/formatDate';
 import styles from '../style/Content.module.css';
 
-function Post({ post, replacePost, removePost, page, repostedBy }) {
+function Post({ post, replacePost, removePost, displayType }) {
   const [currentUserRepostId, setCurrentUserRepostId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -33,6 +33,15 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
     }
   }, [isEditing]);
 
+  async function deletePost() {
+    await backendFetch(setError, `/posts/${post.id}`, {
+      method: 'DELETE',
+    });
+
+    removePost(post.id);
+    deleteModal.current.close();
+  }
+
   async function submitEdit(e) {
     e.preventDefault();
 
@@ -43,15 +52,6 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
 
     replacePost({ ...post, text: response.post.text });
     setIsEditing(false);
-  }
-
-  async function deletePost() {
-    await backendFetch(setError, `/posts/${post.id}`, {
-      method: 'DELETE',
-    });
-
-    removePost(post.id);
-    deleteModal.current.close();
   }
 
   async function repost() {
@@ -104,17 +104,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
         </button>
         <img src={post.imageUrl} alt='' />
       </dialog>
-      {repostedBy && (
-        <p className={`gray ${styles.repostHeading}`}>
-          <span className='material-symbols-outlined'>repeat</span>
-          <span>{repostedBy} reposted</span>
-        </p>
-      )}
-      <div
-        className={`${styles.content} ${
-          page === 'comment' ? styles.ancestor : styles.focused
-        }`}
-      >
+      <div className={`${styles.content} ${styles[displayType]}`}>
         <Link className={styles.pfp} to={`/users/${post.userId}`}>
           <img className='pfp' src={post.user.pfpUrl} alt='' />
         </Link>
@@ -141,7 +131,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
             </div>
           )}
         </div>
-        <div className={styles.line}></div>
+        {displayType === 'ancestor' && <div className={styles.line}></div>}
         <div className={styles.mainContent}>
           {isEditing ? (
             <form onSubmit={(e) => submitEdit(e)}>
@@ -167,14 +157,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
               </div>
             </form>
           ) : (
-            post.text !== '' && (
-              <p
-                className={styles.text}
-                style={{ display: page === 'post' ? 'block' : '-webkit-box' }}
-              >
-                {post.text}
-              </p>
-            )
+            post.text !== '' && <p className={styles.text}>{post.text}</p>
           )}
           {post.imageUrl && (
             <div className={styles.imageContainer}>
@@ -188,7 +171,7 @@ function Post({ post, replacePost, removePost, page, repostedBy }) {
           {post.poll && (
             <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
           )}
-          {page === 'post' && (
+          {displayType === 'focused' && (
             <p className='gray'>{formatDate.long(post.timestamp)}</p>
           )}
         </div>
@@ -231,8 +214,7 @@ Post.propTypes = {
   post: PropTypes.object,
   replacePost: PropTypes.func,
   removePost: PropTypes.func,
-  page: PropTypes.string,
-  repostedBy: PropTypes.string,
+  displayType: PropTypes.string,
 };
 
 export default Post;
