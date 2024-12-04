@@ -9,11 +9,6 @@ import styles from '../style/Profile.module.css';
 
 function Profile() {
   const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState(null);
-  const [comments, setComments] = useState(null);
-  const [imagePosts, setImagePosts] = useState(null);
-  const [likedPosts, setLikedPosts] = useState(null);
-
   const [isFollowed, setIsFollowed] = useState(false);
   const [isUserModal, setIsUserModal] = useState(false);
   const [isUserModalRendered, setIsUserModalRendered] = useState(false);
@@ -36,23 +31,13 @@ function Profile() {
     }
 
     if (currentUser) {
-      Promise.all([
-        backendFetch(setError, `/users/${userId}`),
-        backendFetch(setError, `/users/${userId}/posts`),
-        backendFetch(setError, `/users/${userId}/comments`),
-        backendFetch(setError, `/users/${userId}/posts/images`),
-        backendFetch(setError, `/users/${userId}/posts/likes`),
-      ]).then((responses) => {
+      backendFetch(setError, `/users/${userId}`).then((response) => {
         const isFollowedTemp = currentUser.following.some(
           (followedUser) => followedUser.id === userId,
         );
 
         setIsFollowed(isFollowedTemp);
-        setUser(responses[0].user);
-        setPosts(responses[1].posts);
-        setComments(responses[2].comments);
-        setImagePosts(responses[3].posts);
-        setLikedPosts(responses[4].posts);
+        setUser(response.user);
       });
     }
   }, [userId, currentUser, setError]);
@@ -78,7 +63,7 @@ function Profile() {
     setIsFollowed(!isFollowed);
   }
 
-  return !user || !posts || !currentUser ? (
+  return !user || !currentUser ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>
@@ -121,7 +106,7 @@ function Profile() {
         <div>
           <h2>{user.displayName}</h2>
           <p>
-            {posts.length} post{posts.length === 1 ? '' : 's'}
+            {user._count.posts} post{user._count.posts === 1 ? '' : 's'}
           </p>
         </div>
         <div className={styles.switch}>
@@ -228,12 +213,12 @@ function Profile() {
         </div>
         <Link className={styles.followStats} to={`/users/${user.id}/follows`}>
           <span>
-            <strong>{user.following.length}</strong>
+            <strong>{user._count.following}</strong>
             <span> Following</span>
           </span>
           <span>
-            <strong>{user.followers.length}</strong>
-            <span> Follower{user.followers.length === 1 ? '' : 's'}</span>
+            <strong>{user._count.followers}</strong>
+            <span> Follower{user._count.followers === 1 ? '' : 's'}</span>
           </span>
         </Link>
       </div>
@@ -265,18 +250,7 @@ function Profile() {
           Likes
         </button>
       </div>
-      <ProfilePostList
-        user={user}
-        posts={posts}
-        comments={comments}
-        imagePosts={imagePosts}
-        likedPosts={likedPosts}
-        setPosts={(newPosts) => setPosts(newPosts)}
-        setComments={(newComments) => setComments(newComments)}
-        setImagePosts={(newPosts) => setImagePosts(newPosts)}
-        setLikedPosts={(newPosts) => setLikedPosts(newPosts)}
-        openTab={openTab}
-      />
+      <ProfilePostList user={user} openTab={openTab} />
     </main>
   );
 }

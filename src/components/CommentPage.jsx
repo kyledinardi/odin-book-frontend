@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import NewContentForm from './NewContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
@@ -7,6 +8,7 @@ import backendFetch from '../../ helpers/backendFetch';
 
 function CommentPage() {
   const [comment, setComment] = useState(null);
+  const [hasMoreReplies, setHasMoreReplies] = useState(false);
   const [setError, currentUser] = useOutletContext();
   const navigate = useNavigate();
   const commentId = parseInt(useParams().commentId, 10);
@@ -17,9 +19,27 @@ function CommentPage() {
     } else {
       backendFetch(setError, `/comments/${commentId}`).then((response) => {
         setComment(response.comment);
+        setHasMoreReplies(response.comment.replies.length === 20);
       });
     }
   }, [commentId, setError]);
+
+  async function addMoreReplies() {
+    const response = await backendFetch(
+      setError,
+
+      `/comments/${commentId}/replies?replyId=${
+        comment.replies[comment.replies.length - 1].id
+      }`,
+    );
+    const newComment = {
+      ...comment,
+      replies: [...comment.replies, ...response.replies],
+    };
+
+    setComment(newComment);
+    setHasMoreReplies(response.replies.length === 20);
+  }
 
   function removeChainComment(chainComment) {
     if (chainComment.parentId) {
@@ -91,15 +111,27 @@ function CommentPage() {
         currentUser={currentUser}
         parentId={comment.id}
       />
-      {comment.replies.map((reply) => (
-        <Comment
-          key={reply.id}
-          comment={reply}
-          replaceComment={(updatedReply) => replaceReply(updatedReply)}
-          removeComment={(replyId) => removeReply(replyId)}
-          displayType='reply'
-        />
-      ))}
+      <InfiniteScroll
+        dataLength={comment.replies.length}
+        next={() => addMoreReplies()}
+        hasMore={hasMoreReplies}
+        loader={
+          <div className='loaderContainer'>
+            <div className='loader'></div>
+          </div>
+        }
+        endMessage={<div></div>}
+      >
+        {comment.replies.map((reply) => (
+          <Comment
+            key={reply.id}
+            comment={reply}
+            replaceComment={(updatedReply) => replaceReply(updatedReply)}
+            removeComment={(replyId) => removeReply(replyId)}
+            displayType='reply'
+          />
+        ))}
+      </InfiniteScroll>
     </main>
   );
 }

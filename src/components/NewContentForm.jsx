@@ -60,8 +60,6 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
         path = `/comments/${parentId}`;
         break;
       default:
-        setError({ status: '400', message: 'Cannot submit' });
-        break;
     }
 
     const response = await backendFetch(setError, path, {
@@ -213,6 +211,18 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
             </button>
           ) : (
             <div className={styles.svgButtons}>
+              {contentType === 'post' && (
+                <button
+                  className={styles.svgButton}
+                  type='button'
+                  onClick={() => {
+                    setIsPoll(true);
+                    cancelNewImage();
+                  }}
+                >
+                  <span className='material-symbols-outlined'>ballot</span>
+                </button>
+              )}
               <button className={styles.svgButton} type='button'>
                 <label htmlFor='image'>
                   <span className='material-symbols-outlined'>image</span>
@@ -227,18 +237,6 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
               >
                 <span className='material-symbols-outlined'>gif_box</span>
               </button>
-              {contentType === 'post' && (
-                <button
-                  className={styles.svgButton}
-                  type='button'
-                  onClick={() => {
-                    setIsPoll(true);
-                    cancelNewImage();
-                  }}
-                >
-                  <span className='material-symbols-outlined'>ballot</span>
-                </button>
-              )}
               <button
                 className={styles.svgButton}
                 type='button'

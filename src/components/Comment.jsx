@@ -203,7 +203,11 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
           <Link to={`/comments/${comment.id}`}>
             <button>
               <span className='material-symbols-outlined'>comment</span>
-              <span>{comment.replies.length}</span>
+              <span>
+                {comment._count
+                  ? comment._count.replies
+                  : comment.replies.length}
+              </span>
             </button>
           </Link>
           <button onClick={() => repost()}>

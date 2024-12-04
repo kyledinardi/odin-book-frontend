@@ -17,12 +17,12 @@ function UserList({ currentUser, setCurrentUser, setError }) {
   }, [currentUser]);
 
   useEffect(() => {
-    if (localStorage.getItem('token')) {
+    if (!users) {
       backendFetch(setError, '/users').then((response) => {
         setUsers(response.users);
       });
     }
-  }, [setError]);
+  }, [users, setError]);
 
   return !users || !followedIds ? (
     <div className='loaderContainer'>

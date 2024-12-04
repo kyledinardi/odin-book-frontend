@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import NewContentForm from './NewContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
@@ -8,13 +9,31 @@ import editFeed from '../../ helpers/feedEdit';
 
 function Home() {
   const [posts, setPosts] = useState(null);
+  const [hasMorePosts, setHasMorePosts] = useState(false);
   const [setError, currentUser] = useOutletContext();
 
   useEffect(() => {
     backendFetch(setError, '/posts').then((response) => {
       setPosts(response.posts);
+      setHasMorePosts(response.posts.length === 20);
     });
   }, [setError]);
+
+  async function addMorePosts() {
+    const lastPost = posts.findLast((post) => post.feedItemType === 'post');
+    const lastRepost = posts.findLast((post) => post.feedItemType === 'repost');
+
+    const response = await backendFetch(
+      setError,
+
+      `/posts?${lastPost ? `postId=${lastPost.id}` : ''}&${
+        lastRepost ? `repostId=${lastRepost.id}` : ''
+      }`,
+    );
+    
+    setPosts([...posts, ...response.posts]);
+    setHasMorePosts(response.posts.length === 20);
+  }
 
   function renderPost(post) {
     if (post.postId) {
@@ -90,7 +109,19 @@ function Home() {
         {posts.length === 0 ? (
           <h2>You and your followers have no posts</h2>
         ) : (
-          posts.map((post) => renderPost(post))
+          <InfiniteScroll
+            dataLength={posts.length}
+            next={() => addMorePosts()}
+            hasMore={hasMorePosts}
+            loader={
+              <div className='loaderContainer'>
+                <div className='loader'></div>
+              </div>
+            }
+            endMessage={<div></div>}
+          >
+            {posts.map((post) => renderPost(post))}
+          </InfiniteScroll>
         )}
       </div>
     </main>

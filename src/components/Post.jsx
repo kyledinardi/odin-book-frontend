@@ -179,7 +179,9 @@ function Post({ post, replacePost, removePost, displayType }) {
           <Link to={`/posts/${post.id}`}>
             <button>
               <span className='material-symbols-outlined'>comment</span>
-              <span>{post.comments.length}</span>
+              <span>
+                {post._count ? post._count.comments : post.comments.length}
+              </span>
             </button>
           </Link>
           <button onClick={() => repost()}>

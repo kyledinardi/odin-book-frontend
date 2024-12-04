@@ -7,7 +7,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 10px;
 }
 
 .sidebarButtons {
@@ -89,7 +89,6 @@
 
   .sidebarButtons {
     flex-direction: row;
-    justify-content: space-around;
     gap: 10px;
   }
 
