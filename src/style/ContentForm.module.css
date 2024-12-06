@@ -1,13 +1,19 @@
-.formSection {
+.notEditing {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 15px;
-  padding: 15px;
   border: 1px solid var(--color-near-background);
+  padding: 15px;
 }
 
-.contentForm textarea {
+.editing {
+  padding: 15px 0;
+}
+
+.editing textarea {
+  border: 1px solid var(--color-near-background);
   width: 100%;
+  margin-bottom: 10px;
 }
 
 .imgPreview {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import NewContentForm from './NewContentForm.jsx';
+import ContentForm from './ContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import backendFetch from '../../ helpers/backendFetch';
@@ -100,7 +100,7 @@ function Home() {
     </div>
   ) : (
     <main>
-      <NewContentForm
+      <ContentForm
         contentType={'post'}
         setContent={(post) => setPosts([post, ...posts])}
         currentUser={currentUser}

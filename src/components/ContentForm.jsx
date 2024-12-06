@@ -5,9 +5,15 @@ import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
 import backendFetch from '../../ helpers/backendFetch';
-import styles from '../style/NewContentForm.module.css';
+import styles from '../style/ContentForm.module.css';
 
-function NewContentForm({ contentType, setContent, currentUser, parentId }) {
+function ContentForm({
+  contentType,
+  setContent,
+  currentUser,
+  parentId,
+  contentToEdit,
+}) {
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
@@ -17,6 +23,7 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
   const [gifUrl, setGifUrl] = useState('');
   const [newImage, setNewImage] = useState(null);
 
+  const uuid = useRef(crypto.randomUUID());
   const gifModal = useRef(null);
   const fileInput = useRef(null);
   const textarea = useRef(null);
@@ -51,10 +58,18 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
 
     switch (contentType) {
       case 'post':
-        path = '/posts';
+        if (contentToEdit) {
+          path = `/posts/${contentToEdit.id}`;
+        } else {
+          path = '/posts';
+        }
         break;
       case 'comment':
-        path = `/posts/${parentId}/comments`;
+        if (contentToEdit) {
+          path = `/comments/${contentToEdit.id}`;
+        } else {
+          path = `/posts/${parentId}/comments`;
+        }
         break;
       case 'reply':
         path = `/comments/${parentId}`;
@@ -63,7 +78,7 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
     }
 
     const response = await backendFetch(setError, path, {
-      method: 'POST',
+      method: contentToEdit ? 'PUT' : 'POST',
       body: formData,
     });
 
@@ -76,7 +91,6 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
 
   async function submitPoll(e) {
     e.preventDefault();
-
     const choiceArray = [];
 
     for (let i = 1; i <= pollChoiceCount; i += 1) {
@@ -123,12 +137,18 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
   }
 
   return (
-    <div className={styles.formSection}>
-      <div className={styles.currentUserPfp}>
-        <Link to={`/users/${currentUser.id}`}>
-          <img className='pfp' src={currentUser.pfpUrl} alt='' />
-        </Link>
-      </div>
+    <div
+      className={`${styles.formSection} ${
+        contentToEdit ? styles.editing : styles.notEditing
+      }`}
+    >
+      {!contentToEdit && (
+        <div className={styles.currentUserPfp}>
+          <Link to={`/users/${currentUser.id}`}>
+            <img className='pfp' src={currentUser.pfpUrl} alt='' />
+          </Link>
+        </div>
+      )}
       <form
         className={styles.contentForm}
         encType='multipart/form-data'
@@ -165,13 +185,14 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
         <textarea
           ref={textarea}
           name='text'
-          id='text'
-          maxLength={50000}
+          id={`text-${uuid.current}`}
+          maxLength={contentType === 'post' ? 50000 : 10000}
           placeholder={handlePlaceholder()}
           onInput={(e) => {
             e.target.style.height = 'auto';
             e.target.style.height = `${e.target.scrollHeight}px`;
           }}
+          defaultValue={contentToEdit ? contentToEdit.text : null}
           required={!newImage && !gifUrl}
         ></textarea>
         {isPoll && (
@@ -198,7 +219,7 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
         <input
           type='file'
           name='image'
-          id='image'
+          id={`image-${uuid.current}`}
           accept='image/*'
           hidden
           ref={fileInput}
@@ -211,7 +232,7 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
             </button>
           ) : (
             <div className={styles.svgButtons}>
-              {contentType === 'post' && (
+              {contentType === 'post' && !contentToEdit && (
                 <button
                   className={styles.svgButton}
                   type='button'
@@ -224,7 +245,7 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
                 </button>
               )}
               <button className={styles.svgButton} type='button'>
-                <label htmlFor='image'>
+                <label htmlFor={`image-${uuid.current}`}>
                   <span className='material-symbols-outlined'>image</span>
                 </label>
               </button>
@@ -246,7 +267,9 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
               </button>
             </div>
           )}
-          <button className={styles.submitButton}>Post</button>
+          <button className={styles.submitButton}>
+            {contentToEdit ? 'Update' : 'Post'}
+          </button>
         </div>
         {isEmojiOpen && (
           <div className={styles.emojiPicker}>
@@ -265,11 +288,12 @@ function NewContentForm({ contentType, setContent, currentUser, parentId }) {
   );
 }
 
-NewContentForm.propTypes = {
+ContentForm.propTypes = {
   contentType: PropTypes.string,
   setContent: PropTypes.func,
   currentUser: PropTypes.object,
   parentId: PropTypes.number,
+  contentToEdit: PropTypes.object,
 };
 
-export default NewContentForm;
+export default ContentForm;

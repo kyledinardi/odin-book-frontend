@@ -95,13 +95,6 @@
   display: block;
 }
 
-.content textarea {
-  border: 1px solid #222;
-  width: 100%;
-  overflow: hidden;
-  margin: 15px 0;
-}
-
 .editButtons button {
   margin: 0 15px 15px 0;
 }
