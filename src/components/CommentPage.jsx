@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import NewContentForm from './NewContentForm.jsx';
+import ContentForm from './ContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import backendFetch from '../../ helpers/backendFetch';
@@ -103,7 +103,7 @@ function CommentPage() {
         isCommentPage={true}
         displayType='focused'
       />
-      <NewContentForm
+      <ContentForm
         contentType='reply'
         setContent={(newReply) => {
           addReply(newReply);

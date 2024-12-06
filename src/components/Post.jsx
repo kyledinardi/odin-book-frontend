@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Poll from './Poll.jsx';
+import ContentForm from './ContentForm.jsx';
 import backendFetch from '../../ helpers/backendFetch';
 import formatDate from '../../ helpers/formatDate';
 import styles from '../style/Content.module.css';
@@ -40,18 +41,6 @@ function Post({ post, replacePost, removePost, displayType }) {
 
     removePost(post.id);
     deleteModal.current.close();
-  }
-
-  async function submitEdit(e) {
-    e.preventDefault();
-
-    const response = await backendFetch(setError, `/posts/${post.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ text: e.target[0].value }),
-    });
-
-    replacePost({ ...post, text: response.post.text });
-    setIsEditing(false);
   }
 
   async function repost() {
@@ -122,7 +111,7 @@ function Post({ post, replacePost, removePost, displayType }) {
           </div>
           {post.userId === currentUser.id && (
             <div className={styles.options}>
-              <button onClick={() => setIsEditing(true)}>
+              <button onClick={() => setIsEditing(!isEditing)}>
                 <span className='material-symbols-outlined'>edit</span>
               </button>
               <button onClick={() => deleteModal.current.showModal()}>
@@ -134,28 +123,15 @@ function Post({ post, replacePost, removePost, displayType }) {
         {displayType === 'ancestor' && <div className={styles.line}></div>}
         <div className={styles.mainContent}>
           {isEditing ? (
-            <form onSubmit={(e) => submitEdit(e)}>
-              <textarea
-                className={styles.editTextarea}
-                ref={editTextarea}
-                name='postEditText'
-                id='postEditText'
-                defaultValue={post.text}
-                maxLength={50000}
-                placeholder='Edit Post'
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${e.target.scrollHeight}px`;
-                }}
-                required
-              ></textarea>
-              <div className={styles.editButtons}>
-                <button>Edit</button>
-                <button type='button' onClick={() => setIsEditing(false)}>
-                  Cancel
-                </button>
-              </div>
-            </form>
+            <ContentForm
+              contentType='post'
+              setContent={(updatedPost) => {
+                replacePost(updatedPost);
+                setIsEditing(false);
+              }}
+              currentUser={currentUser}
+              contentToEdit={post}
+            />
           ) : (
             post.text !== '' && <p className={styles.text}>{post.text}</p>
           )}
