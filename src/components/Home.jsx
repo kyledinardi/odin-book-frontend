@@ -30,9 +30,18 @@ function Home() {
         lastRepost ? `repostId=${lastRepost.id}` : ''
       }`,
     );
-    
+
     setPosts([...posts, ...response.posts]);
     setHasMorePosts(response.posts.length === 20);
+  }
+
+  async function refreshPosts() {
+    const response = await backendFetch(
+      setError,
+      `/posts/refresh?timestamp=${posts[0].timestamp}`,
+    );
+
+    setPosts([...response.posts, ...posts]);
   }
 
   function renderPost(post) {
@@ -105,6 +114,9 @@ function Home() {
         setContent={(post) => setPosts([post, ...posts])}
         currentUser={currentUser}
       />
+      <button className='refreshButton' onClick={() => refreshPosts()}>
+        Refresh
+      </button>
       <div>
         {posts.length === 0 ? (
           <h2>You and your followers have no posts</h2>

@@ -152,6 +152,14 @@ button:disabled {
   background-color: gray;
 }
 
+.refreshButton {
+  width: 100%;
+  background-color: inherit;
+  color: #6161ff;
+  border: 1px solid var(--color-near-background);
+  border-radius: 0;
+}
+
 .categoryButtons {
   border-bottom: 1px solid var(--color-near-background);
 }
@@ -163,11 +171,13 @@ button:disabled {
   font-size: 1rem;
 }
 
+.refreshButton:hover,
 .categoryButton:hover,
 .openTab {
   background-color: var(--color-near-background);
 }
 
+.refreshButton:active,
 .categoryButton:active {
   background-color: var(--color-far-background);
 }
