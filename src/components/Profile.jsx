@@ -163,7 +163,7 @@ function Profile() {
       </div>
       <div className={styles.userInfo}>
         <h2>{user.displayName}</h2>
-        <span className='gray'>{`@${user.username}`}</span>
+        <span className='gray'>@{user.username}</span>
         <p>{user.bio}</p>
         <div className={styles.userDetails}>
           {user.location && (

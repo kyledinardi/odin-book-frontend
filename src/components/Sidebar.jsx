@@ -4,6 +4,20 @@ import ThemeSwitch from './ThemeSwitch.jsx';
 import styles from '../style/Sidebar.module.css';
 
 function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
+  function getNotificationCount() {
+    const n = currentUser._count.receivedNotifications;
+
+    if (n === 0) {
+      return null;
+    }
+
+    if (n > 20) {
+      return '20+';
+    }
+
+    return n;
+  }
+
   return !currentUser ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
@@ -23,9 +37,20 @@ function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
           </span>
           <span className={styles.sidebarLabel}>Search</span>
         </Link>
+        <Link className={styles.sidebarButton} to='/notifications'>
+          <div className={styles.notificationIcon}>
+            <span className={`material-symbols-outlined ${styles.menuSvg}`}>
+              notifications
+            </span>
+            <span className={styles.notificationCount}>
+              {getNotificationCount()}
+            </span>
+          </div>
+          <span className={styles.sidebarLabel}>Notifications</span>
+        </Link>
         <Link
           className={styles.sidebarButton}
-          to={`users/${currentUser.id}/follows`}
+          to={`/users/${currentUser.id}/follows`}
         >
           <span className={`material-symbols-outlined ${styles.menuSvg}`}>
             group
@@ -49,19 +74,19 @@ function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
         </button>
       </div>
       <div className={styles.bottom}>
+        <div className={styles.user}>
+          <Link to={`/users/${currentUser.id}`}>
+            <img className='pfp' src={currentUser.pfpUrl} alt='' />
+          </Link>
+          <Link className={styles.names} to={`/users/${currentUser.id}`}>
+            <span>{currentUser.displayName}</span>
+            <span className={styles.username}>@{currentUser.username}</span>
+          </Link>
+        </div>
         <label htmlFor='theme' className={styles.sidebarButton}>
           <span className={styles.themeLabel}>Dark Mode</span>
           <ThemeSwitch theme={theme} setTheme={setTheme} />
         </label>
-        <div className={styles.user}>
-          <img className='pfp' src={currentUser.pfpUrl} alt='' />
-          <div className={styles.names}>
-            <span>{currentUser.displayName}</span>
-            <span
-              className={styles.username}
-            >{`@${currentUser.username}`}</span>
-          </div>
-        </div>
       </div>
     </aside>
   );

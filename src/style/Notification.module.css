@@ -1,0 +1,41 @@
+.notification {
+  padding: 15px 0;
+  border: 1px solid var(--color-near-background);
+  display: grid;
+  grid-template-columns: 100px 1fr;
+}
+
+.icon {
+  font-size: 30px;
+  font-variation-settings: 'OPSZ' 30;
+  justify-self: center;
+}
+
+.notification .repost {
+  color: #008a00;
+}
+
+.notification .like {
+  font-variation-settings: 'FILL' 1;
+  color: #d100d1;
+}
+
+.notification .comment {
+  color: #ff8a00;
+}
+
+.notification .reply {
+  color: #EB0000;
+}
+
+.notification .follow {
+  color: #6161ff;
+}
+
+.notification .message {
+  color: #008585;
+}
+
+.text {
+  margin-top: 10px;
+}

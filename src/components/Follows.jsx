@@ -38,7 +38,7 @@ function Follows() {
     <main className={styles.followContainer}>
       <div className={styles.heading}>
         <h2>{user.displayName}</h2>
-        <p>{`@${user.username}`}</p>
+        <p>@{user.username}</p>
       </div>
       <div>
         <button

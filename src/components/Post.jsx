@@ -103,7 +103,7 @@ function Post({ post, replacePost, removePost, displayType }) {
               <strong>{post.user.displayName}</strong>
             </Link>
             <Link to={`/users/${post.userId}`}>
-              <span className='gray'>{`@${post.user.username}`}</span>
+              <span className='gray'>@{post.user.username}</span>
             </Link>
             <Link to={`/posts/${post.id}`}>
               <span className='gray'>{formatDate.short(post.timestamp)}</span>

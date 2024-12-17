@@ -49,6 +49,18 @@
   color: var(--color-foreground);
 }
 
+.notificationIcon {
+  position: relative;
+}
+
+.notificationCount {
+  position: absolute;
+  left: 25px;
+  width: max-content;
+  color: #6161ff;
+  font-size: 0.8rem;
+}
+
 .bottom {
   display: flex;
   flex-direction: column;
