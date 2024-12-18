@@ -7,14 +7,15 @@ import backendFetch from '../../ helpers/backendFetch';
 function NotificationList() {
   const [notifications, setNotifications] = useState(null);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(false);
-  const [setError] = useOutletContext();
+  const [setError, currentUser, setCurrentUser] = useOutletContext();
 
   useEffect(() => {
     backendFetch(setError, '/notifications').then((response) => {
       setNotifications(response.notifications);
       setHasMoreNotifications(response.notifications.length === 20);
+      setCurrentUser({ ...currentUser, _count: { recievedNotifications: 0 } });
     });
-  }, [setError]);
+  }, [setError, currentUser, setCurrentUser]);
 
   async function addMoreNotifications() {
     const response = await backendFetch(

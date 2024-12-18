@@ -1,9 +1,13 @@
-import { Link } from 'react-router-dom';
+import { useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ThemeSwitch from './ThemeSwitch.jsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
+function Sidebar({ currentUser, theme, setTheme }) {
+  const logoutModal = useRef(null);
+  const navigate = useNavigate();
+
   function getNotificationCount() {
     const n = currentUser._count.receivedNotifications;
 
@@ -88,6 +92,21 @@ function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
           <ThemeSwitch theme={theme} setTheme={setTheme} />
         </label>
       </div>
+      <dialog ref={logoutModal}>
+        <h2>Are you sure you want to log out?</h2>
+        <div className='modalButtons'>
+          <button
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('userId');
+              navigate('/login');
+            }}
+          >
+            Log Out
+          </button>
+          <button onClick={() => logoutModal.current.close()}>Cancel</button>
+        </div>
+      </dialog>
     </aside>
   );
 }
