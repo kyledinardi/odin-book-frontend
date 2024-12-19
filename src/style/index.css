@@ -40,9 +40,6 @@ body {
 
 .app {
   display: grid;
-  grid-template-areas:
-    'sidebar main userList'
-    'profileBar main userList';
   grid-template-columns: 250px 600px 350px;
   max-width: 1200px;
   margin: auto;
@@ -53,6 +50,10 @@ body {
 main {
   border: 1px solid var(--color-near-background);
   max-width: 600px;
+}
+
+.profileBar {
+  display: none;
 }
 
 h1,
@@ -265,11 +266,15 @@ button:disabled {
 @media (max-width: 600px) {
   .app {
     grid-template-columns: auto;
-    grid-template-rows: calc(100vh - 60px) max-content;
+    grid-template-rows: calc(100vh - 60px) 60px;
   }
 
-  main {
+  .main {
     order: 1;
     overflow: auto;
+  }
+
+  .profileBar {
+    display: block;
   }
 }

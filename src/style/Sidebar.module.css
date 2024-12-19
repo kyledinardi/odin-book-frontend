@@ -1,12 +1,10 @@
 .sidebar {
   position: sticky;
   top: 0;
-  left: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
   padding: 10px;
 }
 
@@ -51,6 +49,7 @@
 
 .notificationIcon {
   position: relative;
+  height: 30px;
 }
 
 .notificationCount {
@@ -59,29 +58,6 @@
   width: max-content;
   color: #6161ff;
   font-size: 0.8rem;
-}
-
-.bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.names {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.username {
-  color: gray;
 }
 
 @media (max-width: 850px) {
@@ -102,9 +78,11 @@
   .sidebarButtons {
     flex-direction: row;
     gap: 10px;
+    justify-content: center;
   }
 
-  .bottom {
+  .profile,
+  .profileBar {
     display: none;
   }
 }

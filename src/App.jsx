@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
+import ProfileBar from './components/ProfileBar.jsx';
 import backendFetch from '../ helpers/backendFetch';
 
 function App() {
@@ -54,9 +55,18 @@ function App() {
             theme={theme}
             setTheme={(newTheme) => setTheme(newTheme)}
           />
-          <Outlet
-            context={[setError, currentUser, setCurrentUser, theme, setTheme]}
-          />
+          <div className='main'>
+            <div className="profileBar">
+              <ProfileBar
+                currentUser={currentUser}
+                theme={theme}
+                setTheme={setTheme}
+              />
+            </div>
+            <Outlet
+              context={[setError, currentUser, setCurrentUser, theme, setTheme]}
+            />
+          </div>
           <UserList
             currentUser={currentUser}
             setCurrentUser={(user) => setCurrentUser(user)}

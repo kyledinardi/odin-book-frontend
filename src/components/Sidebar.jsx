@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import ThemeSwitch from './ThemeSwitch.jsx';
+import ProfileBar from './ProfileBar.jsx';
 import styles from '../style/Sidebar.module.css';
 
 function Sidebar({ currentUser, theme, setTheme }) {
@@ -61,7 +61,10 @@ function Sidebar({ currentUser, theme, setTheme }) {
           </span>
           <span className={styles.sidebarLabel}>Follows</span>
         </Link>
-        <Link className={styles.sidebarButton} to={`/users/${currentUser.id}`}>
+        <Link
+          className={`${styles.sidebarButton} ${styles.profile}`}
+          to={`/users/${currentUser.id}`}
+        >
           <span className={`material-symbols-outlined ${styles.menuSvg}`}>
             person
           </span>
@@ -77,20 +80,12 @@ function Sidebar({ currentUser, theme, setTheme }) {
           <span className={styles.sidebarLabel}>Log Out</span>
         </button>
       </div>
-      <div className={styles.bottom}>
-        <div className={styles.user}>
-          <Link to={`/users/${currentUser.id}`}>
-            <img className='pfp' src={currentUser.pfpUrl} alt='' />
-          </Link>
-          <Link className={styles.names} to={`/users/${currentUser.id}`}>
-            <span>{currentUser.displayName}</span>
-            <span className={styles.username}>@{currentUser.username}</span>
-          </Link>
-        </div>
-        <label htmlFor='theme' className={styles.sidebarButton}>
-          <span className={styles.themeLabel}>Dark Mode</span>
-          <ThemeSwitch theme={theme} setTheme={setTheme} />
-        </label>
+      <div className={styles.profileBar}>
+        <ProfileBar
+          currentUser={currentUser}
+          theme={theme}
+          setTheme={setTheme}
+        />
       </div>
       <dialog ref={logoutModal}>
         <h2>Are you sure you want to log out?</h2>

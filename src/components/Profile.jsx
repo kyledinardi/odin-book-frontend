@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
-import ThemeSwitch from './ThemeSwitch.jsx';
 import ProfilePostList from './ProfilePostList.jsx';
 import backendFetch from '../../ helpers/backendFetch';
 import styles from '../style/Profile.module.css';
@@ -21,8 +20,7 @@ function Profile() {
   const imageModal = useRef(null);
   const userId = parseInt(useParams().userId, 10);
 
-  const [setError, currentUser, setCurrentUser, theme, setTheme] =
-    useOutletContext();
+  const [setError, currentUser, setCurrentUser] = useOutletContext();
 
   useEffect(() => {
     if (!userId) {
@@ -108,9 +106,6 @@ function Profile() {
           <p>
             {user._count.posts} post{user._count.posts === 1 ? '' : 's'}
           </p>
-        </div>
-        <div className={styles.switch}>
-          <ThemeSwitch theme={theme} setTheme={(t) => setTheme(t)} />
         </div>
       </div>
       {user.headerUrl && (

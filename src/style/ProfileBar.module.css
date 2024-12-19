@@ -1,0 +1,44 @@
+.profileBar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.names {
+  display: flex;
+  flex-direction: column;
+}
+
+.themeSwitch {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 850px) {
+  .names,
+  .themeLabel {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .profileBar {
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 8px 15px;
+  }
+
+  .names {
+    display: flex;
+    flex-direction: column;
+  }
+}
