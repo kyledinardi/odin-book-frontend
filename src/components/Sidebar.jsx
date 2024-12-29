@@ -1,13 +1,9 @@
-import { useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ProfileBar from './ProfileBar.jsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({ currentUser, theme, setTheme }) {
-  const logoutModal = useRef(null);
-  const navigate = useNavigate();
-
+function Sidebar({ currentUser,logoutModal, theme, setTheme }) {
   function getNotificationCount() {
     const n = currentUser._count.receivedNotifications;
 
@@ -52,6 +48,12 @@ function Sidebar({ currentUser, theme, setTheme }) {
           </div>
           <span className={styles.sidebarLabel}>Notifications</span>
         </Link>
+        <Link className={styles.sidebarButton} to='/messages'>
+          <span className={`material-symbols-outlined ${styles.menuSvg}`}>
+            mail
+          </span>
+          <span className={styles.sidebarLabel}>Messages</span>
+        </Link>
         <Link
           className={styles.sidebarButton}
           to={`/users/${currentUser.id}/follows`}
@@ -71,7 +73,7 @@ function Sidebar({ currentUser, theme, setTheme }) {
           <span className={styles.sidebarLabel}>Profile</span>
         </Link>
         <button
-          className={styles.sidebarButton}
+          className={`${styles.sidebarButton} ${styles.logOut}`}
           onClick={() => logoutModal.current.showModal()}
         >
           <span className={`material-symbols-outlined ${styles.menuSvg}`}>
@@ -87,21 +89,6 @@ function Sidebar({ currentUser, theme, setTheme }) {
           setTheme={setTheme}
         />
       </div>
-      <dialog ref={logoutModal}>
-        <h2>Are you sure you want to log out?</h2>
-        <div className='modalButtons'>
-          <button
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('userId');
-              navigate('/login');
-            }}
-          >
-            Log Out
-          </button>
-          <button onClick={() => logoutModal.current.close()}>Cancel</button>
-        </div>
-      </dialog>
     </aside>
   );
 }

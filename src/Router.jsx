@@ -7,9 +7,11 @@ import Home from './components/Home.jsx';
 import PostPage from './components/PostPage.jsx';
 import CommentPage from './components/CommentPage.jsx';
 import Search from './components/Search.jsx';
+import NotificationList from './components/NotificationList.jsx';
+import RoomList from './components/RoomList.jsx';
+import Chat from './components/Chat.jsx';
 import Profile from './components/Profile.jsx';
 import Follows from './components/Follows.jsx';
-import NotificationList from './components/NotificationList.jsx';
 
 const routes = [
   {
@@ -24,6 +26,8 @@ const routes = [
       { path: 'comments/:commentId', element: <CommentPage /> },
       { path: '/search', element: <Search /> },
       { path: '/notifications', element: <NotificationList /> },
+      { path: '/messages', element: <RoomList /> },
+      { path: '/messages/:roomId', element: <Chat /> },
       { path: '/users/:userId', element: <Profile /> },
       { path: '/users/:userId/follows', element: <Follows /> },
     ],

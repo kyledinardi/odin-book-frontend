@@ -83,8 +83,8 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this comment?</h2>
         <div className='modalButtons'>
+        <button onClick={() => deleteModal.current.close()}>Cancel</button>
           <button onClick={() => deleteComment()}>Delete</button>
-          <button onClick={() => deleteModal.current.close()}>Cancel</button>
         </div>
       </dialog>
       <dialog ref={imageModal} className={styles.imageModal}>
@@ -156,7 +156,6 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
                 replaceComment(updatedPost);
                 setIsEditing(false);
               }}
-              currentUser={currentUser}
               contentToEdit={comment}
             />
           ) : (

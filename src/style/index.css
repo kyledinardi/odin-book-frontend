@@ -137,7 +137,7 @@ button {
   background-color: var(--color-foreground);
   color: var(--color-background);
   border: none;
-  padding: 10px 20px;
+  padding: 10px 15px;
   border-radius: 20px;
   font-weight: bold;
 }

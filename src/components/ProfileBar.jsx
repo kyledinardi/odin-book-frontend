@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ThemeSwitch from './ThemeSwitch.jsx';
 import styles from '../style/ProfileBar.module.css';
 
-function ProfileBar({ currentUser, theme, setTheme }) {
+function ProfileBar({ currentUser, logoutModal, theme, setTheme }) {
   return !currentUser ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
@@ -23,12 +23,21 @@ function ProfileBar({ currentUser, theme, setTheme }) {
         <span className={styles.themeLabel}>Dark Mode</span>
         <ThemeSwitch theme={theme} setTheme={setTheme} />
       </label>
+      <button
+        className={`${styles.sidebarButton} ${styles.logOut}`}
+        onClick={() => logoutModal.current.showModal()}
+      >
+        <span className={`material-symbols-outlined ${styles.menuSvg}`}>
+          logout
+        </span>
+      </button>
     </div>
   );
 }
 
 ProfileBar.propTypes = {
   currentUser: PropTypes.object,
+  logoutModal: PropTypes.object,
   theme: PropTypes.string,
   setTheme: PropTypes.func,
 };

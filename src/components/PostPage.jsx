@@ -70,7 +70,6 @@ function PostPage() {
         setContent={(comment) =>
           setPost({ ...post, comments: [comment, ...post.comments] })
         }
-        currentUser={currentUser}
         parentId={postId}
       />
       <div>

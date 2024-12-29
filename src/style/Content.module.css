@@ -52,7 +52,6 @@
 .heading {
   grid-area: heading;
   display: flex;
-  align-items: center;
   justify-content: space-between;
 }
 
@@ -60,6 +59,10 @@
   display: flex;
   flex-wrap: wrap;
   column-gap: 10px;
+}
+
+.options {
+  display: flex;
 }
 
 .options button {

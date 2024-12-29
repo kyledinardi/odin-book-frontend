@@ -80,8 +80,8 @@ function Post({ post, replacePost, removePost, displayType }) {
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this post?</h2>
         <div className='modalButtons'>
+        <button onClick={() => deleteModal.current.close()}>Cancel</button>
           <button onClick={() => deletePost()}>Delete</button>
-          <button onClick={() => deleteModal.current.close()}>Cancel</button>
         </div>
       </dialog>
       <dialog ref={imageModal} className={styles.imageModal}>
@@ -129,7 +129,6 @@ function Post({ post, replacePost, removePost, displayType }) {
                 replacePost(updatedPost);
                 setIsEditing(false);
               }}
-              currentUser={currentUser}
               contentToEdit={post}
             />
           ) : (

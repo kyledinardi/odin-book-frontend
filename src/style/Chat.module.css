@@ -1,0 +1,57 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid var(--color-near-background);
+  box-sizing: border-box;
+}
+
+.names {
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollContainer {
+  flex: 1;
+  padding: 15px;
+  scrollbar-color: var(--color-far-background) var(--color-background);
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.infiniteScroll {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 15px;
+}
+
+.messageContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.date {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.messageContainer hr {
+  width: 100%;
+  border-color: gray;
+}
+
+@media (max-width: 600px) {
+  .chat {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px);
+  }
+}

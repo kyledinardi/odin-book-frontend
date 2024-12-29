@@ -1,0 +1,91 @@
+.message {
+  max-width: 67%;
+}
+
+.receivedMessage {
+  align-self: start;
+}
+
+.sentMessage {
+  align-self: end;
+}
+
+.timestamp {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.messageBox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.sentMessage .messageBox {
+  background-color: #6161ff;
+}
+
+.receivedMessage .messageBox {
+  background-color: var(--color-far-background);
+}
+
+.optionsMenu button {
+  background-color: inherit;
+  padding: 0;
+  border-radius: 0;
+  height: 24px;
+}
+
+.optionsMenu button:hover,
+.optionsMenu button:active {
+  background-color: inherit;
+}
+
+.optionsMenu {
+  position: absolute;
+  left: -30px;
+}
+
+.options {
+  position: absolute;
+  top: -51px;
+  left: 1px;
+  width: max-content;
+  border: 1px solid gray;
+  border-radius: 15px;
+  background-color: var(--color-background);
+}
+
+.options button {
+  margin: 8px;
+}
+
+.image {
+  max-height: 300px;
+  align-self: center;
+}
+
+.editForm  {
+  display:flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center; 
+}
+
+.editForm textarea {
+  width: 100%;
+  font-size: 1rem;
+}
+
+.editForm button {
+  margin: 0 5px;
+}
+
+@media (max-width: 600px) {
+  .message {
+    max-width: 90%;
+  }
+}

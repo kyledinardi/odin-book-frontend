@@ -1,0 +1,99 @@
+.imageContainer {
+  position: relative;
+  height: 100px;
+  width: 100px;
+  margin-left: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagePreview {
+  max-width: 100px;
+  max-height: 100px;
+}
+
+.messageForm {
+  border: 1px solid var(--color-near-background);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+}
+
+.textInputContainer {
+  border: 1px solid var(--color-near-background);
+  border-radius: 26px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.textInputContainer input {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-size: 1rem;
+  padding: 15px;
+  border: none;
+  outline: none;
+  border-radius: 25px;
+  width: calc(100% - 48px);
+}
+
+.emojiButton {
+  position: absolute;
+  right: 66px;
+}
+
+.svgButtons {
+  right: 70px;
+  display: flex;
+  gap: 5px;
+}
+
+.svgButton {
+  background-color: inherit;
+  padding: 0;
+  border-radius: 0;
+  height: 24px;
+}
+
+.messageForm button:hover,
+.messageForm button:active {
+  background-color: inherit;
+}
+
+.svgButton span {
+  color: #6161ff;
+}
+
+.sendButton {
+  background-color: inherit;
+  padding: 0;
+  height: 24px;
+}
+
+.sendButton:enabled span {
+  color: var(--color-near-foreground);
+}
+
+.sendButton:disabled {
+  background-color: inherit;
+}
+
+@media (max-width: 600px) {
+  .messageForm {
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .textInputContainer input {
+    padding: 5px;
+    width: calc(100% - 38px);
+  }
+
+  .emojiButton {
+    right: 41px;
+  }
+}

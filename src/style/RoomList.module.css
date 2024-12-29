@@ -1,0 +1,23 @@
+.heading {
+  margin: 0;
+  text-align: start;
+  padding: 15px;
+  border: 1px solid var(--color-near-background);
+}
+
+.room {
+  padding: 15px;
+  display: flex;
+  gap: 15px;
+  border: 1px solid var(--color-near-background);
+}
+
+.room:hover {
+  text-decoration: none;
+}
+
+.namesAndDate {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}

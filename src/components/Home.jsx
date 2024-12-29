@@ -112,7 +112,6 @@ function Home() {
       <ContentForm
         contentType={'post'}
         setContent={(post) => setPosts([post, ...posts])}
-        currentUser={currentUser}
       />
       <button className='refreshButton' onClick={() => refreshPosts()}>
         Refresh
@@ -131,6 +130,7 @@ function Home() {
               </div>
             }
             endMessage={<div></div>}
+            // inverse={true}
           >
             {posts.map((post) => renderPost(post))}
           </InfiniteScroll>

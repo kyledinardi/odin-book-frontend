@@ -7,13 +7,7 @@ import PollInputs from './PollInputs.jsx';
 import backendFetch from '../../ helpers/backendFetch';
 import styles from '../style/ContentForm.module.css';
 
-function ContentForm({
-  contentType,
-  setContent,
-  currentUser,
-  parentId,
-  contentToEdit,
-}) {
+function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
@@ -27,7 +21,7 @@ function ContentForm({
   const gifModal = useRef(null);
   const fileInput = useRef(null);
   const textarea = useRef(null);
-  const [setError] = useOutletContext();
+  const [setError, currentUser] = useOutletContext();
 
   useEffect(() => {
     if (isModal) {
@@ -217,12 +211,12 @@ function ContentForm({
           </div>
         )}
         <input
+          ref={fileInput}
           type='file'
           name='image'
           id={`image-${uuid.current}`}
           accept='image/*'
           hidden
-          ref={fileInput}
           onChange={(e) => handleFileInputChange(e)}
         />
         <div className={styles.formButtons}>
@@ -291,7 +285,6 @@ function ContentForm({
 ContentForm.propTypes = {
   contentType: PropTypes.string,
   setContent: PropTypes.func,
-  currentUser: PropTypes.object,
   parentId: PropTypes.number,
   contentToEdit: PropTypes.object,
 };

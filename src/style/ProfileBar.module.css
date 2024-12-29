@@ -23,6 +23,18 @@
   font-size: 1.2rem;
 }
 
+.logOut {
+  display: none;
+  background-color: inherit;
+  padding: 5px;
+}
+
+.logOut span {
+  color: var(--color-foreground);
+  font-size: 30px;
+  font-variation-settings: 'OPSZ' 30;
+}
+
 @media (max-width: 850px) {
   .names,
   .themeLabel {
@@ -40,5 +52,9 @@
   .names {
     display: flex;
     flex-direction: column;
+  }
+
+  .logOut {
+    display: inline;
   }
 }

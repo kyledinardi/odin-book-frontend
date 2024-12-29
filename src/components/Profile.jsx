@@ -1,5 +1,11 @@
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom';
+
 import { useEffect, useRef, useState } from 'react';
-import { Link, useOutletContext, useParams } from 'react-router-dom';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
 import ProfilePostList from './ProfilePostList.jsx';
@@ -15,12 +21,12 @@ function Profile() {
   const [openTab, setOpenTab] = useState('posts');
   const [userModalType, setUserModalType] = useState('');
   const [imageModalType, setImageModalType] = useState('');
-
   const userModal = useRef(null);
   const imageModal = useRef(null);
-  const userId = parseInt(useParams().userId, 10);
 
   const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const navigate = useNavigate();
+  const userId = parseInt(useParams().userId, 10);
 
   useEffect(() => {
     if (!userId) {
@@ -49,6 +55,15 @@ function Profile() {
       }
     }
   }, [isUserModal, isUserModalRendered]);
+
+  async function messageUser() {
+    const response = await backendFetch(setError, '/rooms', {
+      method: 'POST',
+      body: JSON.stringify({ userId: user.id }),
+    });
+
+    navigate(`/messages/${response.room.id}`);
+  }
 
   async function follow() {
     const response = await backendFetch(
@@ -129,32 +144,38 @@ function Profile() {
             imageModal.current.showModal();
           }}
         />
-        <div className={styles.topButtons}>
-          {userId === currentUser.id ? (
-            <>
-              <button
-                onClick={() => {
-                  setUserModalType('profile');
-                  setIsUserModal(true);
-                }}
-              >
-                Edit Profile
-              </button>
-              <button
-                onClick={() => {
-                  setUserModalType('password');
-                  setIsUserModal(true);
-                }}
-              >
-                Change Password
-              </button>
-            </>
-          ) : (
+        {userId === currentUser.id ? (
+          <div className={styles.topButtons}>
+            <button
+              onClick={() => {
+                setUserModalType('profile');
+                setIsUserModal(true);
+              }}
+            >
+              Edit Profile
+            </button>
+            <button
+              onClick={() => {
+                setUserModalType('password');
+                setIsUserModal(true);
+              }}
+            >
+              Change Password
+            </button>
+          </div>
+        ) : (
+          <div className={styles.topButtons}>
+            <button
+              className='material-symbols-outlined'
+              onClick={() => messageUser()}
+            >
+              mail
+            </button>
             <button onClick={() => follow()}>
               {isFollowed ? 'Unfollow' : 'Follow'}
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <div className={styles.userInfo}>
         <h2>{user.displayName}</h2>

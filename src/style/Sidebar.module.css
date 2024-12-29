@@ -82,6 +82,7 @@
   }
 
   .profile,
+  .logOut,
   .profileBar {
     display: none;
   }

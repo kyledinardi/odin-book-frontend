@@ -108,7 +108,6 @@ function CommentPage() {
         setContent={(newReply) => {
           addReply(newReply);
         }}
-        currentUser={currentUser}
         parentId={comment.id}
       />
       <InfiniteScroll
