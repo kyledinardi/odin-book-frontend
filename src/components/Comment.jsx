@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ContentForm from './ContentForm.jsx';
-import backendFetch from '../../ helpers/backendFetch';
-import formatDate from '../../ helpers/formatDate';
+import backendFetch from '../../helpers/backendFetch';
+import formatDate from '../../helpers/formatDate';
 import styles from '../style/Content.module.css';
 
 function Comment({ comment, replaceComment, removeComment, displayType }) {

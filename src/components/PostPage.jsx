@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import ContentForm from './ContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
-import backendFetch from '../../ helpers/backendFetch';
+import backendFetch from '../../helpers/backendFetch';
 
 function PostPage() {
   const [post, setPost] = useState(null);

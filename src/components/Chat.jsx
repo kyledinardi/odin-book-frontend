@@ -2,16 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import MessageForm from './MessageForm.jsx';
-import backendFetch from '../../ helpers/backendFetch';
-import styles from '../style/Chat.module.css';
 import Message from './Message.jsx';
+import backendFetch from '../../helpers/backendFetch';
+import styles from '../style/Chat.module.css';
 
 function Chat() {
-  const [receiver, setReciever] = useState(null);
-  const [messages, setMessages] = useState(null);
-  const [hasImagePreview, setHasImagePreview] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [receiver, setReciever] = useState(null);
+  const [messages, setMessages] = useState(null);
   const messagesEnd = useRef(null);
 
   const [setError, currentUser] = useOutletContext();
@@ -91,12 +90,7 @@ function Chat() {
           <span className='gray'>@{receiver.username}</span>
         </div>
       </Link>
-      <div
-        className={`${styles.scrollContainer} ${
-          hasImagePreview ? styles.withPreview : ''
-        }`}
-        id='scrollContainer'
-      >
+      <div className={styles.scrollContainer} id='scrollContainer'>
         <div ref={messagesEnd}></div>
         <InfiniteScroll
           dataLength={messages.length}
@@ -130,7 +124,6 @@ function Chat() {
           setHasNewMessage(true);
         }}
         roomId={roomId}
-        setHasImagePreview={(bool) => setHasImagePreview(bool)}
       />
     </main>
   );

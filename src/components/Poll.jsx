@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import backendFetch from '../../ helpers/backendFetch';
+import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/Poll.module.css';
 
 function Poll({ post, replacePost }) {

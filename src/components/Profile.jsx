@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
 import ProfilePostList from './ProfilePostList.jsx';
-import backendFetch from '../../ helpers/backendFetch';
+import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/Profile.module.css';
 
 function Profile() {

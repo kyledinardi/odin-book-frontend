@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
 import FollowList from './FollowList.jsx';
-import backendFetch from '../../ helpers/backendFetch';
+import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/Follows.module.css';
 
 function Follows() {

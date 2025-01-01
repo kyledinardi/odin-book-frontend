@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
-import backendFetch from '../../ helpers/backendFetch';
+import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/ContentForm.module.css';
 
 function ContentForm({ contentType, setContent, parentId, contentToEdit }) {

@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Comment from './Comment.jsx';
 import Post from './Post.jsx';
-import editFeed from '../../ helpers/feedEdit';
-import backendFetch from '../../ helpers/backendFetch';
+import editFeed from '../../helpers/feedEdit';
+import backendFetch from '../../helpers/backendFetch';
 
 function ProfilePostList({ user, openTab }) {
   const [posts, setPosts] = useState(null);

@@ -3,10 +3,10 @@ import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
-import backendFetch from '../../ helpers/backendFetch';
+import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/MessageForm.module.css';
 
-function MessageForm({ addMessage, roomId, setHasImagePreview }) {
+function MessageForm({ addMessage, roomId }) {
   const [text, setText] = useState('');
   const [gifUrl, setGifUrl] = useState('');
   const [newImage, setNewImage] = useState(null);
@@ -21,7 +21,6 @@ function MessageForm({ addMessage, roomId, setHasImagePreview }) {
     fileInput.current.value = '';
     setNewImage(null);
     setGifUrl('');
-    setHasImagePreview(false);
   }
 
   async function submitMessage(e) {
@@ -53,7 +52,6 @@ function MessageForm({ addMessage, roomId, setHasImagePreview }) {
 
     if (file) {
       setNewImage(file);
-      setHasImagePreview(true);
     }
   }
 
@@ -167,7 +165,6 @@ function MessageForm({ addMessage, roomId, setHasImagePreview }) {
 MessageForm.propTypes = {
   addMessage: PropTypes.func,
   roomId: PropTypes.number,
-  setHasImagePreview: PropTypes.func,
 };
 
 export default MessageForm;
