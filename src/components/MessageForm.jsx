@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
@@ -7,16 +7,30 @@ import backendFetch from '../../helpers/backendFetch';
 import socket from '../../helpers/socket';
 import styles from '../style/MessageForm.module.css';
 
-function MessageForm({ roomId }) {
+function MessageForm({ receiver, roomId }) {
   const [text, setText] = useState('');
   const [gifUrl, setGifUrl] = useState('');
-  const [newImage, setNewImage] = useState(null);
   const [gifPickerOpen, setGifPickerOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
+  const [newImage, setNewImage] = useState(null);
   const fileInput = useRef(null);
   const textInput = useRef(null);
   const [setError] = useOutletContext();
+
+  useEffect(() => {
+    function receiveIsTyping(bool) {
+      setIsTyping(bool);
+    }
+
+    socket.on('receiveIsTyping', receiveIsTyping);
+    return () => socket.off('receiveIsTyping', receiveIsTyping);
+  }, []);
+
+  useEffect(() => {
+    socket.emit('sendIsTyping', { isTyping: text !== '', roomId });
+  }, [text, roomId]);
 
   function cancelNewImage() {
     fileInput.current.value = '';
@@ -58,7 +72,10 @@ function MessageForm({ roomId }) {
   }
 
   return (
-    <div>
+    <div className={styles.formContainer}>
+      {isTyping && (
+        <p className={styles.isTyping}>{receiver.displayName} is typing...</p>
+      )}
       {(newImage || gifUrl !== '') && (
         <div className={styles.imageContainer}>
           <img
@@ -118,7 +135,10 @@ function MessageForm({ roomId }) {
           <button
             className={styles.svgButton}
             type='button'
-            onClick={() => setGifPickerOpen(!gifPickerOpen)}
+            onClick={() => {
+              setGifPickerOpen(!gifPickerOpen);
+              setEmojiPickerOpen(false);
+            }}
           >
             <span className='material-symbols-outlined'>gif_box</span>
           </button>
@@ -138,7 +158,10 @@ function MessageForm({ roomId }) {
         <button
           className={`${styles.svgButton} ${styles.emojiButton}`}
           type='button'
-          onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}
+          onClick={() => {
+            setEmojiPickerOpen(!emojiPickerOpen);
+            setGifPickerOpen(false);
+          }}
         >
           <span className='material-symbols-outlined'>add_reaction</span>
         </button>
@@ -164,5 +187,8 @@ function MessageForm({ roomId }) {
   );
 }
 
-MessageForm.propTypes = { roomId: PropTypes.number };
+MessageForm.propTypes = {
+  receiver: PropTypes.object,
+  roomId: PropTypes.number,
+};
 export default MessageForm;

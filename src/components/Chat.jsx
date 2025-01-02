@@ -136,7 +136,7 @@ function Chat() {
           ))}
         </InfiniteScroll>
       </div>
-      <MessageForm roomId={roomId} />
+      <MessageForm receiver={receiver} roomId={roomId} />
     </main>
   );
 }

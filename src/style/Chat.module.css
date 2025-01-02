@@ -20,7 +20,7 @@
 
 .scrollContainer {
   flex: 1;
-  padding: 15px;
+  padding: 15px 15px 30px 15px ;
   scrollbar-color: var(--color-far-background) var(--color-background);
   overflow: auto;
   display: flex;

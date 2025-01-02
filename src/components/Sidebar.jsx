@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import ProfileBar from './ProfileBar.jsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({ currentUser,logoutModal, theme, setTheme }) {
+function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
   function getNotificationCount() {
     const n = currentUser._count.receivedNotifications;
 
