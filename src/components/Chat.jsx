@@ -4,6 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import MessageForm from './MessageForm.jsx';
 import Message from './Message.jsx';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 import styles from '../style/Chat.module.css';
 
 function Chat() {
@@ -25,8 +26,41 @@ function Chat() {
         setMessages(response.room.messages);
         setHasMoreMessages(response.room.messages.length === 20);
       });
+
+      socket.emit('joinRoom', roomId);
     }
   }, [setError, currentUser, roomId]);
+
+  useEffect(() => {
+    function addNewMessage(newMessage) {
+      setMessages([newMessage, ...messages]);
+      setHasNewMessage(true);
+    }
+
+    function replaceMessage(newMessage) {
+      const newMessages = messages.map((message) =>
+        message.id === newMessage.id ? newMessage : message,
+      );
+
+      setMessages(newMessages);
+    }
+
+    function removeMessage(messageId) {
+      setMessages(messages.filter((message) => message.id !== messageId));
+    }
+
+    if (messages) {
+      socket.on('addNewMessage', addNewMessage);
+      socket.on('replaceMessage', replaceMessage);
+      socket.on('removeMessage', removeMessage);
+    }
+
+    return () => {
+      socket.off('addNewMessage', addNewMessage);
+      socket.off('replaceMessage', replaceMessage);
+      socket.off('removeMessage', removeMessage);
+    };
+  }, [messages]);
 
   useEffect(() => {
     if (hasNewMessage) {
@@ -65,18 +99,6 @@ function Chat() {
     setHasMoreMessages(response.messages.length === 20);
   }
 
-  function replaceMessage(newMessage) {
-    setMessages(
-      messages.map((message) =>
-        message.id === newMessage.id ? newMessage : message,
-      ),
-    );
-  }
-
-  function removeMessage(messageId) {
-    setMessages(messages.filter((message) => message.id !== messageId));
-  }
-
   return !receiver || !messages ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
@@ -109,22 +131,12 @@ function Chat() {
           {messages.map((message, i) => (
             <div className={styles.messageContainer} key={message.id}>
               {messages[i + 1] && renderDate(i)}
-              <Message
-                message={message}
-                replaceMessage={(newMessage) => replaceMessage(newMessage)}
-                removeMessage={(messageId) => removeMessage(messageId)}
-              />
+              <Message message={message} roomId={roomId} />
             </div>
           ))}
         </InfiniteScroll>
       </div>
-      <MessageForm
-        addMessage={(message) => {
-          setMessages([message, ...messages]);
-          setHasNewMessage(true);
-        }}
-        roomId={roomId}
-      />
+      <MessageForm roomId={roomId} />
     </main>
   );
 }

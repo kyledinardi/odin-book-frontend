@@ -2,14 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 import styles from '../style/Message.module.css';
 
-function Message({ message, replaceMessage, removeMessage }) {
+function Message({ message, roomId }) {
   const [isCurrentUserMessage, setIsCurrentUserMessage] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [optionsOpened, setOptionsOpened] = useState(false);
   const deleteModal = useRef(null);
   const editText = useRef(null);
+  
   const [setError, currentUser] = useOutletContext();
 
   useEffect(() => {
@@ -37,7 +39,7 @@ function Message({ message, replaceMessage, removeMessage }) {
         body: JSON.stringify({ text: e.target[0].value }),
       });
 
-      replaceMessage(response.message);
+      socket.emit('updateMessage', { message: response.message, roomId });
     }
   }
 
@@ -46,8 +48,8 @@ function Message({ message, replaceMessage, removeMessage }) {
       method: 'Delete',
     });
 
-    removeMessage(message.id);
     deleteModal.current.close();
+    socket.emit('deleteMessage', { messageId: message.id, roomId });
   }
 
   return (
@@ -59,7 +61,7 @@ function Message({ message, replaceMessage, removeMessage }) {
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this post?</h2>
         <div className='modalButtons'>
-        <button onClick={() => deleteModal.current.close()}>Cancel</button>
+          <button onClick={() => deleteModal.current.close()}>Cancel</button>
           <button onClick={() => deleteMessage()}>Delete</button>
         </div>
       </dialog>
@@ -134,8 +136,7 @@ function Message({ message, replaceMessage, removeMessage }) {
 
 Message.propTypes = {
   message: PropTypes.object,
-  replaceMessage: PropTypes.func,
-  removeMessage: PropTypes.func,
+  roomId: PropTypes.number,
 };
 
 export default Message;

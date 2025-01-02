@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 import styles from '../style/MessageForm.module.css';
 
-function MessageForm({ addMessage, roomId }) {
+function MessageForm({ roomId }) {
   const [text, setText] = useState('');
   const [gifUrl, setGifUrl] = useState('');
   const [newImage, setNewImage] = useState(null);
@@ -38,12 +39,13 @@ function MessageForm({ addMessage, roomId }) {
       body: formData,
     });
 
-    cancelNewImage();
     setText('');
-    e.target.reset();
     setGifPickerOpen(false);
     setEmojiPickerOpen(false);
-    addMessage(response.message);
+
+    cancelNewImage();
+    e.target.reset();
+    socket.emit('submitMessage', { message: response.message, roomId });
   }
 
   function handleFileInputChange(e) {
@@ -162,9 +164,5 @@ function MessageForm({ addMessage, roomId }) {
   );
 }
 
-MessageForm.propTypes = {
-  addMessage: PropTypes.func,
-  roomId: PropTypes.number,
-};
-
+MessageForm.propTypes = { roomId: PropTypes.number };
 export default MessageForm;
