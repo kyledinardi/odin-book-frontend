@@ -22,7 +22,9 @@ function Search() {
     if (currentUser) {
       setFollowedIds(currentUser.following.map((user) => user.id));
     }
+  }, [currentUser]);
 
+  useEffect(() => {
     if (searchParams.has('query')) {
       if (searchParams.get('query') !== '') {
         backendFetch(
@@ -47,7 +49,7 @@ function Search() {
         setHasMoreUsers(false);
       }
     }
-  }, [currentUser, searchParams, setError]);
+  }, [searchParams, setError]);
 
   async function addMorePosts() {
     const response = await backendFetch(

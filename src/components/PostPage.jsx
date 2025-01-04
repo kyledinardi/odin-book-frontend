@@ -5,6 +5,7 @@ import ContentForm from './ContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 
 function PostPage() {
   const [post, setPost] = useState(null);
@@ -67,9 +68,10 @@ function PostPage() {
       />
       <ContentForm
         contentType='comment'
-        setContent={(comment) =>
-          setPost({ ...post, comments: [comment, ...post.comments] })
-        }
+        setContent={(comment) => {
+          setPost({ ...post, comments: [comment, ...post.comments] });
+          socket.emit('sendNotification', { userId: post.userId });
+        }}
         parentId={postId}
       />
       <div>

@@ -211,11 +211,14 @@ button:disabled {
 }
 
 .loaderContainer {
-  margin: 50px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .loader {
   width: 50px;
+  height: 50px;
   aspect-ratio: 1;
   display: grid;
   border: 4px solid #0000;

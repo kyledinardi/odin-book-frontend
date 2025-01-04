@@ -5,11 +5,13 @@ import UserList from './components/UserList.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
 import backendFetch from '../helpers/backendFetch';
+import socket from '../helpers/socket';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
   const [theme, setTheme] = useState('');
+  const [notificationCount, setNotificationCount] = useState(0);
   const logoutModal = useRef(null);
   const navigate = useNavigate();
 
@@ -27,11 +29,22 @@ function App() {
 
   useEffect(() => {
     if (!error) {
-      backendFetch(setError, '/users/currentUser').then((response) =>
-        setCurrentUser(response.user),
-      );
+      backendFetch(setError, '/users/currentUser').then((response) => {
+        setCurrentUser(response.user);
+        setNotificationCount(response.user._count.receivedNotifications);
+        socket.emit('joinUserRoom', response.user.id);
+      });
     }
   }, [error]);
+
+  useEffect(() => {
+    function incrementNotificationCount() {
+      setNotificationCount(notificationCount + 1);
+    }
+
+    socket.on('receiveNotification', incrementNotificationCount);
+    return () => socket.off('receiveNotification', incrementNotificationCount);
+  }, [notificationCount]);
 
   useEffect(() => {
     function handleNavigation() {
@@ -55,6 +68,7 @@ function App() {
           <Sidebar
             currentUser={currentUser}
             logoutModal={logoutModal}
+            notificationCount={notificationCount}
             theme={theme}
             setTheme={(newTheme) => setTheme(newTheme)}
           />
@@ -67,7 +81,15 @@ function App() {
                 setTheme={setTheme}
               />
             </div>
-            <Outlet context={[setError, currentUser, setCurrentUser]} />
+            <Outlet
+              context={[
+                setError,
+                currentUser,
+                setCurrentUser,
+                notificationCount,
+                setNotificationCount,
+              ]}
+            />
           </div>
           <UserList
             currentUser={currentUser}

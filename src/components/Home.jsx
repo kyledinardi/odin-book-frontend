@@ -6,10 +6,12 @@ import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import editFeed from '../../helpers/feedEdit';
+import socket from '../../helpers/socket';
 
 function Home() {
   const [posts, setPosts] = useState(null);
   const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [newPostCount, setNewPostCount] = useState(0);
   const [setError, currentUser] = useOutletContext();
 
   useEffect(() => {
@@ -18,6 +20,15 @@ function Home() {
       setHasMorePosts(response.posts.length === 20);
     });
   }, [setError]);
+
+  useEffect(() => {
+    function incrementNewPostCount() {
+      setNewPostCount(newPostCount + 1);
+    }
+
+    socket.on('receiveNewPost', incrementNewPostCount);
+    return () => socket.off('receiveNewPost', incrementNewPostCount);
+  }, [newPostCount]);
 
   async function addMorePosts() {
     const lastPost = posts.findLast((post) => post.feedItemType === 'post');
@@ -42,6 +53,7 @@ function Home() {
     );
 
     setPosts([...response.posts, ...posts]);
+    setNewPostCount(0);
   }
 
   function renderPost(post) {
@@ -111,11 +123,16 @@ function Home() {
     <main>
       <ContentForm
         contentType={'post'}
-        setContent={(post) => setPosts([post, ...posts])}
+        setContent={(post) => {
+          setPosts([post, ...posts]);
+          socket.emit('sendNewPost', { userId: post.userId });
+        }}
       />
-      <button className='refreshButton' onClick={() => refreshPosts()}>
-        Refresh
-      </button>
+      {newPostCount > 0 && (
+        <button className='refreshButton' onClick={() => refreshPosts()}>
+          {newPostCount} new post{newPostCount === 1 ? '' : 's'}
+        </button>
+      )}
       <div>
         {posts.length === 0 ? (
           <h2>You and your followers have no posts</h2>

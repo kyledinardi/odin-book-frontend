@@ -10,7 +10,7 @@ import styles from '../style/Chat.module.css';
 function Chat() {
   const [hasMoreMessages, setHasMoreMessages] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
-  const [receiver, setReciever] = useState(null);
+  const [receiver, setReceiver] = useState(null);
   const [messages, setMessages] = useState(null);
   const messagesEnd = useRef(null);
 
@@ -22,12 +22,12 @@ function Chat() {
       setError({ status: 404, message: 'Chat not found' });
     } else if (currentUser) {
       backendFetch(setError, `/rooms/${roomId}`).then((response) => {
-        setReciever(response.room.users.find((u) => u.id !== currentUser.id));
+        setReceiver(response.room.users.find((u) => u.id !== currentUser.id));
         setMessages(response.room.messages);
         setHasMoreMessages(response.room.messages.length === 20);
       });
 
-      socket.emit('joinRoom', roomId);
+      socket.emit('joinChatRoom', roomId);
     }
   }, [setError, currentUser, roomId]);
 

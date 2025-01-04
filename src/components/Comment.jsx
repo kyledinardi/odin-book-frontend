@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import ContentForm from './ContentForm.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import formatDate from '../../helpers/formatDate';
+import socket from '../../helpers/socket';
 import styles from '../style/Content.module.css';
 
 function Comment({ comment, replaceComment, removeComment, displayType }) {
@@ -54,6 +55,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
       };
 
       replaceComment(newComment);
+      socket.emit('sendNotification', { userId: comment.userId });
     } else {
       const response = await backendFetch(setError, '/reposts', {
         method: 'Delete',
@@ -76,6 +78,10 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
     );
 
     replaceComment({ ...comment, likes: response.comment.likes });
+
+    if (!isLiked) {
+      socket.emit('sendNotification', { userId: comment.userId });
+    }
   }
 
   return (
@@ -83,7 +89,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this comment?</h2>
         <div className='modalButtons'>
-        <button onClick={() => deleteModal.current.close()}>Cancel</button>
+          <button onClick={() => deleteModal.current.close()}>Cancel</button>
           <button onClick={() => deleteComment()}>Delete</button>
         </div>
       </dialog>

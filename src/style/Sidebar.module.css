@@ -55,7 +55,7 @@
 .notificationCount {
   position: absolute;
   left: 25px;
-  width: max-content;
+  width: 22px;
   color: #6161ff;
   font-size: 0.8rem;
 }

@@ -75,10 +75,10 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
       method: contentToEdit ? 'PUT' : 'POST',
       body: formData,
     });
-
-    cancelNewImage();
     e.target.reset();
     e.target[0].style.height = '64px';
+
+    cancelNewImage();
     setIsEmojiOpen(false);
     setContent(contentType === 'post' ? response.post : response.comment);
   }

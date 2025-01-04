@@ -1,15 +1,10 @@
-import {
-  Link,
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from 'react-router-dom';
-
 import { useEffect, useRef, useState } from 'react';
+import * as reactRouterDom from 'react-router-dom';
 import UpdateProfileForm from './UpdateProfileForm.jsx';
 import UpdatePasswordForm from './UpdatePasswordForm.jsx';
 import ProfilePostList from './ProfilePostList.jsx';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 import styles from '../style/Profile.module.css';
 
 function Profile() {
@@ -24,6 +19,7 @@ function Profile() {
   const userModal = useRef(null);
   const imageModal = useRef(null);
 
+  const { Link, useNavigate, useOutletContext, useParams } = reactRouterDom;
   const [setError, currentUser, setCurrentUser] = useOutletContext();
   const navigate = useNavigate();
   const userId = parseInt(useParams().userId, 10);
@@ -59,7 +55,7 @@ function Profile() {
   async function messageUser() {
     const response = await backendFetch(setError, '/rooms', {
       method: 'POST',
-      body: JSON.stringify({ userId: user.id }),
+      body: JSON.stringify({ userId }),
     });
 
     navigate(`/messages/${response.room.id}`);
@@ -69,11 +65,15 @@ function Profile() {
     const response = await backendFetch(
       setError,
       `/users/${isFollowed ? 'unfollow' : 'follow'}`,
-      { method: 'PUT', body: JSON.stringify({ userId: user.id }) },
+      { method: 'PUT', body: JSON.stringify({ userId }) },
     );
 
     setCurrentUser({ ...currentUser, following: response.user.following });
     setIsFollowed(!isFollowed);
+
+    if (!isFollowed) {
+      socket.emit('sendNotification', { userId });
+    }
   }
 
   return !user || !currentUser ? (
@@ -165,12 +165,7 @@ function Profile() {
           </div>
         ) : (
           <div className={styles.topButtons}>
-            <button
-              className='material-symbols-outlined'
-              onClick={() => messageUser()}
-            >
-              mail
-            </button>
+            <button onClick={() => messageUser()}>Message</button>
             <button onClick={() => follow()}>
               {isFollowed ? 'Unfollow' : 'Follow'}
             </button>

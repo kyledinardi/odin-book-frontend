@@ -10,6 +10,7 @@ function UserList({ currentUser, setCurrentUser, setError }) {
   const [followedIds, setFollowedIds] = useState(null);
   const navigate = useNavigate();
 
+
   useEffect(() => {
     if (currentUser) {
       setFollowedIds(currentUser.following.map((user) => user.id));

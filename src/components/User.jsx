@@ -1,6 +1,7 @@
 import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 import styles from '../style/User.module.css';
 
 function User({ user, bio, isFollowed, replaceUser, setError }) {
@@ -23,6 +24,10 @@ function User({ user, bio, isFollowed, replaceUser, setError }) {
     );
 
     replaceUser(response.user);
+
+    if (!isFollowed) {
+      socket.emit('sendNotification', { userId: user.id });
+    }
   }
 
   return (

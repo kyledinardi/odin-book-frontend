@@ -5,6 +5,7 @@ import ContentForm from './ContentForm.jsx';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import backendFetch from '../../helpers/backendFetch';
+import socket from '../../helpers/socket';
 
 function CommentPage() {
   const [comment, setComment] = useState(null);
@@ -65,7 +66,7 @@ function CommentPage() {
     setComment({ ...comment, replies: newReplies });
   }
 
-  function addReply(newReply) {
+  function addNewReply(newReply) {
     const newComment = { ...comment, replies: [newReply, ...comment.replies] };
     setComment(newComment);
   }
@@ -106,7 +107,8 @@ function CommentPage() {
       <ContentForm
         contentType='reply'
         setContent={(newReply) => {
-          addReply(newReply);
+          addNewReply(newReply);
+          socket.emit('sendNotification', { userId: comment.userId });
         }}
         parentId={comment.id}
       />

@@ -3,19 +3,23 @@ import PropTypes from 'prop-types';
 import ProfileBar from './ProfileBar.jsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
+function Sidebar({
+  currentUser,
+  logoutModal,
+  notificationCount,
+  theme,
+  setTheme,
+}) {
   function getNotificationCount() {
-    const n = currentUser._count.receivedNotifications;
-
-    if (n === 0) {
+    if (notificationCount === 0) {
       return null;
     }
 
-    if (n > 20) {
+    if (notificationCount > 20) {
       return '20+';
     }
 
-    return n;
+    return notificationCount;
   }
 
   return !currentUser ? (
@@ -96,6 +100,7 @@ function Sidebar({ currentUser, logoutModal, theme, setTheme }) {
 Sidebar.propTypes = {
   currentUser: PropTypes.object,
   logoutModal: PropTypes.object,
+  notificationCount: PropTypes.number,
   theme: PropTypes.string,
   setTheme: PropTypes.func,
 };
