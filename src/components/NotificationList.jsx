@@ -58,6 +58,7 @@ function NotificationList() {
     </div>
   ) : (
     <main>
+      <h2>Notifications</h2>
       <InfiniteScroll
         dataLength={notifications.length}
         next={() => addMoreNotifications()}
