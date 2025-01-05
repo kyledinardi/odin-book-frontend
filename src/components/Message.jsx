@@ -11,7 +11,7 @@ function Message({ message, roomId }) {
   const [optionsOpened, setOptionsOpened] = useState(false);
   const deleteModal = useRef(null);
   const editText = useRef(null);
-  
+
   const [setError, currentUser] = useOutletContext();
 
   useEffect(() => {
@@ -124,7 +124,7 @@ function Message({ message, roomId }) {
             </div>
           </form>
         ) : (
-          <span>{message.text}</span>
+          message.text !== '' && <span>{message.text}</span>
         )}
         {message.imageUrl && (
           <img className={styles.image} src={message.imageUrl} alt='' />

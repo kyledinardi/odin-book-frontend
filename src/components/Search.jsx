@@ -25,23 +25,36 @@ function Search() {
   }, [currentUser]);
 
   useEffect(() => {
-    if (searchParams.has('query')) {
-      if (searchParams.get('query') !== '') {
+    async function search() {
+      const [postsResponse, usersResponse] = await Promise.all([
         backendFetch(
           setError,
           `/posts/search?query=${searchParams.get('query')}`,
-        ).then((response) => {
-          setPosts(response.posts);
-          setHasMorePosts(response.posts.length === 20);
-        });
+        ),
 
         backendFetch(
           setError,
           `/users/search?query=${searchParams.get('query')}`,
-        ).then((response) => {
-          setUsers(response.users);
-          setHasMoreUsers(response.users.length === 20);
-        });
+        ),
+      ]);
+
+      setPosts(postsResponse.posts);
+      setUsers(usersResponse.users);
+      setHasMorePosts(postsResponse.posts.length === 20);
+      setHasMoreUsers(usersResponse.users.length === 20);
+
+      if (postsResponse.posts.length > 0 && usersResponse.users.length === 0) {
+        setOpenTab('posts');
+      }
+
+      if (postsResponse.posts.length === 0 && usersResponse.users.length > 0) {
+        setOpenTab('users');
+      }
+    }
+
+    if (searchParams.has('query')) {
+      if (searchParams.get('query') !== '') {
+        search();
       } else {
         setPosts(null);
         setUsers(null);
@@ -122,57 +135,67 @@ function Search() {
         </button>
       </div>
       {posts &&
+        users &&
+        followedIds &&
         (openTab === 'posts' ? (
           <div>
-            <InfiniteScroll
-              dataLength={posts.length}
-              next={() => addMorePosts()}
-              hasMore={hasMorePosts}
-              loader={
-                <div className='loaderContainer'>
-                  <div className='loader'></div>
-                </div>
-              }
-              endMessage={<div></div>}
-            >
-              {posts.map((post) => (
-                <Post
-                  key={post.id}
-                  post={post}
-                  replacePost={(updatedPost) => replacePost(updatedPost)}
-                  removePost={(postId) =>
-                    setPosts(posts.filter((p) => p.id !== postId))
-                  }
-                  displayType='feed'
-                />
-              ))}
-            </InfiniteScroll>
+            {posts.length > 0 ? (
+              <InfiniteScroll
+                dataLength={posts.length}
+                next={() => addMorePosts()}
+                hasMore={hasMorePosts}
+                loader={
+                  <div className='loaderContainer'>
+                    <div className='loader'></div>
+                  </div>
+                }
+                endMessage={<div></div>}
+              >
+                {posts.map((post) => (
+                  <Post
+                    key={post.id}
+                    post={post}
+                    replacePost={(updatedPost) => replacePost(updatedPost)}
+                    removePost={(postId) =>
+                      setPosts(posts.filter((p) => p.id !== postId))
+                    }
+                    displayType='feed'
+                  />
+                ))}
+              </InfiniteScroll>
+            ) : (
+              <h2>No post results for {`"${searchParams.get('query')}"`}</h2>
+            )}
           </div>
         ) : (
           <div>
-            <InfiniteScroll
-              dataLength={users.length}
-              next={() => addMoreUsers()}
-              hasMore={hasMoreUsers}
-              loader={
-                <div className='loaderContainer'>
-                  <div className='loader'></div>
-                </div>
-              }
-              endMessage={<div></div>}
-            >
-              {users.map((user) => (
-                <User
-                  key={user.id}
-                  user={user}
-                  bio={true}
-                  isFollowed={followedIds.includes(user.id)}
-                  replaceUser={(u) =>
-                    setCurrentUser({ ...currentUser, following: u.following })
-                  }
-                />
-              ))}
-            </InfiniteScroll>
+            {users.length > 0 ? (
+              <InfiniteScroll
+                dataLength={users.length}
+                next={() => addMoreUsers()}
+                hasMore={hasMoreUsers}
+                loader={
+                  <div className='loaderContainer'>
+                    <div className='loader'></div>
+                  </div>
+                }
+                endMessage={<div></div>}
+              >
+                {users.map((user) => (
+                  <User
+                    key={user.id}
+                    user={user}
+                    bio={true}
+                    isFollowed={followedIds.includes(user.id)}
+                    replaceUser={(u) =>
+                      setCurrentUser({ ...currentUser, following: u.following })
+                    }
+                  />
+                ))}
+              </InfiniteScroll>
+            ) : (
+              <h2>No user results for {`"${searchParams.get('query')}"`}</h2>
+            )}
           </div>
         ))}
     </main>
