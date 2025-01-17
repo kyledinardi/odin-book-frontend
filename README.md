@@ -1,4 +1,4 @@
-# Odin Book
+# Odin-Book
 
 A social networking site built with React and Vite
 
