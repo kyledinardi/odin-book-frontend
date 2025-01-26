@@ -62,7 +62,7 @@ function SignUp() {
                 arrow_back
               </span>
             </Link>
-            <h1>Sign up for FakeSocial</h1>
+            <h1>Sign up for Odin-Book</h1>
           </div>
           <div className={styles.loginForms}>
             {errorArray && (
