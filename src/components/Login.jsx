@@ -69,7 +69,7 @@ function Login() {
         />
       ) : (
         <div className={styles.flexWrapper}>
-          <h1>Log in to FakeSocial</h1>
+          <h1>Log in to Odin-Book</h1>
           <div className={styles.loginForms}>
             {errorMessage !== '' && (
               <div className={styles.error}>{errorMessage}</div>
