@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Post from './Post.jsx';
-import User from './User.jsx';
+import Post from '../components/Post.jsx';
+import User from '../components/User.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/Search.module.css';
 

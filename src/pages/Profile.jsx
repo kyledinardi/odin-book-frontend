@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as reactRouterDom from 'react-router-dom';
-import UpdateProfileForm from './UpdateProfileForm.jsx';
-import UpdatePasswordForm from './UpdatePasswordForm.jsx';
-import ProfilePostList from './ProfilePostList.jsx';
+import UpdateProfileForm from '../components/UpdateProfileForm.jsx';
+import UpdatePasswordForm from '../components/UpdatePasswordForm.jsx';
+import ProfilePostList from '../components/ProfilePostList.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import socket from '../../helpers/socket';
 import styles from '../style/Profile.module.css';

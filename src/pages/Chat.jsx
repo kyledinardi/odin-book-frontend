@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import MessageForm from './MessageForm.jsx';
-import Message from './Message.jsx';
+import MessageForm from '../components/MessageForm.jsx';
+import Message from '../components/Message.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import socket from '../../helpers/socket';
 import styles from '../style/Chat.module.css';

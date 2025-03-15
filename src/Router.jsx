@@ -1,17 +1,17 @@
 import { redirect } from 'react-router-dom';
 import App from './App.jsx';
-import ErrorPage from './components/ErrorPage.jsx';
-import Login from './components/Login.jsx';
-import SignUp from './components/SignUp.jsx';
-import Home from './components/Home.jsx';
-import PostPage from './components/PostPage.jsx';
-import CommentPage from './components/CommentPage.jsx';
-import Search from './components/Search.jsx';
-import NotificationList from './components/NotificationList.jsx';
-import RoomList from './components/RoomList.jsx';
-import Chat from './components/Chat.jsx';
-import Profile from './components/Profile.jsx';
-import Follows from './components/Follows.jsx';
+import ErrorPage from './pages/ErrorPage.jsx';
+import Login from './pages/Login.jsx';
+import SignUp from './pages/SignUp.jsx';
+import Home from './pages/Home.jsx';
+import PostPage from './pages/PostPage.jsx';
+import CommentPage from './pages/CommentPage.jsx';
+import Search from './pages/Search.jsx';
+import NotificationList from './pages/NotificationList.jsx';
+import RoomList from './pages/RoomList.jsx';
+import Chat from './pages/Chat.jsx';
+import Profile from './pages/Profile.jsx';
+import Follows from './pages/Follows.jsx';
 
 const routes = [
   {

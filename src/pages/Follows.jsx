@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
-import FollowList from './FollowList.jsx';
+import FollowList from '../components/FollowList.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import styles from '../style/Follows.module.css';
 

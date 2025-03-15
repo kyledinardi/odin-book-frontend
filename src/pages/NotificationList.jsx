@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Notification from './Notification.jsx';
+import Notification from '../components/Notification.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import socket from '../../helpers/socket';
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import ContentForm from './ContentForm.jsx';
-import Post from './Post.jsx';
-import Comment from './Comment.jsx';
+import ContentForm from '../components/ContentForm.jsx';
+import Post from '../components/Post.jsx';
+import Comment from '../components/Comment.jsx';
 import backendFetch from '../../helpers/backendFetch';
 import editFeed from '../../helpers/feedEdit';
 import socket from '../../helpers/socket';

@@ -1,8 +1,8 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import ErrorPage from './pages/ErrorPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
-import ErrorPage from './components/ErrorPage.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
 import backendFetch from '../helpers/backendFetch';
 import socket from '../helpers/socket';
