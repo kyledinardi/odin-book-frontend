@@ -3,9 +3,9 @@ import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Poll from './Poll.jsx';
 import ContentForm from './ContentForm.jsx';
-import backendFetch from '../../helpers/backendFetch';
-import formatDate from '../../helpers/formatDate';
-import socket from '../../helpers/socket';
+import backendFetch from '../../utils/backendFetch';
+import formatDate from '../../utils/formatDate';
+import socket from '../../utils/socket';
 import styles from '../style/Content.module.css';
 
 function Post({ post, replacePost, removePost, displayType }) {

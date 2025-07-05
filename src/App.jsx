@@ -4,8 +4,8 @@ import ErrorPage from './pages/ErrorPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
-import backendFetch from '../helpers/backendFetch';
-import socket from '../helpers/socket';
+import backendFetch from '../utils/backendFetch';
+import socket from '../utils/socket';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);

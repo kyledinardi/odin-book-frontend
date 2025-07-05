@@ -4,8 +4,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import ContentForm from '../components/ContentForm.jsx';
 import Post from '../components/Post.jsx';
 import Comment from '../components/Comment.jsx';
-import backendFetch from '../../helpers/backendFetch';
-import socket from '../../helpers/socket';
+import backendFetch from '../../utils/backendFetch';
+import socket from '../../utils/socket';
 
 function PostPage() {
   const [post, setPost] = useState(null);

@@ -1,7 +1,7 @@
 import { Link, useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import backendFetch from '../../helpers/backendFetch';
-import socket from '../../helpers/socket';
+import backendFetch from '../../utils/backendFetch';
+import socket from '../../utils/socket';
 import styles from '../style/User.module.css';
 
 function User({ user, bio, isFollowed, replaceUser, setError }) {

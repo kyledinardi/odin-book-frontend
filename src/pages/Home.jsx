@@ -4,9 +4,9 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import ContentForm from '../components/ContentForm.jsx';
 import Post from '../components/Post.jsx';
 import Comment from '../components/Comment.jsx';
-import backendFetch from '../../helpers/backendFetch';
-import editFeed from '../../helpers/feedEdit';
-import socket from '../../helpers/socket';
+import backendFetch from '../../utils/backendFetch';
+import editFeed from '../../utils/feedEdit';
+import socket from '../../utils/socket';
 
 function Home() {
   const [posts, setPosts] = useState(null);

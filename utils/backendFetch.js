@@ -1,14 +1,15 @@
-async function backendFetch(setError, path, options) {
-  function isJsonString(str) {
-    try {
-      JSON.parse(str);
-    } catch (err) {
-      return false;
-    }
-
-    return true;
+/* eslint-disable no-console */
+function isJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (err) {
+    return false;
   }
 
+  return true;
+}
+
+async function backendFetch(setError, path, options) {
   let hasBearer = true;
   let method;
   let body;

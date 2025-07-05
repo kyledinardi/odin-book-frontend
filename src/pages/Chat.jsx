@@ -3,8 +3,8 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import MessageForm from '../components/MessageForm.jsx';
 import Message from '../components/Message.jsx';
-import backendFetch from '../../helpers/backendFetch';
-import socket from '../../helpers/socket';
+import backendFetch from '../../utils/backendFetch';
+import socket from '../../utils/socket';
 import styles from '../style/Chat.module.css';
 
 function Chat() {
