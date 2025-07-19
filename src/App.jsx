@@ -1,19 +1,20 @@
-import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import ErrorPage from './pages/ErrorPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
-import backendFetch from '../utils/backendFetch';
+import { GET_CURRENT_USER } from '../utils/queries';
 import socket from '../utils/socket';
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
   const [theme, setTheme] = useState('');
   const [notificationCount, setNotificationCount] = useState(0);
   const logoutModal = useRef(null);
   const navigate = useNavigate();
+  const currentUserResult = useQuery(GET_CURRENT_USER);
 
   useEffect(() => {
     let themeName = localStorage.getItem('theme');
@@ -28,14 +29,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!error) {
-      backendFetch(setError, '/users/currentUser').then((response) => {
-        setCurrentUser(response.user);
-        setNotificationCount(response.user._count.receivedNotifications);
-        socket.emit('joinUserRoom', response.user.id);
-      });
+    if (currentUserResult.data && !error) {
+      const { _count, id } = currentUserResult.data.currentUser;
+      setNotificationCount(_count.receivedNotifications);
+      socket.emit('joinUserRoom', id);
     }
-  }, [error]);
+  }, [currentUserResult.data, error]);
 
   useEffect(() => {
     function incrementNotificationCount() {
@@ -66,7 +65,7 @@ function App() {
       ) : (
         <div className='app' data-theme={theme}>
           <Sidebar
-            currentUser={currentUser}
+            currentUser={currentUserResult.data?.currentUser}
             logoutModal={logoutModal}
             notificationCount={notificationCount}
             theme={theme}
@@ -75,7 +74,7 @@ function App() {
           <div className='main'>
             <div className='profileBar'>
               <ProfileBar
-                currentUser={currentUser}
+                currentUser={currentUserResult.data?.currentUser}
                 logoutModal={logoutModal}
                 theme={theme}
                 setTheme={setTheme}
@@ -84,16 +83,16 @@ function App() {
             <Outlet
               context={[
                 setError,
-                currentUser,
-                setCurrentUser,
+                currentUserResult.data?.currentUser,
+                currentUserResult.refetch(),
                 notificationCount,
                 setNotificationCount,
               ]}
             />
           </div>
           <UserList
-            currentUser={currentUser}
-            setCurrentUser={(user) => setCurrentUser(user)}
+            currentUser={currentUserResult.data?.currentUser}
+            setCurrentUser={() => currentUserResult.refetch()}
             setError={(err) => setError(err)}
           />
           <dialog ref={logoutModal}>
