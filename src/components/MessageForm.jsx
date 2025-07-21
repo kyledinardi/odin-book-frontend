@@ -3,8 +3,8 @@ import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import backendFetch from '../utils/backendFetch';
+import socket from '../utils/socket';
 import styles from '../style/MessageForm.module.css';
 
 function MessageForm({ receiver, roomId }) {

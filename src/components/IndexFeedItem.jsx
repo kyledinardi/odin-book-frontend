@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
 import { GET_INDEX_POSTS } from '../graphql/queries';
-import editFeed from '../../utils/feedEdit';
+import editFeed from '../utils/feedEdit';
 
 function IndexFeedItem({ post, postsResult }) {
   const updateCache = (updated, deletedId, deletedFeedItemType) =>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import backendFetch from '../../utils/backendFetch';
-import formatDate from '../../utils/formatDate';
+import backendFetch from '../utils/backendFetch';
+import formatDate from '../utils/formatDate';
 import styles from '../style/RoomList.module.css';
 
 function RoomList() {

@@ -4,8 +4,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import ContentForm from '../components/ContentForm.jsx';
 import Post from '../components/Post.jsx';
 import Comment from '../components/Comment.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import backendFetch from '../utils/backendFetch';
+import socket from '../utils/socket';
 
 function CommentPage() {
   const [comment, setComment] = useState(null);

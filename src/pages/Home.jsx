@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import ErrorPage from './ErrorPage.jsx';
 import ContentForm from '../components/ContentForm.jsx';
 import { GET_INDEX_POSTS } from '../graphql/queries';
-import socket from '../../utils/socket';
+import socket from '../utils/socket';
 import IndexFeedItem from '../components/IndexFeedItem.jsx';
 
 function Home() {
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const [newPostCount, setNewPostCount] = useState(0);
-  const [, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
   const postsResult = useQuery(GET_INDEX_POSTS);
-  
 
   useEffect(() => {
     if (postsResult.data) {
@@ -74,6 +74,10 @@ function Home() {
     }));
 
     socket.emit('sendNewPost', { userId: post.userId });
+  }
+
+  if (postsResult.error) {
+    return <ErrorPage error={postsResult.error} />;
   }
 
   return !currentUser || postsResult.loading ? (

@@ -3,7 +3,7 @@ import { useOutletContext, useSearchParams } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Post from '../components/Post.jsx';
 import User from '../components/User.jsx';
-import backendFetch from '../../utils/backendFetch';
+import backendFetch from '../utils/backendFetch';
 import styles from '../style/Search.module.css';
 
 function Search() {

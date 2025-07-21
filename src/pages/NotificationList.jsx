@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Notification from '../components/Notification.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import backendFetch from '../utils/backendFetch';
+import socket from '../utils/socket';
 
 function NotificationList() {
   const [notifications, setNotifications] = useState(null);

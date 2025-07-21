@@ -64,25 +64,12 @@ function Login() {
     });
 
     e.target[1].value = '';
-
-    // if (response.expectedError) {
-    //   e.target.reset();
-    //   setErrorMessage(response.expectedError.message);
-    // } else {
-    //   localStorage.setItem('token', response.token);
-    //   localStorage.setItem('userId', response.user.id);
-    //   navigate('/');
-    // }
   }
 
   return (
     <div className='themeWrapper' data-theme={theme}>
       {unexpectedError ? (
-        <ErrorPage
-          data-theme={theme}
-          error={unexpectedError}
-          setError={(err) => setUnexpectedError(err)}
-        />
+        <ErrorPage error={unexpectedError} />
       ) : (
         <div className={styles.flexWrapper}>
           <h1>Log in to Odin-Book</h1>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import PropTypes from 'prop-types';
+import ErrorPage from '../pages/ErrorPage.jsx';
 import User from './User.jsx';
 import { GET_LISTED_USERS } from '../graphql/queries';
 import styles from '../style/UserList.module.css';
@@ -16,6 +17,10 @@ function UserList({ currentUser, setCurrentUser, setError }) {
       setFollowedIds(currentUser.following.map((user) => user.id));
     }
   }, [currentUser]);
+
+  if (usersResult.error) {
+    return <ErrorPage error={usersResult.error} />;
+  }
 
   return usersResult.loading || !followedIds ? (
     <div className='loaderContainer'>

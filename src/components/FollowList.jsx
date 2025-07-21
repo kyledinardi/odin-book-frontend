@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import User from './User.jsx';
-import backendFetch from '../../utils/backendFetch';
+import backendFetch from '../utils/backendFetch';
 
 function FollowList({ openTab, user, followedIds }) {
   const [following, setFollowing] = useState(null);

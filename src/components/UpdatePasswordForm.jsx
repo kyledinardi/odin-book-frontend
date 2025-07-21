@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import backendFetch from '../../utils/backendFetch';
+import backendFetch from '../utils/backendFetch';
 import styles from '../style/UpdatePasswordForm.module.css';
 
 function UpdatePasswordForm({ userModal }) {

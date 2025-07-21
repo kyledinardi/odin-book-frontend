@@ -6,10 +6,9 @@ import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
 import { GET_CURRENT_USER } from './graphql/queries';
-import socket from '../utils/socket';
+import socket from './utils/socket';
 
 function App() {
-  const [error, setError] = useState(null);
   const [theme, setTheme] = useState('');
   const [notificationCount, setNotificationCount] = useState(0);
   const logoutModal = useRef(null);
@@ -29,12 +28,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (currentUserResult.data && !error) {
+    if (currentUserResult.data) {
       const { _count, id } = currentUserResult.data.getCurrentUser;
       setNotificationCount(_count.receivedNotifications);
       socket.emit('joinUserRoom', id);
     }
-  }, [currentUserResult.data, error]);
+  }, [currentUserResult.data]);
 
   useEffect(() => {
     function incrementNotificationCount() {
@@ -45,24 +44,13 @@ function App() {
     return () => socket.off('receiveNotification', incrementNotificationCount);
   }, [notificationCount]);
 
-  useEffect(() => {
-    function handleNavigation() {
-      setError(null);
-    }
-
-    window.addEventListener('popstate', handleNavigation);
-    return () => window.removeEventListener('popstate', handleNavigation);
-  }, []);
+  if (currentUserResult.error) {
+    return <ErrorPage error={currentUserResult.error} />;
+  }
 
   return (
     <div className='themeWrapper' data-theme={theme}>
-      {currentUserResult.error ? (
-        <ErrorPage
-          data-theme={theme}
-          error={currentUserResult.error}
-          setError={(err) => setError(err)}
-        />
-      ) : (
+      {!currentUserResult.loading && (
         <div className='app' data-theme={theme}>
           <Sidebar
             currentUser={currentUserResult.data?.getCurrentUser}
@@ -82,7 +70,6 @@ function App() {
             </div>
             <Outlet
               context={[
-                setError,
                 currentUserResult.data?.getCurrentUser,
                 currentUserResult.refetch(),
                 notificationCount,
@@ -93,7 +80,6 @@ function App() {
           <UserList
             currentUser={currentUserResult.data?.getCurrentUser}
             setCurrentUser={() => currentUserResult.refetch()}
-            setError={(err) => setError(err)}
           />
           <dialog ref={logoutModal}>
             <h2>Are you sure you want to log out?</h2>

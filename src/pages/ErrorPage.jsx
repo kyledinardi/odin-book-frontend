@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import styles from '../style/ErrorPage.module.css';
 
-function ErrorPage({ error, setError }) {
+function ErrorPage({ error }) {
   const [theme, setTheme] = useState('');
   const navigate = useNavigate();
 
@@ -24,28 +24,8 @@ function ErrorPage({ error, setError }) {
       <div className={styles.error}>
         <h1>{error ? error.message : '404: Page not found'}</h1>
         <div>
-          <button
-            onClick={() => {
-              if (setError) {
-                setError(null);
-              }
-
-              navigate('/');
-            }}
-          >
-            Go Home
-          </button>
-          <button
-            onClick={() => {
-              if (setError) {
-                setError(null);
-              }
-
-              navigate(-1);
-            }}
-          >
-            Go Back
-          </button>
+          <button onClick={() => navigate('/')}>Go Home</button>
+          <button onClick={() => navigate(-1)}>Go Back</button>
         </div>
       </div>
     </div>

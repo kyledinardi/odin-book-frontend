@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ErrorPage from './ErrorPage.jsx';
-import backendFetch from '../../utils/backendFetch';
+import backendFetch from '../utils/backendFetch';
 import styles from '../style/Login.module.css';
 
 function SignUp() {

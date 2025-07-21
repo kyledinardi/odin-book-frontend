@@ -3,8 +3,8 @@ import * as reactRouterDom from 'react-router-dom';
 import UpdateProfileForm from '../components/UpdateProfileForm.jsx';
 import UpdatePasswordForm from '../components/UpdatePasswordForm.jsx';
 import ProfilePostList from '../components/ProfilePostList.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import backendFetch from '../utils/backendFetch';
+import socket from '../utils/socket';
 import styles from '../style/Profile.module.css';
 
 function Profile() {
