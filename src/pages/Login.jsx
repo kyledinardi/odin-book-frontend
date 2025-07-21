@@ -1,9 +1,10 @@
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import ErrorPage from './ErrorPage.jsx';
-import backendFetch from '../../utils/backendFetch';
 import githubLogo from '../assets/github-mark.svg';
 import styles from '../style/Login.module.css';
+import { LOCAL_LOGIN } from '../graphql/queries';
 
 function Login() {
   const [unexpectedError, setUnexpectedError] = useState(null);
@@ -11,6 +12,16 @@ function Login() {
   const [errorMessage, setErrorMessage] = useState('');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const [login, loginResult] = useMutation(LOCAL_LOGIN, {
+    onError: (err) => {
+      if (err.graphQLErrors[0].message === 'Incorrect username or password') {
+        setErrorMessage(err.graphQLErrors[0].message);
+      } else {
+        setUnexpectedError(err);
+      }
+    },
+  });
 
   useEffect(() => {
     let themeName = localStorage.getItem('theme');
@@ -36,27 +47,32 @@ function Login() {
     }
   }, [searchParams, navigate]);
 
+  useEffect(() => {
+    if (loginResult.data) {
+      const { token, user } = loginResult.data.localLogin;
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId', user.id);
+      navigate('/');
+    }
+  }, [loginResult, navigate]);
+
   async function submitLogin(e) {
     e.preventDefault();
 
-    const response = await backendFetch(setUnexpectedError, '/auth/local', {
-      hasBearer: false,
-      method: 'POST',
-
-      body: JSON.stringify({
-        username: e.target[0].value,
-        password: e.target[1].value,
-      }),
+    login({
+      variables: { username: e.target[0].value, password: e.target[1].value },
     });
 
-    if (response.expectedError) {
-      e.target.reset();
-      setErrorMessage(response.expectedError.message);
-    } else {
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('userId', response.user.id);
-      navigate('/');
-    }
+    e.target[1].value = '';
+
+    // if (response.expectedError) {
+    //   e.target.reset();
+    //   setErrorMessage(response.expectedError.message);
+    // } else {
+    //   localStorage.setItem('token', response.token);
+    //   localStorage.setItem('userId', response.user.id);
+    //   navigate('/');
+    // }
   }
 
   return (

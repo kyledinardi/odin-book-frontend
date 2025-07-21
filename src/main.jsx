@@ -1,3 +1,4 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { setContext } from '@apollo/client/link/context';
 import {
   ApolloClient,
@@ -5,11 +6,13 @@ import {
   createHttpLink,
   InMemoryCache,
 } from '@apollo/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ReactDOM from 'react-dom/client';
 import React from 'react';
 import routes from './Router.jsx';
 import './style/index.css';
+
+const router = createBrowserRouter(routes);
+const httpLink = createHttpLink({ uri: 'http://localhost:3000' });
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('token');
@@ -19,14 +22,10 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const httpLink = createHttpLink({ uri: 'http://localhost:3000' });
-
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: authLink.concat(httpLink),
 });
-
-const router = createBrowserRouter(routes);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

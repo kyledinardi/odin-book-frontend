@@ -5,7 +5,7 @@ import ErrorPage from './pages/ErrorPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
-import { GET_CURRENT_USER } from '../utils/queries';
+import { GET_CURRENT_USER } from './graphql/queries';
 import socket from '../utils/socket';
 
 function App() {
@@ -30,7 +30,7 @@ function App() {
 
   useEffect(() => {
     if (currentUserResult.data && !error) {
-      const { _count, id } = currentUserResult.data.currentUser;
+      const { _count, id } = currentUserResult.data.getCurrentUser;
       setNotificationCount(_count.receivedNotifications);
       socket.emit('joinUserRoom', id);
     }
@@ -56,16 +56,16 @@ function App() {
 
   return (
     <div className='themeWrapper' data-theme={theme}>
-      {error ? (
+      {currentUserResult.error ? (
         <ErrorPage
           data-theme={theme}
-          error={error}
+          error={currentUserResult.error}
           setError={(err) => setError(err)}
         />
       ) : (
         <div className='app' data-theme={theme}>
           <Sidebar
-            currentUser={currentUserResult.data?.currentUser}
+            currentUser={currentUserResult.data?.getCurrentUser}
             logoutModal={logoutModal}
             notificationCount={notificationCount}
             theme={theme}
@@ -74,7 +74,7 @@ function App() {
           <div className='main'>
             <div className='profileBar'>
               <ProfileBar
-                currentUser={currentUserResult.data?.currentUser}
+                currentUser={currentUserResult.data?.getCurrentUser}
                 logoutModal={logoutModal}
                 theme={theme}
                 setTheme={setTheme}
@@ -83,7 +83,7 @@ function App() {
             <Outlet
               context={[
                 setError,
-                currentUserResult.data?.currentUser,
+                currentUserResult.data?.getCurrentUser,
                 currentUserResult.refetch(),
                 notificationCount,
                 setNotificationCount,
@@ -91,7 +91,7 @@ function App() {
             />
           </div>
           <UserList
-            currentUser={currentUserResult.data?.currentUser}
+            currentUser={currentUserResult.data?.getCurrentUser}
             setCurrentUser={() => currentUserResult.refetch()}
             setError={(err) => setError(err)}
           />

@@ -22,22 +22,14 @@ function ErrorPage({ error, setError }) {
   return (
     <div className='themeWrapper' data-theme={theme}>
       <div className={styles.error}>
-        <h1>
-          {error
-            ? `${error.status}: ${
-                Math.floor(error.status / 100) === 5
-                  ? 'Internal Server Error'
-                  : error.message
-              }`
-            : '404: Page not found'}
-        </h1>
+        <h1>{error ? error.message : '404: Page not found'}</h1>
         <div>
           <button
             onClick={() => {
               if (setError) {
                 setError(null);
               }
-              
+
               navigate('/');
             }}
           >

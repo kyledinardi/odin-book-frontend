@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import PropTypes from 'prop-types';
 import User from './User.jsx';
-import backendFetch from '../../utils/backendFetch';
+import { GET_LISTED_USERS } from '../graphql/queries';
 import styles from '../style/UserList.module.css';
 
 function UserList({ currentUser, setCurrentUser, setError }) {
-  const [users, setUsers] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const navigate = useNavigate();
-
+  const usersResult = useQuery(GET_LISTED_USERS);
 
   useEffect(() => {
     if (currentUser) {
@@ -17,15 +17,7 @@ function UserList({ currentUser, setCurrentUser, setError }) {
     }
   }, [currentUser]);
 
-  useEffect(() => {
-    if (!users) {
-      backendFetch(setError, '/users').then((response) => {
-        setUsers(response.users);
-      });
-    }
-  }, [users, setError]);
-
-  return !users || !followedIds ? (
+  return usersResult.loading || !followedIds ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>
@@ -42,7 +34,7 @@ function UserList({ currentUser, setCurrentUser, setError }) {
         <input type='search' name='search' id='search' placeholder='Search' />
       </form>
       <div>
-        {users.map((user) => (
+        {usersResult.data.getListedUsers.map((user) => (
           <User
             key={user.id}
             user={user}

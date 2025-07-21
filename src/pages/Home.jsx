@@ -1,121 +1,82 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ContentForm from '../components/ContentForm.jsx';
-import Post from '../components/Post.jsx';
-import Comment from '../components/Comment.jsx';
-import backendFetch from '../../utils/backendFetch';
-import editFeed from '../../utils/feedEdit';
+import { GET_INDEX_POSTS } from '../graphql/queries';
 import socket from '../../utils/socket';
+import IndexFeedItem from '../components/IndexFeedItem.jsx';
 
 function Home() {
-  const [posts, setPosts] = useState(null);
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const [newPostCount, setNewPostCount] = useState(0);
-  const [setError, currentUser] = useOutletContext();
+  const [, currentUser] = useOutletContext();
+  const postsResult = useQuery(GET_INDEX_POSTS);
+  
 
   useEffect(() => {
-    backendFetch(setError, '/posts').then((response) => {
-      setPosts(response.posts);
-      setHasMorePosts(response.posts.length === 20);
-    });
-  }, [setError]);
-
-  useEffect(() => {
-    function incrementNewPostCount() {
-      setNewPostCount(newPostCount + 1);
+    if (postsResult.data) {
+      setHasMorePosts(postsResult.data.getIndexPosts.length % 20 === 0);
     }
+  }, [postsResult.data]);
 
+  useEffect(() => {
+    const incrementNewPostCount = () => setNewPostCount(newPostCount + 1);
     socket.on('receiveNewPost', incrementNewPostCount);
     return () => socket.off('receiveNewPost', incrementNewPostCount);
   }, [newPostCount]);
 
-  async function addMorePosts() {
-    const lastPost = posts.findLast((post) => post.feedItemType === 'post');
-    const lastRepost = posts.findLast((post) => post.feedItemType === 'repost');
+  async function fetchOlderPosts() {
+    const { getIndexPosts } = postsResult.data;
 
-    const response = await backendFetch(
-      setError,
-
-      `/posts?${lastPost ? `postId=${lastPost.id}` : ''}&${
-        lastRepost ? `repostId=${lastRepost.id}` : ''
-      }`,
+    const lastPost = getIndexPosts.findLast(
+      (post) => post.feedItemType === 'post'
     );
 
-    setPosts([...posts, ...response.posts]);
-    setHasMorePosts(response.posts.length === 20);
+    const lastRepost = getIndexPosts.findLast(
+      (post) => post.feedItemType === 'repost'
+    );
+
+    postsResult.fetchMore({
+      variables: { postCursor: lastPost?.id, repostCursor: lastRepost?.id },
+
+      updateQuery: (previousData, { fetchMoreResult }) => ({
+        ...previousData,
+
+        getIndexPosts: [
+          ...previousData.getIndexPosts,
+          ...fetchMoreResult.getIndexPosts,
+        ],
+      }),
+    });
   }
 
-  async function refreshPosts() {
-    const response = await backendFetch(
-      setError,
-      `/posts/refresh?timestamp=${posts[0].timestamp}`,
-    );
+  async function fetchNewerPosts() {
+    postsResult.fetchMore({
+      variables: { timestamp: postsResult.data.getIndexPosts[0].timestamp },
 
-    setPosts([...response.posts, ...posts]);
+      updateQuery: (previousData, { fetchMoreResult }) => ({
+        ...previousData,
+
+        getIndexPosts: [
+          ...fetchMoreResult.getIndexPosts,
+          ...previousData.getIndexPosts,
+        ],
+      }),
+    });
+
     setNewPostCount(0);
   }
 
-  function renderPost(post) {
-    if (post.postId) {
-      return (
-        <div key={`repost${post.id}`}>
-          <p className='repostHeading'>
-            <span className='material-symbols-outlined'>repeat</span>
-            <span>{post.user.displayName} reposted</span>
-          </p>
-          <Post
-            post={post.post}
-            replacePost={(updatedPost) =>
-              setPosts(editFeed.replace(updatedPost, posts))
-            }
-            removePost={(deletedPostId) =>
-              setPosts(editFeed.remove(deletedPostId, 'post', posts))
-            }
-            displayType='repost'
-          />
-        </div>
-      );
-    }
+  function handleCreatedPost(post) {
+    postsResult.updateQuery({ GET_INDEX_POSTS }, (previousData) => ({
+      getIndexPosts: [post, ...previousData.getIndexPosts],
+    }));
 
-    if (post.commentId) {
-      return (
-        <div key={`repost${post.id}`}>
-          <p className='repostHeading'>
-            <span className='material-symbols-outlined'>repeat</span>
-            <span>{post.user.displayName} reposted</span>
-          </p>
-          <Comment
-            comment={post.comment}
-            replaceComment={(updatedComment) =>
-              setPosts(editFeed.replace(updatedComment, posts))
-            }
-            removeComment={(deletedCommentId) =>
-              setPosts(editFeed.remove(deletedCommentId, 'comment', posts))
-            }
-            displayType='repost'
-            repostedBy={post.user.username}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <Post
-        key={post.id}
-        post={post}
-        replacePost={(updatedPost) =>
-          setPosts(editFeed.replace(updatedPost, posts))
-        }
-        removePost={(deletedPostId) =>
-          setPosts(editFeed.remove(deletedPostId, 'post', posts))
-        }
-        displayType='feed'
-      />
-    );
+    socket.emit('sendNewPost', { userId: post.userId });
   }
 
-  return !currentUser || !posts ? (
+  return !currentUser || postsResult.loading ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>
@@ -123,23 +84,20 @@ function Home() {
     <main>
       <ContentForm
         contentType={'post'}
-        setContent={(post) => {
-          setPosts([post, ...posts]);
-          socket.emit('sendNewPost', { userId: post.userId });
-        }}
+        setContent={(post) => handleCreatedPost(post)}
       />
       {newPostCount > 0 && (
-        <button className='refreshButton' onClick={() => refreshPosts()}>
+        <button className='refreshButton' onClick={() => fetchNewerPosts()}>
           {newPostCount} new post{newPostCount === 1 ? '' : 's'}
         </button>
       )}
       <div>
-        {posts.length === 0 ? (
+        {postsResult.data.getIndexPosts.length === 0 ? (
           <h2>You and your followers have no posts</h2>
         ) : (
           <InfiniteScroll
-            dataLength={posts.length}
-            next={() => addMorePosts()}
+            dataLength={postsResult.data.getIndexPosts.length}
+            next={() => fetchOlderPosts()}
             hasMore={hasMorePosts}
             loader={
               <div className='loaderContainer'>
@@ -147,9 +105,14 @@ function Home() {
               </div>
             }
             endMessage={<div></div>}
-            // inverse={true}
           >
-            {posts.map((post) => renderPost(post))}
+            {postsResult.data.getIndexPosts.map((post) => (
+              <IndexFeedItem
+                key={post.id}
+                post={post}
+                postsResult={postsResult}
+              />
+            ))}
           </InfiniteScroll>
         )}
       </div>
