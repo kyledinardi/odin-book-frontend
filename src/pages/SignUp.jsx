@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import ErrorPage from './ErrorPage.jsx';
-import backendFetch from '../utils/backendFetch';
+import { CREATE_USER } from '../graphql/mutations';
 import styles from '../style/Login.module.css';
 
 function SignUp() {
   const [unexpectedError, setUnexpectedError] = useState(null);
-  const [errorArray, setErrorArray] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const [theme, setTheme] = useState('');
   const navigate = useNavigate();
+
+  const [createUser, createUserResult] = useMutation(CREATE_USER, {
+    onError: (err) => {
+      if (err.graphQLErrors[0].extensions.code === 'BAD_USER_INPUT') {
+        setErrorMessage(err.graphQLErrors[0].message);
+      } else {
+        setUnexpectedError(err);
+      }
+    },
+  });
 
   useEffect(() => {
     let themeName = localStorage.getItem('theme');
@@ -22,36 +33,35 @@ function SignUp() {
     setTheme(themeName);
   }, []);
 
-  async function submitLogin(e) {
+  useEffect(() => {
+    if (createUserResult.data) {
+      const { token, user } = createUserResult.data.createUser;
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId', user.id);
+      navigate('/');
+    }
+  }, [createUserResult.data, navigate]);
+
+  async function submitSignUp(e) {
     e.preventDefault();
 
-    const response = await backendFetch(setUnexpectedError, '/users', {
-      hasBearer: false,
-      method: 'POST',
-
-      body: JSON.stringify({
+    createUser({
+      variables: {
         displayName: e.target[0].value,
         username: e.target[1].value,
         password: e.target[2].value,
         passwordConfirmation: e.target[3].value,
-      }),
+      },
     });
 
-    if (response.expectedErrors) {
-      e.target.reset();
-      setErrorArray(response.expectedErrors);
-    } else {
-      navigate('/');
-    }
+    e.target[2].value = '';
+    e.target[3].value = '';
   }
 
   return (
     <div className='themeWrapper' data-theme={theme}>
       {unexpectedError ? (
-        <ErrorPage
-          error={unexpectedError}
-          setError={(err) => setUnexpectedError(err)}
-        />
+        <ErrorPage error={unexpectedError} />
       ) : (
         <div className={styles.flexWrapper}>
           <div>
@@ -65,14 +75,12 @@ function SignUp() {
             <h1>Sign up for Odin-Book</h1>
           </div>
           <div className={styles.loginForms}>
-            {errorArray && (
+            {errorMessage !== '' && (
               <div className={styles.error}>
-                {errorArray.map((error, i) => (
-                  <span key={i}>{error.msg}</span>
-                ))}
+                <span>{errorMessage}</span>
               </div>
             )}
-            <form className={styles.flexForm} onSubmit={(e) => submitLogin(e)}>
+            <form className={styles.flexForm} onSubmit={(e) => submitSignUp(e)}>
               <div>
                 <label htmlFor='displayName'>Display Name (optional)</label>
                 <input

@@ -8,8 +8,23 @@ export const LOCAL_LOGIN = gql`
   }
 `;
 
-export const LOGOUT = gql`
-  mutation logout {
-    logout
+export const CREATE_USER = gql`
+  mutation createUser(
+    $displayName: String
+    $username: String!
+    $password: String!
+    $passwordConfirmation: String!
+  ) {
+    createUser(
+      displayName: $displayName
+      username: $username
+      password: $password
+      passwordConfirmation: $passwordConfirmation
+    ) {
+      token
+      user {
+        id
+      }
+    }
   }
 `;
