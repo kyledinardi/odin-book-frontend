@@ -15,7 +15,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
   const editTextarea = useRef(null);
   const deleteModal = useRef(null);
   const imageModal = useRef(null);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
 
   useEffect(() => {
     const repostTemp = comment.reposts.find(

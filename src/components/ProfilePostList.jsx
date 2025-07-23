@@ -17,7 +17,7 @@ function ProfilePostList({ user, openTab }) {
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [hasMoreImagePosts, setHasMoreImagePosts] = useState(false);
   const [hasMoreLikedPosts, setHasMoreLikedPosts] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
 
   useEffect(() => {
     Promise.all([
@@ -35,7 +35,7 @@ function ProfilePostList({ user, openTab }) {
       setHasMoreImagePosts(responses[2].posts.length === 20);
       setHasMoreLikedPosts(responses[3].posts.length === 20);
     });
-  }, [setError, user]);
+  }, [user]);
 
   const noPostsMessageTemplate =
     user.id === currentUser.id ? 'You have' : `${user.displayName} has`;

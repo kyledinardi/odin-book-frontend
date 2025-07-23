@@ -13,7 +13,7 @@ function UpdateProfileForm({ userModal }) {
   const profileForm = useRef(null);
   const newPfpInput = useRef(null);
   const newHeaderImageInput = useRef(null);
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext();
 
   async function submitProfileChange(e) {
     e.preventDefault();

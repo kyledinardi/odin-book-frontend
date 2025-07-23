@@ -6,7 +6,7 @@ import styles from '../style/UpdatePasswordForm.module.css';
 
 function UpdatePasswordForm({ userModal }) {
   const [errorArray, setErrorArray] = useState(null);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
 
   async function submitPasswordChange(e) {
     e.preventDefault();

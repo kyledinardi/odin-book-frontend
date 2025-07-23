@@ -9,7 +9,7 @@ function NotificationList() {
   const [notifications, setNotifications] = useState(null);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(false);
 
-  const [setError, , , notificationCount, setNotificationCount] =
+  const [, , notificationCount, setNotificationCount] =
     useOutletContext();
 
   useEffect(() => {
@@ -37,7 +37,7 @@ function NotificationList() {
 
     socket.on('receiveNotification', refreshNotifications);
     return () => socket.off('receiveNotification', refreshNotifications);
-  }, [setError, notifications]);
+  }, [notifications]);
 
   async function addMoreNotifications() {
     const response = await backendFetch(

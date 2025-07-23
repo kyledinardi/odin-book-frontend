@@ -14,7 +14,7 @@ function Chat() {
   const [messages, setMessages] = useState(null);
   const messagesEnd = useRef(null);
 
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
   const roomId = parseInt(useParams().roomId, 10);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function Chat() {
 
       socket.emit('joinChatRoom', roomId);
     }
-  }, [setError, currentUser, roomId]);
+  }, [currentUser, roomId]);
 
   useEffect(() => {
     function addNewMessage(newMessage) {

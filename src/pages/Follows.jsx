@@ -8,7 +8,7 @@ function Follows() {
   const [user, setUser] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const [openTab, setOpenTab] = useState('following');
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
   const userId = parseInt(useParams().userId, 10);
 
   useEffect(() => {

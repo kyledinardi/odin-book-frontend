@@ -20,7 +20,7 @@ function Profile() {
   const imageModal = useRef(null);
 
   const { Link, useNavigate, useOutletContext, useParams } = reactRouterDom;
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext();
   const navigate = useNavigate();
   const userId = parseInt(useParams().userId, 10);
 

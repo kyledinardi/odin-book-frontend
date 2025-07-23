@@ -10,7 +10,7 @@ import socket from '../utils/socket';
 function CommentPage() {
   const [comment, setComment] = useState(null);
   const [hasMoreReplies, setHasMoreReplies] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
   const navigate = useNavigate();
   const commentId = parseInt(useParams().commentId, 10);
 

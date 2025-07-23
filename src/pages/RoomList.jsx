@@ -8,7 +8,7 @@ import styles from '../style/RoomList.module.css';
 function RoomList() {
   const [rooms, setRooms] = useState(null);
   const [hasMoreRooms, setHasMoreRooms] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
 
   useEffect(() => {
     if (currentUser) {
@@ -22,7 +22,7 @@ function RoomList() {
         setHasMoreRooms(response.rooms.length === 20);
       });
     }
-  }, [setError, currentUser, setHasMoreRooms]);
+  }, [currentUser, setHasMoreRooms]);
 
   async function addMoreRooms() {
     const response = await backendFetch(

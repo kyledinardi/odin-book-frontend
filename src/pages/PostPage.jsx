@@ -10,7 +10,7 @@ import socket from '../utils/socket';
 function PostPage() {
   const [post, setPost] = useState(null);
   const [hasMoreComments, setHasMoreComments] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
   const navigate = useNavigate();
   const postId = parseInt(useParams().postId, 10);
 

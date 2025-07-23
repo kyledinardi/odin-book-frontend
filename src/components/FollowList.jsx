@@ -15,7 +15,7 @@ function FollowList({ openTab, user, followedIds }) {
   const [hasMoreFollowers, setHasMoreFollowers] = useState(null);
   const [hasMoreMutuals, setHasMoreMutuals] = useState(null);
   const [hasMoreFfs, setHasMoreFfs] = useState(null);
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext();
 
   useEffect(() => {
     Promise.all([

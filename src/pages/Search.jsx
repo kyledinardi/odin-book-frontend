@@ -16,7 +16,7 @@ function Search() {
   const [openTab, setOpenTab] = useState('posts');
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext();
 
   useEffect(() => {
     if (currentUser) {

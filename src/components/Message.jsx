@@ -12,7 +12,7 @@ function Message({ message, roomId }) {
   const deleteModal = useRef(null);
   const editText = useRef(null);
 
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
 
   useEffect(() => {
     if (message.userId === currentUser.id) {
