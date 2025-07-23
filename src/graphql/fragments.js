@@ -42,6 +42,7 @@ export const POST_FRAGMENT = gql`
     }
     reposts {
       id
+      userId
     }
     pollChoices {
       id

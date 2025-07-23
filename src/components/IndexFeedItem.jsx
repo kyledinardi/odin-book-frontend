@@ -1,16 +1,20 @@
 import PropTypes from 'prop-types';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
-import { GET_INDEX_POSTS } from '../graphql/queries';
 import editFeed from '../utils/feedEdit';
 
 function IndexFeedItem({ post, postsResult }) {
-  const updateCache = (updated, deletedId, deletedFeedItemType) =>
-    postsResult.updateQuery({ GET_INDEX_POSTS }, (previousData) => ({
-      getIndexPosts: updated
-        ? editFeed.replace(updated, previousData)
-        : editFeed.remove(deletedId, deletedFeedItemType, previousData),
-    }));
+  const updateCache = (updated, deletedId, deletedFeedItemType) => {
+    postsResult.updateQuery((previousData) => {
+      const prev = previousData.getIndexPosts;
+
+      return {
+        getIndexPosts: updated
+          ? editFeed.replace(updated, prev)
+          : editFeed.remove(deletedId, deletedFeedItemType, prev),
+      };
+    });
+  };
 
   if (post.postId) {
     return (
@@ -55,7 +59,7 @@ function IndexFeedItem({ post, postsResult }) {
     <Post
       key={post.id}
       post={post}
-      replacePost={(updatedPost) => updateCache(updatedPost, null, 'post')}
+      replacePost={(updatedPost) => updateCache(updatedPost)}
       removePost={(deletedPostId) => updateCache(null, deletedPostId, 'post')}
       displayType='feed'
     />

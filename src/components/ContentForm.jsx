@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
-import backendFetch from '../utils/backendFetch';
+import { CREATE_POST } from '../graphql/mutations';
 import styles from '../style/ContentForm.module.css';
 
 function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
@@ -21,7 +22,14 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
   const gifModal = useRef(null);
   const fileInput = useRef(null);
   const textarea = useRef(null);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
+
+  const [submitPost] = useMutation(CREATE_POST, {
+    onError: (err) => console.log(JSON.stringify(err, null, 2)),
+    onCompleted: (data) => {
+      setContent(data.createPost);
+    },
+  });
 
   useEffect(() => {
     if (isModal) {
@@ -39,75 +47,94 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
     setGifUrl('');
   }
 
-  async function submitPostOrComment(e) {
+  async function submitContent(e) {
     e.preventDefault();
-    let path;
-    const formData = new FormData();
-    formData.append('text', e.target[0].value);
-    formData.append('gifUrl', gifUrl);
 
-    if (e.target[2].files) {
-      formData.append('image', e.target[2].files[0]);
+    const variables = {
+      text: e.target[0].value,
+      gifUrl,
+      image: newImage,
+    };
+
+    if (contentType === 'post') {
+      submitPost({ variables });
     }
 
-    switch (contentType) {
-      case 'post':
-        if (contentToEdit) {
-          path = `/posts/${contentToEdit.id}`;
-        } else {
-          path = '/posts';
-        }
-        break;
-      case 'comment':
-        if (contentToEdit) {
-          path = `/comments/${contentToEdit.id}`;
-        } else {
-          path = `/posts/${parentId}/comments`;
-        }
-        break;
-      case 'reply':
-        path = `/comments/${parentId}`;
-        break;
-      default:
-    }
-
-    const response = await backendFetch(setError, path, {
-      method: contentToEdit ? 'PUT' : 'POST',
-      body: formData,
-    });
     e.target.reset();
     e.target[0].style.height = '64px';
-
     cancelNewImage();
     setIsEmojiOpen(false);
-    setContent(contentType === 'post' ? response.post : response.comment);
   }
 
-  async function submitPoll(e) {
-    e.preventDefault();
-    const choiceArray = [];
+  // async function submitPostOrComment(e) {
+  //   e.preventDefault();
+  //   let path;
+  //   const formData = new FormData();
+  //   formData.append('text', e.target[0].value);
+  //   formData.append('gifUrl', gifUrl);
 
-    for (let i = 1; i <= pollChoiceCount; i += 1) {
-      choiceArray.push(e.target[i].value);
-    }
+  //   if (e.target[2].files) {
+  //     formData.append('image', e.target[2].files[0]);
+  //   }
 
-    const response = await backendFetch(setError, '/polls', {
-      method: 'POST',
+  //   switch (contentType) {
+  //     case 'post':
+  //       if (contentToEdit) {
+  //         path = `/posts/${contentToEdit.id}`;
+  //       } else {
+  //         path = '/posts';
+  //       }
+  //       break;
+  //     case 'comment':
+  //       if (contentToEdit) {
+  //         path = `/comments/${contentToEdit.id}`;
+  //       } else {
+  //         path = `/posts/${parentId}/comments`;
+  //       }
+  //       break;
+  //     case 'reply':
+  //       path = `/comments/${parentId}`;
+  //       break;
+  //     default:
+  //   }
 
-      body: JSON.stringify({
-        question: e.target[0].value,
-        choices: choiceArray,
-      }),
-    });
+  //   const response = await backendFetch(setError, path, {
+  //     method: contentToEdit ? 'PUT' : 'POST',
+  //     body: formData,
+  //   });
+  //   e.target.reset();
+  //   e.target[0].style.height = '64px';
 
-    cancelNewImage();
-    e.target.reset();
-    e.target[0].style.height = '64px';
-    setIsEmojiOpen(false);
-    setIsPoll(false);
-    setPollChoiceCount(2);
-    setContent(response.post);
-  }
+  //   cancelNewImage();
+  //   setIsEmojiOpen(false);
+  //   setContent(contentType === 'post' ? response.post : response.comment);
+  // }
+
+  // async function submitPoll(e) {
+  //   e.preventDefault();
+  //   const choiceArray = [];
+
+  //   for (let i = 1; i <= pollChoiceCount; i += 1) {
+  //     choiceArray.push(e.target[i].value);
+  //   }
+
+  //   const response = await backendFetch(setError, '/polls', {
+  //     method: 'POST',
+
+  //     body: JSON.stringify({
+  //       question: e.target[0].value,
+  //       choices: choiceArray,
+  //     }),
+  //   });
+
+  //   cancelNewImage();
+  //   e.target.reset();
+  //   e.target[0].style.height = '64px';
+  //   setIsEmojiOpen(false);
+  //   setIsPoll(false);
+  //   setPollChoiceCount(2);
+  //   setContent(response.post);
+  // }
 
   function handlePlaceholder() {
     if (contentType === 'post') {
@@ -146,7 +173,7 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
       <form
         className={styles.contentForm}
         encType='multipart/form-data'
-        onSubmit={(e) => (isPoll ? submitPoll(e) : submitPostOrComment(e))}
+        onSubmit={(e) => submitContent(e)}
       >
         {isModal && (
           <dialog

@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { POST_FRAGMENT, REPOST_FRAGMENT } from './fragments';
 
 export const LOCAL_LOGIN = gql`
   mutation localLogin($email: String!, $password: String!) {
@@ -25,6 +26,54 @@ export const CREATE_USER = gql`
       user {
         id
       }
+    }
+  }
+`;
+
+export const CREATE_POST = gql`
+  mutation createPost(
+    $text: String
+    $gifUrl: String
+    $pollChoices: [String!]
+    $image: Upload
+  ) {
+    createPost(
+      text: $text
+      gifUrl: $gifUrl
+      pollChoices: $pollChoices
+      image: $image
+    ) {
+      ...PostFragment
+    }
+  }
+
+  ${POST_FRAGMENT}
+`;
+
+export const LIKE_POST = gql`
+  mutation likePost($postId: ID!) {
+    likePost(postId: $postId) {
+      ...PostFragment
+    }
+  }
+
+  ${POST_FRAGMENT}
+`;
+
+export const REPOST = gql`
+  mutation repost($id: ID!, $contentType: String!) {
+    repost(id: $id, contentType: $contentType) {
+      ...RepostFragment
+    }
+  }
+
+  ${REPOST_FRAGMENT}
+`;
+
+export const DELETE_POST = gql`
+  mutation deletePost($postId: ID!) {
+    deletePost(postId: $postId) {
+      id
     }
   }
 `;
