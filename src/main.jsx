@@ -1,14 +1,10 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { setContext } from '@apollo/client/link/context';
-import {
-  ApolloClient,
-  ApolloProvider,
-  createHttpLink,
-  InMemoryCache,
-} from '@apollo/client';
+import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client';
 import ReactDOM from 'react-dom/client';
 import React from 'react';
 import routes from './Router.jsx';
+import apolloCache from './utils/apolloCache';
 import './style/index.css';
 
 const router = createBrowserRouter(routes);
@@ -23,7 +19,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: apolloCache,
   link: authLink.concat(httpLink),
 });
 

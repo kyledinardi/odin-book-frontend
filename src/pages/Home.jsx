@@ -69,7 +69,7 @@ function Home() {
   }
 
   function handleCreatedPost(post) {
-    postsResult.updateQuery({ GET_INDEX_POSTS }, (previousData) => ({
+    postsResult.updateQuery((previousData) => ({
       getIndexPosts: [post, ...previousData.getIndexPosts],
     }));
 
@@ -112,7 +112,9 @@ function Home() {
           >
             {postsResult.data.getIndexPosts.map((post) => (
               <IndexFeedItem
-                key={post.id}
+                key={
+                  post.feedItemType === 'post' ? `p-${post.id}` : `r-${post.id}`
+                }
                 post={post}
                 postsResult={postsResult}
               />

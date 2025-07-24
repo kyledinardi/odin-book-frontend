@@ -25,12 +25,6 @@ function Post({ post, replacePost, removePost, displayType }) {
     onCompleted: () => {
       if (!isLiked) {
         socket.emit('sendNotification', { userId: post.userId });
-      } else {
-        const newLikes = post.likes.filter(
-          (user) => user.id !== currentUser.id
-        );
-
-        replacePost({ ...post, likes: newLikes });
       }
     },
   });
@@ -41,12 +35,6 @@ function Post({ post, replacePost, removePost, displayType }) {
     onCompleted: () => {
       if (!currentUserRepostId) {
         socket.emit('sendNotification', { userId: post.userId });
-      } else {
-        const newReposts = post.reposts.filter(
-          (repostObj) => repostObj.id !== currentUserRepostId
-        );
-
-        replacePost({ ...post, reposts: newReposts });
       }
     },
   });
@@ -148,7 +136,7 @@ function Post({ post, replacePost, removePost, displayType }) {
               />
             </div>
           )}
-          {post.poll && (
+          {post.pollChoices && (
             <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
           )}
           {displayType === 'focused' && (
