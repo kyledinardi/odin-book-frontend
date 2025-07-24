@@ -70,6 +70,19 @@ export const REPOST = gql`
   ${REPOST_FRAGMENT}
 `;
 
+export const VOTE_IN_POLL = gql`
+  mutation voteInPoll($choiceId: ID!) {
+    voteInPoll(choiceId: $choiceId) {
+      id
+      postId
+      text
+      votes {
+        id
+      }
+    }
+  }
+`;
+
 export const DELETE_POST = gql`
   mutation deletePost($postId: ID!) {
     deletePost(postId: $postId) {

@@ -5,7 +5,10 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   settings: { react: { version: '18.3' } },
   plugins: ['react-refresh'],
-  rules: { 'no-underscore-dangle': ['error', { allow: ['_count'] }] },
+  rules: {
+    'no-underscore-dangle': ['error', { allow: ['_count'] }],
+    'import/extensions': ['error', 'ignorePackages', { js: 'never' }],
+  },
 
   extends: [
     'eslint:recommended',

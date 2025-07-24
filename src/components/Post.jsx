@@ -6,6 +6,7 @@ import Poll from './Poll.jsx';
 import ContentForm from './ContentForm.jsx';
 import { LIKE_POST, REPOST, DELETE_POST } from '../graphql/mutations';
 import formatDate from '../utils/formatDate';
+import logError from '../utils/logError';
 import socket from '../utils/socket';
 import styles from '../style/Content.module.css';
 
@@ -20,7 +21,7 @@ function Post({ post, replacePost, removePost, displayType }) {
   const [currentUser] = useOutletContext();
 
   const [likePost] = useMutation(LIKE_POST, {
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
+    onError: logError,
 
     onCompleted: () => {
       if (!isLiked) {
@@ -30,7 +31,7 @@ function Post({ post, replacePost, removePost, displayType }) {
   });
 
   const [repost] = useMutation(REPOST, {
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
+    onError: logError,
 
     onCompleted: () => {
       if (!currentUserRepostId) {
@@ -40,7 +41,7 @@ function Post({ post, replacePost, removePost, displayType }) {
   });
 
   const [deletePost] = useMutation(DELETE_POST, {
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
+    onError: logError,
 
     onCompleted: () => {
       removePost(post.id);
@@ -136,7 +137,7 @@ function Post({ post, replacePost, removePost, displayType }) {
               />
             </div>
           )}
-          {post.pollChoices && (
+          {post.pollChoices.length > 1 && (
             <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
           )}
           {displayType === 'focused' && (

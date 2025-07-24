@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { setContext } from '@apollo/client/link/context';
-import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client';
+import { ApolloClient, ApolloProvider } from '@apollo/client';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import ReactDOM from 'react-dom/client';
 import React from 'react';
 import routes from './Router.jsx';
@@ -8,7 +9,10 @@ import apolloCache from './utils/apolloCache';
 import './style/index.css';
 
 const router = createBrowserRouter(routes);
-const httpLink = createHttpLink({ uri: 'http://localhost:3000' });
+const uploadLink = createUploadLink({
+  uri: 'http://localhost:3000',
+  headers: { 'Apollo-Require-Preflight': 'true' },
+});
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('token');
@@ -20,7 +24,7 @@ const authLink = setContext((_, { headers }) => {
 
 const client = new ApolloClient({
   cache: apolloCache,
-  link: authLink.concat(httpLink),
+  link: authLink.concat(uploadLink),
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(

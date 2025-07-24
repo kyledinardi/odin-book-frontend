@@ -1,38 +1,62 @@
+import { useMutation } from '@apollo/client';
 import { Fragment } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import backendFetch from '../utils/backendFetch';
+import { VOTE_IN_POLL } from '../graphql/mutations';
+import logError from '../utils/logError';
 import styles from '../style/Poll.module.css';
 
 function Poll({ post, replacePost }) {
-  const [setError] = useOutletContext();
-  const userId = parseInt(localStorage.getItem('userId'), 10);
-  const totalVoters = post.poll.voters.length;
+  const [voteInPoll] = useMutation(VOTE_IN_POLL, {
+    onError: logError,
 
-  async function vote(choiceNumber) {
-    if (!post.poll.voters.includes(userId)) {
-      const response = await backendFetch(setError, `/polls/${post.poll.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ choiceNumber }),
-      });
+    onCompleted: (data) => {
+      const newPollChoices = post.pollChoices.map((choice) =>
+        choice.id === data.voteInPoll.id ? data.voteInPoll : choice
+      );
 
-      replacePost({ ...post, poll: response.poll });
+      replacePost({ ...post, pollChoices: newPollChoices });
+    },
+  });
+
+  const totalVotes = post.pollChoices.reduce(
+    (acc, choice) => acc + choice.votes.length,
+    0
+  );
+
+  function getWidth(choice) {
+    const numberOfVotes = choice.votes.length;
+
+    if (totalVotes === 0 || numberOfVotes / totalVotes < 0.05) {
+      return '5%';
     }
+
+    return `${(numberOfVotes / totalVotes) * 100}%`;
   }
 
-  function getVotes(choiceNumber) {
-    return post.poll[`choice${choiceNumber}Votes`].length;
+  function handleVote(choiceId) {
+    const hasVoted = post.pollChoices.some((choice) =>
+      choice.votes.some((vote) => vote.id === localStorage.getItem('userId'))
+    );
+
+    if (!hasVoted) {
+      voteInPoll({ variables: { choiceId } });
+    }
   }
 
   return (
     <>
       <div className={styles.pollChoices}>
-        {post.poll.choices.map((choice, i) => (
-          <Fragment key={i}>
-            <div className={styles.choiceBox} onClick={() => vote(i + 1)}>
+        {post.pollChoices.map((choice) => (
+          <Fragment key={choice.id}>
+            <div
+              className={styles.choiceBox}
+              onClick={() => handleVote(choice.id)}
+            >
               <div className={styles.choiceLabel}>
-                <span>{choice}</span>
-                {post.poll[`choice${i + 1}Votes`].includes(userId) && (
+                <span>{choice.text}</span>
+                {choice.votes.includes(
+                  Number(localStorage.getItem('userId'))
+                ) && (
                   <span className={`material-symbols-outlined ${styles.voted}`}>
                     check_circle
                   </span>
@@ -40,27 +64,22 @@ function Poll({ post, replacePost }) {
               </div>
               <div
                 className={styles.progressBar}
-                style={{
-                  width:
-                    totalVoters === 0
-                      ? '5%'
-                      : `${(getVotes(i + 1) / totalVoters) * 100}%`,
-                }}
+                style={{ width: getWidth(choice) }}
               ></div>
             </div>
             <div>
-              {totalVoters === 0
+              {totalVotes === 0
                 ? '0% (0 votes)'
                 : `${
-                    Math.round((getVotes(i + 1) / totalVoters) * 1000) / 10
-                  }% (${getVotes(i + 1)} vote${
-                    getVotes(i + 1) === 1 ? '' : 's'
+                    Math.round((choice.votes.length / totalVotes) * 1000) / 10
+                  }% (${choice.votes.length} vote${
+                    choice.votes.length === 1 ? '' : 's'
                   })`}
             </div>
           </Fragment>
         ))}
       </div>
-      <p>{totalVoters} votes</p>
+      <p>{totalVotes} votes</p>
     </>
   );
 }

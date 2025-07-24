@@ -6,9 +6,14 @@ import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
 import { CREATE_POST } from '../graphql/mutations';
+import logError from '../utils/logError';
 import styles from '../style/ContentForm.module.css';
 
-function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
+function ContentForm({
+  contentType,
+  setContent,
+  /* parentId, */ contentToEdit,
+}) {
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
@@ -24,11 +29,9 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
   const textarea = useRef(null);
   const [currentUser] = useOutletContext();
 
-  const [submitPost] = useMutation(CREATE_POST, {
-    onError: (err) => console.log(JSON.stringify(err, null, 2)),
-    onCompleted: (data) => {
-      setContent(data.createPost);
-    },
+  const [createPost] = useMutation(CREATE_POST, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.createPost),
   });
 
   useEffect(() => {
@@ -56,85 +59,41 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
       image: newImage,
     };
 
-    if (contentType === 'post') {
-      submitPost({ variables });
+    if (isPoll) {
+      variables.pollChoices = [];
+
+      for (let i = 1; i <= pollChoiceCount; i += 1) {
+        variables.pollChoices.push(e.target[i].value);
+      }
+    }
+
+    switch (contentType) {
+      case 'post':
+        if (contentToEdit) {
+          // updatePost();
+        } else {
+          createPost({ variables });
+        }
+        break;
+      case 'comment':
+        if (contentToEdit) {
+          // updateComment()
+        } else {
+          // createRootComment()
+        }
+        break;
+      case 'reply':
+        // createReply()
+        break;
+      default:
     }
 
     e.target.reset();
     e.target[0].style.height = '64px';
     cancelNewImage();
     setIsEmojiOpen(false);
+    setIsPoll(false);
   }
-
-  // async function submitPostOrComment(e) {
-  //   e.preventDefault();
-  //   let path;
-  //   const formData = new FormData();
-  //   formData.append('text', e.target[0].value);
-  //   formData.append('gifUrl', gifUrl);
-
-  //   if (e.target[2].files) {
-  //     formData.append('image', e.target[2].files[0]);
-  //   }
-
-  //   switch (contentType) {
-  //     case 'post':
-  //       if (contentToEdit) {
-  //         path = `/posts/${contentToEdit.id}`;
-  //       } else {
-  //         path = '/posts';
-  //       }
-  //       break;
-  //     case 'comment':
-  //       if (contentToEdit) {
-  //         path = `/comments/${contentToEdit.id}`;
-  //       } else {
-  //         path = `/posts/${parentId}/comments`;
-  //       }
-  //       break;
-  //     case 'reply':
-  //       path = `/comments/${parentId}`;
-  //       break;
-  //     default:
-  //   }
-
-  //   const response = await backendFetch(setError, path, {
-  //     method: contentToEdit ? 'PUT' : 'POST',
-  //     body: formData,
-  //   });
-  //   e.target.reset();
-  //   e.target[0].style.height = '64px';
-
-  //   cancelNewImage();
-  //   setIsEmojiOpen(false);
-  //   setContent(contentType === 'post' ? response.post : response.comment);
-  // }
-
-  // async function submitPoll(e) {
-  //   e.preventDefault();
-  //   const choiceArray = [];
-
-  //   for (let i = 1; i <= pollChoiceCount; i += 1) {
-  //     choiceArray.push(e.target[i].value);
-  //   }
-
-  //   const response = await backendFetch(setError, '/polls', {
-  //     method: 'POST',
-
-  //     body: JSON.stringify({
-  //       question: e.target[0].value,
-  //       choices: choiceArray,
-  //     }),
-  //   });
-
-  //   cancelNewImage();
-  //   e.target.reset();
-  //   e.target[0].style.height = '64px';
-  //   setIsEmojiOpen(false);
-  //   setIsPoll(false);
-  //   setPollChoiceCount(2);
-  //   setContent(response.post);
-  // }
 
   function handlePlaceholder() {
     if (contentType === 'post') {
