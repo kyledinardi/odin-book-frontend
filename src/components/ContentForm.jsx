@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
-import { CREATE_POST } from '../graphql/mutations';
+import { CREATE_POST, UPDATE_POST } from '../graphql/mutations';
 import logError from '../utils/logError';
 import styles from '../style/ContentForm.module.css';
 
@@ -32,6 +32,11 @@ function ContentForm({
   const [createPost] = useMutation(CREATE_POST, {
     onError: logError,
     onCompleted: (data) => setContent(data.createPost),
+  });
+
+  const [updatePost] = useMutation(UPDATE_POST, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.updatePost),
   });
 
   useEffect(() => {
@@ -67,10 +72,14 @@ function ContentForm({
       }
     }
 
+    if (contentToEdit) {
+      variables[`${contentType}Id`] = contentToEdit.id;
+    }
+
     switch (contentType) {
       case 'post':
         if (contentToEdit) {
-          // updatePost();
+          updatePost({ variables });
         } else {
           createPost({ variables });
         }

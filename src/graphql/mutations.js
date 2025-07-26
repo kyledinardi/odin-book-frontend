@@ -50,6 +50,29 @@ export const CREATE_POST = gql`
   ${POST_FRAGMENT}
 `;
 
+export const DELETE_POST = gql`
+  mutation deletePost($postId: ID!) {
+    deletePost(postId: $postId) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_POST = gql`
+  mutation updatePost(
+    $postId: ID!
+    $text: String
+    $gifUrl: String
+    $image: Upload
+  ) {
+    updatePost(postId: $postId, text: $text, gifUrl: $gifUrl, image: $image) {
+      ...PostFragment
+    }
+  }
+
+  ${POST_FRAGMENT}
+`;
+
 export const LIKE_POST = gql`
   mutation likePost($postId: ID!) {
     likePost(postId: $postId) {
@@ -58,16 +81,6 @@ export const LIKE_POST = gql`
   }
 
   ${POST_FRAGMENT}
-`;
-
-export const REPOST = gql`
-  mutation repost($id: ID!, $contentType: String!) {
-    repost(id: $id, contentType: $contentType) {
-      ...RepostFragment
-    }
-  }
-
-  ${REPOST_FRAGMENT}
 `;
 
 export const VOTE_IN_POLL = gql`
@@ -83,10 +96,12 @@ export const VOTE_IN_POLL = gql`
   }
 `;
 
-export const DELETE_POST = gql`
-  mutation deletePost($postId: ID!) {
-    deletePost(postId: $postId) {
-      id
+export const REPOST = gql`
+  mutation repost($id: ID!, $contentType: String!) {
+    repost(id: $id, contentType: $contentType) {
+      ...RepostFragment
     }
   }
+
+  ${REPOST_FRAGMENT}
 `;
