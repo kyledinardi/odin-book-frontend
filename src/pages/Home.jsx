@@ -4,9 +4,11 @@ import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ErrorPage from './ErrorPage.jsx';
 import ContentForm from '../components/ContentForm.jsx';
-import { GET_INDEX_POSTS } from '../graphql/queries';
-import socket from '../utils/socket';
 import IndexFeedItem from '../components/IndexFeedItem.jsx';
+import { GET_INDEX_POSTS } from '../graphql/queries';
+import { indexFeedCache } from '../utils/apolloCache';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 
 function Home() {
   const [hasMorePosts, setHasMorePosts] = useState(false);
@@ -16,7 +18,11 @@ function Home() {
 
   useEffect(() => {
     if (postsResult.data) {
-      setHasMorePosts(postsResult.data.getIndexPosts.length % 20 === 0);
+      const { getIndexPosts } = postsResult.data;
+
+      setHasMorePosts(
+        getIndexPosts.length % 20 === 0 && getIndexPosts.length > 0
+      );
     }
   }, [postsResult.data]);
 
@@ -68,15 +74,8 @@ function Home() {
     setNewPostCount(0);
   }
 
-  function handleCreatedPost(post) {
-    postsResult.updateQuery((previousData) => ({
-      getIndexPosts: [post, ...previousData.getIndexPosts],
-    }));
-
-    socket.emit('sendNewPost', { userId: post.userId });
-  }
-
   if (postsResult.error) {
+    logError(postsResult.error);
     return <ErrorPage error={postsResult.error} />;
   }
 
@@ -88,7 +87,10 @@ function Home() {
     <main>
       <ContentForm
         contentType={'post'}
-        setContent={(post) => handleCreatedPost(post)}
+        setContent={(post) => {
+          indexFeedCache.createPost(postsResult, post);
+          socket.emit('sendNewPost', { userId: post.userId });
+        }}
       />
       {newPostCount > 0 && (
         <button className='refreshButton' onClick={() => fetchNewerPosts()}>

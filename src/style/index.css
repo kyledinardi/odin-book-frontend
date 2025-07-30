@@ -203,11 +203,14 @@ button:disabled {
 }
 
 .repostHeading {
-  color: gray;
   margin: 15px 0 0 30px;
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.repostHeading a {
+  color: gray;
 }
 
 .loaderContainer {

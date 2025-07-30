@@ -36,6 +36,12 @@ function Post({ post, replacePost, removePost, displayType }) {
     onCompleted: () => {
       if (!currentUserRepostId) {
         socket.emit('sendNotification', { userId: post.userId });
+      } else {
+        const newReposts = post.reposts.filter(
+          (repostObj) => repostObj.id !== currentUserRepostId
+        );
+        
+        replacePost({ ...post, reposts: newReposts });
       }
     },
   });
@@ -119,10 +125,7 @@ function Post({ post, replacePost, removePost, displayType }) {
           {isEditing ? (
             <ContentForm
               contentType='post'
-              setContent={(updatedPost) => {
-                replacePost(updatedPost);
-                setIsEditing(false);
-              }}
+              setContent={() => setIsEditing(false)}
               contentToEdit={post}
             />
           ) : (
@@ -137,9 +140,7 @@ function Post({ post, replacePost, removePost, displayType }) {
               />
             </div>
           )}
-          {post.pollChoices.length > 1 && (
-            <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
-          )}
+          {post.pollChoices.length > 1 && <Poll post={post} />}
           {displayType === 'focused' && (
             <p className='gray'>{formatDate.long(post.timestamp)}</p>
           )}

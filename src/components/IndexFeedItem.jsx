@@ -1,33 +1,26 @@
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import Post from './Post.jsx';
 import Comment from './Comment.jsx';
-import editFeed from '../utils/feedEdit';
+import { indexFeedCache } from '../utils/apolloCache';
 
 function IndexFeedItem({ post, postsResult }) {
-  const updateCache = (updated, deletedId, deletedFeedItemType) => {
-    postsResult.updateQuery((previousData) => {
-      const prev = previousData.getIndexPosts;
-
-      return {
-        getIndexPosts: updated
-          ? editFeed.replace(updated, prev)
-          : editFeed.remove(deletedId, deletedFeedItemType, prev),
-      };
-    });
-  };
-
   if (post.postId) {
     return (
       <div key={`repost${post.id}`}>
         <p className='repostHeading'>
           <span className='material-symbols-outlined'>repeat</span>
-          <span>{post.user.displayName} reposted</span>
+          <Link to={`/users/${post.userId}`}>
+            {post.user.displayName} reposted
+          </Link>
         </p>
         <Post
           post={post.post}
-          replacePost={(updatedPost) => updateCache(updatedPost)}
+          replacePost={(updatedPost) =>
+            indexFeedCache.update(postsResult, updatedPost)
+          }
           removePost={(deletedPostId) =>
-            updateCache(null, deletedPostId, 'post')
+            indexFeedCache.delete(postsResult, deletedPostId, 'post')
           }
           displayType='repost'
         />
@@ -40,13 +33,17 @@ function IndexFeedItem({ post, postsResult }) {
       <div key={`repost${post.id}`}>
         <p className='repostHeading'>
           <span className='material-symbols-outlined'>repeat</span>
-          <span>{post.user.displayName} reposted</span>
+          <Link to={`/users/${post.userId}`}>
+            {post.user.displayName} reposted
+          </Link>
         </p>
         <Comment
           comment={post.comment}
-          replaceComment={(updatedComment) => updateCache(updatedComment)}
-          removeComment={(deletedCommentId) =>
-            updateCache(null, deletedCommentId, 'comment')
+          replaceComment={(updatedPost) =>
+            indexFeedCache.update(postsResult, updatedPost)
+          }
+          removeComment={(deletedPostId) =>
+            indexFeedCache.delete(postsResult, deletedPostId, 'post')
           }
           displayType='repost'
           repostedBy={post.user.username}
@@ -59,8 +56,12 @@ function IndexFeedItem({ post, postsResult }) {
     <Post
       key={post.id}
       post={post}
-      replacePost={(updatedPost) => updateCache(updatedPost)}
-      removePost={(deletedPostId) => updateCache(null, deletedPostId, 'post')}
+      replacePost={(updatedPost) =>
+        indexFeedCache.update(postsResult, updatedPost)
+      }
+      removePost={(deletedPostId) =>
+        indexFeedCache.delete(postsResult, deletedPostId, 'post')
+      }
       displayType='feed'
     />
   );

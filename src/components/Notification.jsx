@@ -18,11 +18,12 @@ function Notification({ notification }) {
           setLink(<Link to={`/posts/${notification.postId}`}>post.</Link>);
         } else {
           setLink(
-            <Link to={`/comments/${notification.commentId}`}>comment.</Link>,
+            <Link to={`/comments/${notification.commentId}`}>comment.</Link>
           );
         }
 
         break;
+
       case 'like':
         setIcon('heart_plus');
         setText(' liked your ');
@@ -31,39 +32,45 @@ function Notification({ notification }) {
           setLink(<Link to={`/posts/${notification.postId}`}>post.</Link>);
         } else {
           setLink(
-            <Link to={`/comments/${notification.commentId}`}>comment.</Link>,
+            <Link to={`/comments/${notification.commentId}`}>comment.</Link>
           );
         }
 
         break;
+
       case 'comment':
         setIcon('add_comment');
         setText(' commented on your ');
         setLink(<Link to={`/posts/${notification.postId}`}>post.</Link>);
         break;
+
       case 'reply':
         setIcon('reply');
         setText(' replied to your ');
 
         setLink(
-          <Link to={`/comments/${notification.commentId}`}>comment.</Link>,
+          <Link to={`/comments/${notification.commentId}`}>comment.</Link>
         );
 
         break;
+
       case 'follow':
         setIcon('group_add');
         setText(' started following you.');
         break;
+
       case 'message':
         setIcon('forward_to_inbox');
         setText(' sent you a ');
 
         setLink(
-          <Link to={`/messages/${notification.sourceUserId}`}>message.</Link>,
+          <Link to={`/messages/${notification.sourceUserId}`}>message.</Link>
         );
 
         break;
+
       default:
+        throw new Error(`Unknown notification type: ${notification.type}`);
     }
   }, [notification]);
 

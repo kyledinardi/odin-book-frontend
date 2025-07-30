@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
 import ProfileBar from './components/ProfileBar.jsx';
 import { GET_CURRENT_USER } from './graphql/queries';
+import logError from './utils/logError';
 import socket from './utils/socket';
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
   }, [notificationCount]);
 
   if (currentUserResult.error) {
+    logError(currentUserResult.error);
     return <ErrorPage error={currentUserResult.error} />;
   }
 

@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import { POST_FRAGMENT, REPOST_FRAGMENT } from './fragments';
+import { COMMENT_FRAGMENT, POST_FRAGMENT, REPOST_FRAGMENT } from './fragments';
 
 export const LOCAL_LOGIN = gql`
   mutation localLogin($email: String!, $password: String!) {
@@ -104,4 +104,82 @@ export const REPOST = gql`
   }
 
   ${REPOST_FRAGMENT}
+`;
+
+export const CREATE_ROOT_COMMENT = gql`
+  mutation createRootComment(
+    $postId: ID!
+    $text: String
+    $gifUrl: String
+    $image: Upload
+  ) {
+    createRootComment(
+      postId: $postId
+      text: $text
+      gifUrl: $gifUrl
+      image: $image
+    ) {
+      ...CommentFragment
+    }
+  }
+
+  ${COMMENT_FRAGMENT}
+`;
+
+export const CREATE_REPLY = gql`
+  mutation createReply(
+    $parentId: ID!
+    $text: String
+    $gifUrl: String
+    $image: Upload
+  ) {
+    createReply(
+      parentId: $parentId
+      text: $text
+      gifUrl: $gifUrl
+      image: $image
+    ) {
+      ...CommentFragment
+    }
+  }
+
+  ${COMMENT_FRAGMENT}
+`;
+
+export const UPDATE_COMMENT = gql`
+  mutation updateComment(
+    $commentId: ID!
+    $text: String
+    $gifUrl: String
+    $image: Upload
+  ) {
+    updateComment(
+      commentId: $commentId
+      text: $text
+      gifUrl: $gifUrl
+      image: $image
+    ) {
+      ...CommentFragment
+    }
+  }
+
+  ${COMMENT_FRAGMENT}
+`;
+
+export const LIKE_COMMENT = gql`
+  mutation likeComment($commentId: ID!) {
+    likeComment(commentId: $commentId) {
+      ...CommentFragment
+    }
+  }
+
+  ${COMMENT_FRAGMENT}
+`;
+
+export const DELETE_COMMENT = gql`
+  mutation deleteComment($commentId: ID!) {
+    deleteComment(commentId: $commentId) {
+      id
+    }
+  }
 `;

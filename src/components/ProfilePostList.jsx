@@ -12,7 +12,7 @@ function ProfilePostList({ user, openTab }) {
   const [comments, setComments] = useState(null);
   const [imagePosts, setImagePosts] = useState(null);
   const [likedPosts, setLikedPosts] = useState(null);
-  
+
   const [hasMorePosts, setHasMorePosts] = useState(false);
   const [hasMoreComments, setHasMoreComments] = useState(false);
   const [hasMoreImagePosts, setHasMoreImagePosts] = useState(false);
@@ -49,7 +49,7 @@ function ProfilePostList({ user, openTab }) {
 
       `/users/${user.id}/posts?${lastPost ? `postId=${lastPost.id}` : ''}&${
         lastRepost ? `repostId=${lastRepost.id}` : ''
-      }`,
+      }`
     );
 
     setPosts([...posts, ...response.posts]);
@@ -60,9 +60,7 @@ function ProfilePostList({ user, openTab }) {
     const response = await backendFetch(
       setError,
 
-      `/users/${user.id}/comments?commentId=${
-        comments[comments.length - 1].id
-      }`,
+      `/users/${user.id}/comments?commentId=${comments[comments.length - 1].id}`
     );
 
     setComments([...comments, ...response.comments]);
@@ -75,7 +73,7 @@ function ProfilePostList({ user, openTab }) {
 
       `/users/${user.id}/posts/images?postId=${
         imagePosts[imagePosts.length - 1].id
-      }`,
+      }`
     );
 
     setImagePosts([...imagePosts, ...response.posts]);
@@ -88,7 +86,7 @@ function ProfilePostList({ user, openTab }) {
 
       `/users/${user.id}/posts/likes?postId=${
         likedPosts[likedPosts.length - 1].id
-      }`,
+      }`
     );
 
     setLikedPosts([...likedPosts, ...response.posts]);
@@ -105,13 +103,13 @@ function ProfilePostList({ user, openTab }) {
   function removeFeedItem(deletedFeedItemId, deletedFeedItemType) {
     setPosts(editFeed.remove(deletedFeedItemId, deletedFeedItemType, posts));
     setComments(
-      editFeed.remove(deletedFeedItemId, deletedFeedItemType, comments),
+      editFeed.remove(deletedFeedItemId, deletedFeedItemType, comments)
     );
     setImagePosts(
-      editFeed.remove(deletedFeedItemId, deletedFeedItemType, imagePosts),
+      editFeed.remove(deletedFeedItemId, deletedFeedItemType, imagePosts)
     );
     setLikedPosts(
-      editFeed.remove(deletedFeedItemId, deletedFeedItemType, likedPosts),
+      editFeed.remove(deletedFeedItemId, deletedFeedItemType, likedPosts)
     );
   }
 

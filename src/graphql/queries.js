@@ -1,5 +1,10 @@
 import { gql } from '@apollo/client';
-import { POST_FRAGMENT, REPOST_FRAGMENT, USER_FRAGMENT } from './fragments';
+import {
+  COMMENT_FRAGMENT,
+  POST_FRAGMENT,
+  REPOST_FRAGMENT,
+  USER_FRAGMENT,
+} from './fragments';
 
 export const LOCAL_LOGIN = gql`
   mutation localLogin($username: String!, $password: String!) {
@@ -30,7 +35,7 @@ export const GET_LISTED_USERS = gql`
   }
 
   ${USER_FRAGMENT}
-` 
+`;
 
 export const GET_INDEX_POSTS = gql`
   query getIndexPosts($postCursor: ID, $repostCursor: ID, $timestamp: String) {
@@ -50,4 +55,41 @@ export const GET_INDEX_POSTS = gql`
 
   ${POST_FRAGMENT}
   ${REPOST_FRAGMENT}
+`;
+
+export const GET_POST = gql`
+  query getPost($postId: ID!, $cursor: ID) {
+    getPost(postId: $postId, cursor: $cursor) {
+      ...PostFragment
+      comments {
+        ...CommentFragment
+      }
+    }
+  }
+
+  ${POST_FRAGMENT}
+  ${COMMENT_FRAGMENT}
+`;
+
+export const GET_COMMENT = gql`
+  query getComment($commentId: ID!, $cursor: ID) {
+    getComment(commentId: $commentId, cursor: $cursor) {
+      ...CommentFragment
+      post {
+        ...PostFragment
+      }
+      parent {
+        ...CommentFragment
+      }
+      commentChain {
+        ...CommentFragment
+      }
+      replies {
+        ...CommentFragment
+      }
+    }
+  }
+
+  ${POST_FRAGMENT}
+  ${COMMENT_FRAGMENT}
 `;

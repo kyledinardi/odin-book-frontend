@@ -29,12 +29,12 @@ function Search() {
       const [postsResponse, usersResponse] = await Promise.all([
         backendFetch(
           setError,
-          `/posts/search?query=${searchParams.get('query')}`,
+          `/posts/search?query=${searchParams.get('query')}`
         ),
 
         backendFetch(
           setError,
-          `/users/search?query=${searchParams.get('query')}`,
+          `/users/search?query=${searchParams.get('query')}`
         ),
       ]);
 
@@ -70,7 +70,7 @@ function Search() {
 
       `/posts/search?query=${searchParams.get('query')}&postId=${
         posts[posts.length - 1].id
-      }`,
+      }`
     );
 
     setPosts([...posts, ...response.posts]);
@@ -83,7 +83,7 @@ function Search() {
 
       `/users/search?query=${searchParams.get('query')}&userId=${
         users[users.length - 1].id
-      }`,
+      }`
     );
 
     setUsers([...users, ...response.users]);
@@ -92,7 +92,7 @@ function Search() {
 
   function replacePost(updatedPost) {
     const newPosts = posts.map((post) =>
-      post.id === updatedPost.id ? updatedPost : post,
+      post.id === updatedPost.id ? updatedPost : post
     );
 
     setPosts(newPosts);

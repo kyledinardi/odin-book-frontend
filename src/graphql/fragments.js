@@ -32,17 +32,9 @@ export const POST_FRAGMENT = gql`
     imageUrl
     userId
     user {
-      id
+      pfpUrl
       username
       displayName
-      pfpUrl
-    }
-    likes {
-      id
-    }
-    reposts {
-      id
-      userId
     }
     pollChoices {
       id
@@ -51,27 +43,15 @@ export const POST_FRAGMENT = gql`
         id
       }
     }
-    comments {
+    reposts {
       id
-      text
-      imageUrl
-      user {
-        id
-        username
-        displayName
-        pfpUrl
-      }
-      likes {
-        id
-      }
-      replies {
-        id
-        text
-        imageUrl
-      }
-      reposts {
-        id
-      }
+      userId
+    }
+    likes {
+      id
+    }
+    _count {
+      comments
     }
   }
 `;
@@ -86,7 +66,6 @@ export const COMMENT_FRAGMENT = gql`
     postId
     parentId
     user {
-      id
       username
       displayName
       pfpUrl
@@ -96,55 +75,12 @@ export const COMMENT_FRAGMENT = gql`
     }
     reposts {
       id
+      userId
     }
-    post {
-      ...PostFragment
-    }
-    parent {
-      id
-      user {
-        id
-        username
-        displayName
-        pfpUrl
-      }
-      likes {
-        id
-      }
-      replies {
-        id
-        text
-        imageUrl
-      }
-      reposts {
-        id
-      }
-    }
-    replies {
-      id
-      text
-      imageUrl
-      user {
-        id
-        username
-        displayName
-        pfpUrl
-      }
-      likes {
-        id
-      }
-      replies {
-        id
-        text
-        imageUrl
-      }
-      reposts {
-        id
-      }
+    _count {
+      replies
     }
   }
-
-  ${POST_FRAGMENT}
 `;
 
 export const REPOST_FRAGMENT = gql`
@@ -156,16 +92,25 @@ export const REPOST_FRAGMENT = gql`
     postId
     commentId
     user {
-      id
-      username
       displayName
-      pfpUrl
     }
     post {
       ...PostFragment
     }
     comment {
       ...CommentFragment
+      post {
+        userId
+        user {
+          username
+        }
+      }
+      parent {
+        userId
+        user {
+          username
+        }
+      }
     }
   }
 

@@ -5,15 +5,17 @@ import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
-import { CREATE_POST, UPDATE_POST } from '../graphql/mutations';
+import {
+  CREATE_POST,
+  CREATE_REPLY,
+  CREATE_ROOT_COMMENT,
+  UPDATE_COMMENT,
+  UPDATE_POST,
+} from '../graphql/mutations';
 import logError from '../utils/logError';
 import styles from '../style/ContentForm.module.css';
 
-function ContentForm({
-  contentType,
-  setContent,
-  /* parentId, */ contentToEdit,
-}) {
+function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
@@ -36,7 +38,22 @@ function ContentForm({
 
   const [updatePost] = useMutation(UPDATE_POST, {
     onError: logError,
-    onCompleted: (data) => setContent(data.updatePost),
+    onCompleted: () => setContent(),
+  });
+
+  const [createRootComment] = useMutation(CREATE_ROOT_COMMENT, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.createRootComment),
+  });
+
+  const [updateComment] = useMutation(UPDATE_COMMENT, {
+    onError: logError,
+    onCompleted: () => setContent(),
+  });
+
+  const [createReply] = useMutation(CREATE_REPLY, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.createReply),
   });
 
   useEffect(() => {
@@ -83,18 +100,26 @@ function ContentForm({
         } else {
           createPost({ variables });
         }
+
         break;
+
       case 'comment':
         if (contentToEdit) {
-          // updateComment()
+          updateComment({ variables });
         } else {
-          // createRootComment()
+          variables.postId = parentId;
+          createRootComment({ variables });
         }
+
         break;
+
       case 'reply':
-        // createReply()
+        variables.parentId = parentId;
+        createReply({ variables });
         break;
+
       default:
+        throw new Error(`Invalid content type: ${contentType}`);
     }
 
     e.target.reset();

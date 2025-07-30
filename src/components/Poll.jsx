@@ -5,18 +5,8 @@ import { VOTE_IN_POLL } from '../graphql/mutations';
 import logError from '../utils/logError';
 import styles from '../style/Poll.module.css';
 
-function Poll({ post, replacePost }) {
-  const [voteInPoll] = useMutation(VOTE_IN_POLL, {
-    onError: logError,
-
-    onCompleted: (data) => {
-      const newPollChoices = post.pollChoices.map((choice) =>
-        choice.id === data.voteInPoll.id ? data.voteInPoll : choice
-      );
-
-      replacePost({ ...post, pollChoices: newPollChoices });
-    },
-  });
+function Poll({ post }) {
+  const [voteInPoll] = useMutation(VOTE_IN_POLL, { onError: logError });
 
   const totalVotes = post.pollChoices.reduce(
     (acc, choice) => acc + choice.votes.length,
@@ -84,9 +74,5 @@ function Poll({ post, replacePost }) {
   );
 }
 
-Poll.propTypes = {
-  post: PropTypes.object,
-  replacePost: PropTypes.func,
-};
-
+Poll.propTypes = { post: PropTypes.object };
 export default Poll;

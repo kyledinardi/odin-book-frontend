@@ -44,9 +44,7 @@ function FollowList({ openTab, user, followedIds }) {
     const response = await backendFetch(
       setError,
 
-      `/users/${user.id}/following?userId=${
-        following[following.length - 1].id
-      }`,
+      `/users/${user.id}/following?userId=${following[following.length - 1].id}`
     );
 
     setFollowing([...following, ...response.users]);
@@ -57,9 +55,7 @@ function FollowList({ openTab, user, followedIds }) {
     const response = await backendFetch(
       setError,
 
-      `/users/${user.id}/followers?userId=${
-        followers[followers.length - 1].id
-      }`,
+      `/users/${user.id}/followers?userId=${followers[followers.length - 1].id}`
     );
 
     setFollowers([...followers, ...response.users]);
@@ -69,7 +65,7 @@ function FollowList({ openTab, user, followedIds }) {
   async function addMoreMutuals() {
     const response = await backendFetch(
       setError,
-      `/users/${user.id}/mutuals?userId=${mutuals[mutuals.length - 1].id}`,
+      `/users/${user.id}/mutuals?userId=${mutuals[mutuals.length - 1].id}`
     );
 
     setMutuals([...mutuals, ...response.users]);
@@ -82,7 +78,7 @@ function FollowList({ openTab, user, followedIds }) {
 
       `/users/${user.id}/followedFollowers?userId=${
         followedFollowers[followedFollowers.length - 1].id
-      }`,
+      }`
     );
 
     setFollowedFollowers([...followedFollowers, ...response.users]);
@@ -206,7 +202,7 @@ function FollowList({ openTab, user, followedIds }) {
       }
 
       default:
-        return null;
+        throw new Error(`Invalid tab: ${openTab}`);
     }
   }
 }
