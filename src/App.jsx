@@ -11,7 +11,7 @@ import socket from './utils/socket';
 
 function App() {
   const [theme, setTheme] = useState('');
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [notifCount, setNotifCount] = useState(0);
   const logoutModal = useRef(null);
   const navigate = useNavigate();
   const currentUserResult = useQuery(GET_CURRENT_USER);
@@ -31,19 +31,21 @@ function App() {
   useEffect(() => {
     if (currentUserResult.data) {
       const { _count, id } = currentUserResult.data.getCurrentUser;
-      setNotificationCount(_count.receivedNotifications);
+      setNotifCount(_count.receivedNotifications);
       socket.emit('joinUserRoom', id);
     }
+
+    console.log('create post not working')
   }, [currentUserResult.data]);
 
   useEffect(() => {
-    function incrementNotificationCount() {
-      setNotificationCount(notificationCount + 1);
+    function incrementNotifCount() {
+      setNotifCount(notifCount + 1);
     }
 
-    socket.on('receiveNotification', incrementNotificationCount);
-    return () => socket.off('receiveNotification', incrementNotificationCount);
-  }, [notificationCount]);
+    socket.on('receiveNotification', incrementNotifCount);
+    return () => socket.off('receiveNotification', incrementNotifCount);
+  }, [notifCount]);
 
   if (currentUserResult.error) {
     logError(currentUserResult.error);
@@ -52,12 +54,12 @@ function App() {
 
   return (
     <div className='themeWrapper' data-theme={theme}>
-      {!currentUserResult.loading && (
+      {currentUserResult.data && (
         <div className='app' data-theme={theme}>
           <Sidebar
             currentUser={currentUserResult.data?.getCurrentUser}
             logoutModal={logoutModal}
-            notificationCount={notificationCount}
+            notifCount={notifCount}
             theme={theme}
             setTheme={(newTheme) => setTheme(newTheme)}
           />
@@ -74,8 +76,8 @@ function App() {
               context={[
                 currentUserResult.data?.getCurrentUser,
                 currentUserResult.refetch(),
-                notificationCount,
-                setNotificationCount,
+                notifCount,
+                setNotifCount,
               ]}
             />
           </div>

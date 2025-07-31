@@ -1,34 +1,23 @@
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
-import backendFetch from '../utils/backendFetch';
+import { FOLLOW } from '../graphql/mutations';
+import logError from '../utils/logError';
 import socket from '../utils/socket';
 import styles from '../style/User.module.css';
 
-function User({ user, bio, isFollowed, replaceUser, setError }) {
-  const outletContext = useOutletContext();
+function User({ user, replaceUser, isFollowed, bio }) {
+  const [follow] = useMutation(FOLLOW, {
+    onError: logError,
 
-  function setUserError(err) {
-    if (outletContext) {
-      const [setOutletError] = outletContext;
-      setOutletError(err);
-    } else {
-      setError(err);
-    }
-  }
+    onCompleted: () => {
+      replaceUser();
 
-  async function follow() {
-    const response = await backendFetch(
-      setUserError,
-      `/users/${isFollowed ? 'unfollow' : 'follow'}`,
-      { method: 'PUT', body: JSON.stringify({ userId: user.id }) },
-    );
-
-    replaceUser(response.user);
-
-    if (!isFollowed) {
-      socket.emit('sendNotification', { userId: user.id });
-    }
-  }
+      if (!isFollowed) {
+        socket.emit('sendNotification', { userId: user.id });
+      }
+    },
+  });
 
   return (
     <div className={styles.user}>
@@ -40,21 +29,23 @@ function User({ user, bio, isFollowed, replaceUser, setError }) {
         <span className='gray'>{` @${user.username}`}</span>
       </Link>
       {user.id !== parseInt(localStorage.getItem('userId'), 10) && (
-        <button className={styles.followButton} onClick={() => follow()}>
+        <button
+          className={styles.followButton}
+          onClick={() => follow({ variables: { userId: user.id } })}
+        >
           {isFollowed ? 'Unfollow' : 'Follow'}
         </button>
       )}
-      {!!bio && <p className={styles.bio}>{user.bio}</p>}
+      {bio && <p className={styles.bio}>{user.bio}</p>}
     </div>
   );
 }
 
 User.propTypes = {
   user: PropTypes.object,
-  bio: PropTypes.bool,
-  isFollowed: PropTypes.bool,
   replaceUser: PropTypes.func,
-  setError: PropTypes.func,
+  isFollowed: PropTypes.bool,
+  bio: PropTypes.bool,
 };
 
 export default User;

@@ -37,6 +37,16 @@ export const GET_LISTED_USERS = gql`
   ${USER_FRAGMENT}
 `;
 
+export const SEARCH_USERS = gql`
+  query searchUsers($query: String!, $cursor: ID) {
+    searchUsers(query: $query, cursor: $cursor) {
+      ...UserFragment
+    }
+  }
+
+  ${USER_FRAGMENT}
+`;
+
 export const GET_INDEX_POSTS = gql`
   query getIndexPosts($postCursor: ID, $repostCursor: ID, $timestamp: String) {
     getIndexPosts(
@@ -55,6 +65,16 @@ export const GET_INDEX_POSTS = gql`
 
   ${POST_FRAGMENT}
   ${REPOST_FRAGMENT}
+`;
+
+export const SEARCH_POSTS = gql`
+  query searchPosts($query: String!, $cursor: ID) {
+    searchPosts(query: $query, cursor: $cursor) {
+      ...PostFragment
+    }
+  }
+
+  ${POST_FRAGMENT}
 `;
 
 export const GET_POST = gql`

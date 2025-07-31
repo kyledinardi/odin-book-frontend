@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -21,28 +21,26 @@ function PostPage() {
   const post = postResult.data?.getPost;
   const comments = post?.comments;
 
-  useEffect(() => {
-    if (postResult.data) {
-      setHasMoreComments(comments.length % 20 === 0 && comments.length > 0);
-    }
-  }, [postResult.data, comments?.length]);
-
   function fetchMoreComments() {
     postResult.fetchMore({
       variables: { cursor: comments[comments.length - 1].id },
 
-      updateQuery: (previousData, { fetchMoreResult }) => ({
-        ...previousData,
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newComments = fetchMoreResult.getPost.comments;
 
-        getPost: {
-          ...previousData.getPost,
+        setHasMoreComments(
+          newComments.length % 20 === 0 && newComments.length > 0
+        );
 
-          comments: [
-            ...previousData.getPost.comments,
-            ...fetchMoreResult.getPost.comments,
-          ],
-        },
-      }),
+        return {
+          ...previousData,
+
+          getPost: {
+            ...previousData.getPost,
+            comments: [...previousData.getPost.comments, ...newComments],
+          },
+        };
+      },
     });
   }
 

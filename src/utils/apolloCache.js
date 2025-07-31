@@ -4,7 +4,10 @@ import editFeed from './feedEdit';
 export default new InMemoryCache({
   typePolicies: {
     Query: {
-      fields: { getIndexPosts: { merge: (_, incoming) => incoming } },
+      fields: {
+        getIndexPosts: { merge: (_, incoming) => incoming },
+        searchPosts: { merge: (_, incoming) => incoming },
+      },
     },
 
     Post: {
@@ -43,6 +46,20 @@ export const indexFeedCache = {
         deletedFeedItemType,
         getIndexPosts
       ),
+    })),
+};
+
+export const searchChache = {
+  updatePost: (result, updatedPost) =>
+    result.updateQuery(({ searchPosts }) => ({
+      searchPosts: searchPosts.map((post) =>
+        post.id === updatedPost.id ? updatedPost : post
+      ),
+    })),
+
+  deletePost: (result, deletedPostId) =>
+    result.updateQuery(({ searchPosts }) => ({
+      searchPosts: searchPosts.filter((post) => post.id !== deletedPostId),
     })),
 };
 

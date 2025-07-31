@@ -30,6 +30,14 @@ export const CREATE_USER = gql`
   }
 `;
 
+export const FOLLOW = gql`
+  mutation follow($userId: ID!) {
+    follow(userId: $userId) {
+      id
+    }
+  }
+`;
+
 export const CREATE_POST = gql`
   mutation createPost(
     $text: String

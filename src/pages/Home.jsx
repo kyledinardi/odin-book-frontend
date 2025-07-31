@@ -15,16 +15,7 @@ function Home() {
   const [newPostCount, setNewPostCount] = useState(0);
   const [currentUser] = useOutletContext();
   const postsResult = useQuery(GET_INDEX_POSTS);
-
-  useEffect(() => {
-    if (postsResult.data) {
-      const { getIndexPosts } = postsResult.data;
-
-      setHasMorePosts(
-        getIndexPosts.length % 20 === 0 && getIndexPosts.length > 0
-      );
-    }
-  }, [postsResult.data]);
+  const posts = postsResult.data?.getIndexPosts;
 
   useEffect(() => {
     const incrementNewPostCount = () => setNewPostCount(newPostCount + 1);
@@ -32,32 +23,26 @@ function Home() {
     return () => socket.off('receiveNewPost', incrementNewPostCount);
   }, [newPostCount]);
 
-  async function fetchOlderPosts() {
-    const { getIndexPosts } = postsResult.data;
-
-    const lastPost = getIndexPosts.findLast(
-      (post) => post.feedItemType === 'post'
-    );
-
-    const lastRepost = getIndexPosts.findLast(
-      (post) => post.feedItemType === 'repost'
-    );
+  function fetchOlderPosts() {
+    const lastPost = posts.findLast((post) => post.feedItemType === 'post');
+    const lastRepost = posts.findLast((post) => post.feedItemType === 'repost');
 
     postsResult.fetchMore({
       variables: { postCursor: lastPost?.id, repostCursor: lastRepost?.id },
 
-      updateQuery: (previousData, { fetchMoreResult }) => ({
-        ...previousData,
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newPosts = fetchMoreResult.getIndexPosts;
+        setHasMorePosts(newPosts.length % 20 === 0 && newPosts.length > 0);
 
-        getIndexPosts: [
-          ...previousData.getIndexPosts,
-          ...fetchMoreResult.getIndexPosts,
-        ],
-      }),
+        return {
+          ...previousData,
+          getIndexPosts: [...previousData.getIndexPosts, ...newPosts],
+        };
+      },
     });
   }
 
-  async function fetchNewerPosts() {
+  function fetchNewerPosts() {
     postsResult.fetchMore({
       variables: { timestamp: postsResult.data.getIndexPosts[0].timestamp },
 
@@ -98,11 +83,11 @@ function Home() {
         </button>
       )}
       <div>
-        {postsResult.data.getIndexPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <h2>You and your followers have no posts</h2>
         ) : (
           <InfiniteScroll
-            dataLength={postsResult.data.getIndexPosts.length}
+            dataLength={posts.length}
             next={() => fetchOlderPosts()}
             hasMore={hasMorePosts}
             loader={
@@ -112,7 +97,7 @@ function Home() {
             }
             endMessage={<div></div>}
           >
-            {postsResult.data.getIndexPosts.map((post) => (
+            {posts.map((post) => (
               <IndexFeedItem
                 key={
                   post.feedItemType === 'post' ? `p-${post.id}` : `r-${post.id}`

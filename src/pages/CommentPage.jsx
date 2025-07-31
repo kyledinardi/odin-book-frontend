@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -21,28 +21,26 @@ function CommentPage() {
   const comment = commentResult.data?.getComment;
   const replies = comment?.replies;
 
-  useEffect(() => {
-    if (commentResult.data) {
-      setHasMoreReplies(replies.length % 20 === 0 && replies.length > 0);
-    }
-  }, [commentResult.data, replies?.length]);
-
-  async function fetchMoreReplies() {
+  function fetchMoreReplies() {
     commentResult.fetchMore({
       variables: { cursor: replies[replies.length - 1].id },
 
-      updateQuery: (previousData, { fetchMoreResult }) => ({
-        ...previousData,
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newReplies = fetchMoreResult.getComment.replies;
 
-        getComment: {
-          ...previousData.getComment,
+        setHasMoreReplies(
+          newReplies.length % 20 === 0 && newReplies.length > 0
+        );
 
-          replies: [
-            ...previousData.getComment.replies,
-            ...fetchMoreResult.getComment.replies,
-          ],
-        },
-      }),
+        return {
+          ...previousData,
+
+          getComment: {
+            ...previousData.getComment,
+            replies: [...previousData.getComment.replies, ...newReplies],
+          },
+        };
+      },
     });
   }
 

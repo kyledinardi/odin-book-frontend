@@ -7,16 +7,14 @@ import { GET_LISTED_USERS } from '../graphql/queries';
 import logError from '../utils/logError';
 import styles from '../style/UserList.module.css';
 
-function UserList({ currentUser, setCurrentUser, setError }) {
+function UserList({ currentUser, setCurrentUser }) {
   const [followedIds, setFollowedIds] = useState(null);
   const navigate = useNavigate();
   const usersResult = useQuery(GET_LISTED_USERS);
 
   useEffect(() => {
-    if (currentUser) {
-      setFollowedIds(currentUser.following.map((user) => user.id));
-    }
-  }, [currentUser]);
+    setFollowedIds(currentUser.following.map((user) => user.id));
+  }, [currentUser.following]);
 
   if (usersResult.error) {
     logError(usersResult.error);
@@ -43,12 +41,8 @@ function UserList({ currentUser, setCurrentUser, setError }) {
           <User
             key={user.id}
             user={user}
-            bio={false}
+            replaceUser={() => setCurrentUser()}
             isFollowed={followedIds.includes(user.id)}
-            replaceUser={(u) =>
-              setCurrentUser({ ...currentUser, following: u.following })
-            }
-            setError={(err) => setError(err)}
           />
         ))}
       </div>
@@ -59,7 +53,6 @@ function UserList({ currentUser, setCurrentUser, setError }) {
 UserList.propTypes = {
   currentUser: PropTypes.object,
   setCurrentUser: PropTypes.func,
-  setError: PropTypes.func,
 };
 
 export default UserList;
