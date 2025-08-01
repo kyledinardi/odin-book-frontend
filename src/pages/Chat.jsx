@@ -15,7 +15,7 @@ function Chat() {
   const messagesEnd = useRef(null);
 
   const [currentUser] = useOutletContext();
-  const roomId = parseInt(useParams().roomId, 10);
+  const roomId = Number(useParams().roomId);
 
   useEffect(() => {
     if (!roomId) {

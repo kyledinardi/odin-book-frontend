@@ -113,3 +113,22 @@ export const GET_COMMENT = gql`
   ${POST_FRAGMENT}
   ${COMMENT_FRAGMENT}
 `;
+
+export const GET_NOTIFICATIONS = gql`
+  query getNotifications($cursor: ID, $timestamp: String) {
+    getNotifications(cursor: $cursor, timestamp: $timestamp) {
+      id
+      timestamp
+      type
+      isRead
+      sourceUserId
+      targetUserId
+      postId
+      commentId
+      sourceUser {
+        displayName
+        pfpUrl
+      }
+    }
+  }
+`;

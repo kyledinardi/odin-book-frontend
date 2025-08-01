@@ -23,7 +23,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
     onError: logError,
 
     onCompleted: () => {
-      if (!isLiked) {
+      if (!isLiked && comment.userId !== Number(currentUser.id)) {
         socket.emit('sendNotification', { userId: comment.userId });
       }
     },
@@ -33,7 +33,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
     onError: logError,
 
     onCompleted: () => {
-      if (!currentUserRepostId) {
+      if (!currentUserRepostId && comment.userId !== Number(currentUser.id)) {
         socket.emit('sendNotification', { userId: comment.userId });
       } else {
         const newReposts = comment.reposts.filter(

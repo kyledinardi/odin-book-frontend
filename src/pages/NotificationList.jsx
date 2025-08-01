@@ -1,68 +1,83 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import ErrorPage from './ErrorPage.jsx';
 import Notification from '../components/Notification.jsx';
-import backendFetch from '../utils/backendFetch';
+import { GET_NOTIFICATIONS } from '../graphql/queries';
+import logError from '../utils/logError';
 import socket from '../utils/socket';
 
 function NotificationList() {
-  const [notifications, setNotifications] = useState(null);
-  const [hasMoreNotifications, setHasMoreNotifications] = useState(false);
-
-  const [, , notificationCount, setNotificationCount] =
-    useOutletContext();
+  const [hasMoreNotifs, setHasMoreNotifs] = useState(true);
+  const [, , notifCount, setNotifCount] = useOutletContext();
+  const notificationsResult = useQuery(GET_NOTIFICATIONS);
+  const notifs = notificationsResult.data?.getNotifications;
 
   useEffect(() => {
-    backendFetch(setError, '/notifications').then((response) => {
-      setNotifications(response.notifications);
-      setHasMoreNotifications(response.notifications.length === 20);
+    if (notifCount > 0) {
+      setNotifCount(0);
+    }
+  }, [notifCount, setNotifCount]);
+
+  useEffect(() => {
+    function refreshNotifs() {
+      notificationsResult.fetchMore({
+        variables: { timestamp: notifs[0].timestamp },
+
+        updateQuery: (previousData, { fetchMoreResult }) => ({
+          ...previousData,
+
+          getNotifications: [
+            ...fetchMoreResult.getNotifications,
+            ...previousData.getNotifications,
+          ],
+        }),
+      });
+    }
+
+    socket.on('receiveNotification', refreshNotifs);
+    return () => socket.off('receiveNotification', refreshNotifs);
+  }, [notificationsResult, notifs]);
+
+  async function fetchMoreNotifs() {
+    notificationsResult.fetchMore({
+      variables: { cursor: notifs[notifs.length - 1].id },
+
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newNotifs = fetchMoreResult.getNotifications;
+        setHasMoreNotifs(newNotifs.length % 20 === 0 && newNotifs.length > 0);
+
+        return {
+          ...previousData,
+          getNotifications: [...previousData.getNotifications, ...newNotifs],
+        };
+      },
     });
-  }, [setError]);
-
-  useEffect(() => {
-    if (notificationCount > 0) {
-      setNotificationCount(0);
-    }
-  }, [notificationCount, setNotificationCount]);
-
-  useEffect(() => {
-    async function refreshNotifications() {
-      const response = await backendFetch(
-        setError,
-        `/notifications/refresh?timestamp=${notifications[0].timestamp}`,
-      );
-
-      setNotifications([...response.notifications, ...notifications]);
-    }
-
-    socket.on('receiveNotification', refreshNotifications);
-    return () => socket.off('receiveNotification', refreshNotifications);
-  }, [notifications]);
-
-  async function addMoreNotifications() {
-    const response = await backendFetch(
-      setError,
-
-      `/notifications?notificationId=${
-        notifications[notifications.length - 1].id
-      }`,
-    );
-
-    setNotifications([...notifications, ...response.notifications]);
-    setHasMoreNotifications(response.notifications.length === 20);
   }
 
-  return !notifications ? (
+  if (notificationsResult.error) {
+    logError(notificationsResult.error);
+    return <ErrorPage error={notificationsResult.error} />;
+  }
+
+  return !notifs ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>
   ) : (
     <main>
       <h2>Notifications</h2>
+      {notifs.length === 0 && (
+        <div>
+          <br />
+          <h2>No notifications</h2>
+        </div>
+      )}
       <InfiniteScroll
-        dataLength={notifications.length}
-        next={() => addMoreNotifications()}
-        hasMore={hasMoreNotifications}
+        dataLength={notifs.length}
+        next={() => fetchMoreNotifs()}
+        hasMore={hasMoreNotifs}
         loader={
           <div className='loaderContainer'>
             <div className='loader'></div>
@@ -70,8 +85,8 @@ function NotificationList() {
         }
         endMessage={<div></div>}
       >
-        {notifications.map((notification) => (
-          <Notification key={notification.id} notification={notification} />
+        {notifs.map((notif) => (
+          <Notification key={notif.id} notif={notif} />
         ))}
       </InfiniteScroll>
     </main>

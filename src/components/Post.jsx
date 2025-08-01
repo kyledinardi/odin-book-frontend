@@ -15,8 +15,8 @@ function Post({ post, replacePost, removePost, displayType }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const editTextarea = useRef(null);
   const deleteModal = useRef(null);
+  const editTextarea = useRef(null);
   const imageModal = useRef(null);
   const [currentUser] = useOutletContext();
 
@@ -24,7 +24,7 @@ function Post({ post, replacePost, removePost, displayType }) {
     onError: logError,
 
     onCompleted: () => {
-      if (!isLiked) {
+      if (!isLiked && post.userId !== Number(currentUser.id)) {
         socket.emit('sendNotification', { userId: post.userId });
       }
     },
@@ -34,13 +34,13 @@ function Post({ post, replacePost, removePost, displayType }) {
     onError: logError,
 
     onCompleted: () => {
-      if (!currentUserRepostId) {
+      if (!currentUserRepostId && post.userId !== Number(currentUser.id)) {
         socket.emit('sendNotification', { userId: post.userId });
       } else {
         const newReposts = post.reposts.filter(
           (repostObj) => repostObj.id !== currentUserRepostId
         );
-        
+
         replacePost({ ...post, reposts: newReposts });
       }
     },

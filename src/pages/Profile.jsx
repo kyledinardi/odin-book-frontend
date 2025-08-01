@@ -22,7 +22,7 @@ function Profile() {
   const { Link, useNavigate, useOutletContext, useParams } = reactRouterDom;
   const [currentUser, setCurrentUser] = useOutletContext();
   const navigate = useNavigate();
-  const userId = parseInt(useParams().userId, 10);
+  const userId = Number(useParams().userId);
 
   useEffect(() => {
     if (!userId) {
@@ -33,7 +33,7 @@ function Profile() {
     if (currentUser) {
       backendFetch(setError, `/users/${userId}`).then((response) => {
         const isFollowedTemp = currentUser.following.some(
-          (followedUser) => followedUser.id === userId,
+          (followedUser) => followedUser.id === userId
         );
 
         setIsFollowed(isFollowedTemp);
@@ -65,13 +65,13 @@ function Profile() {
     const response = await backendFetch(
       setError,
       `/users/${isFollowed ? 'unfollow' : 'follow'}`,
-      { method: 'PUT', body: JSON.stringify({ userId }) },
+      { method: 'PUT', body: JSON.stringify({ userId }) }
     );
 
     setCurrentUser({ ...currentUser, following: response.user.following });
     setIsFollowed(!isFollowed);
 
-    if (!isFollowed) {
+    if (!isFollowed && user.id !== Number(currentUser.id)) {
       socket.emit('sendNotification', { userId });
     }
   }

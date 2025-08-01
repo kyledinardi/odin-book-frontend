@@ -9,14 +9,14 @@ import { searchChache } from '../utils/apolloCache';
 import styles from '../style/Search.module.css';
 
 function Search() {
-  const [hasMorePosts, setHasMorePosts] = useState(false);
-  const [hasMoreUsers, setHasMoreUsers] = useState(false);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [followedIds, setFollowedIds] = useState(null);
   const [openTab, setOpenTab] = useState('posts');
 
   const [currentUser, setCurrentUser] = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
-
+  
   const postsResult = useQuery(SEARCH_POSTS, {
     variables: { query: searchParams.get('query') },
     skip: !searchParams.get('query'),

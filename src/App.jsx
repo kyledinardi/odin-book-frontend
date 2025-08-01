@@ -34,12 +34,11 @@ function App() {
       setNotifCount(_count.receivedNotifications);
       socket.emit('joinUserRoom', id);
     }
-
-    console.log('create post not working')
   }, [currentUserResult.data]);
 
   useEffect(() => {
     function incrementNotifCount() {
+      console.log('incrementing notif count');
       setNotifCount(notifCount + 1);
     }
 
@@ -75,7 +74,7 @@ function App() {
             <Outlet
               context={[
                 currentUserResult.data?.getCurrentUser,
-                currentUserResult.refetch(),
+                currentUserResult.refetch,
                 notifCount,
                 setNotifCount,
               ]}

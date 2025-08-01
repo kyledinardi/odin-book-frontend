@@ -12,7 +12,7 @@ import logError from '../utils/logError';
 import socket from '../utils/socket';
 
 function CommentPage() {
-  const [hasMoreReplies, setHasMoreReplies] = useState(false);
+  const [hasMoreReplies, setHasMoreReplies] = useState(true);
   const [currentUser] = useOutletContext();
   const navigate = useNavigate();
   const commentId = Number(useParams().commentId);
@@ -49,6 +49,14 @@ function CommentPage() {
       navigate(`/comments/${chainComment.parentId}`);
     } else {
       navigate(`/posts/${comment.postId}`);
+    }
+  }
+
+  function handleNewReply(newReply) {
+    commentPageCache.createReply(commentResult, newReply);
+
+    if (comment.userId !== Number(currentUser.id)) {
+      socket.emit('sendNotification', { userId: comment.userId });
     }
   }
 
@@ -93,10 +101,7 @@ function CommentPage() {
       />
       <ContentForm
         contentType='reply'
-        setContent={(newComment) => {
-          commentPageCache.createReply(commentResult, newComment);
-          socket.emit('sendNotification', { userId: comment.userId });
-        }}
+        setContent={(newReply) => handleNewReply(newReply)}
         parentId={commentId}
       />
       <InfiniteScroll

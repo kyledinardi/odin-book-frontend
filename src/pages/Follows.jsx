@@ -9,12 +9,12 @@ function Follows() {
   const [followedIds, setFollowedIds] = useState(null);
   const [openTab, setOpenTab] = useState('following');
   const [currentUser] = useOutletContext();
-  const userId = parseInt(useParams().userId, 10);
+  const userId = Number(useParams().userId);
 
   useEffect(() => {
     if (currentUser) {
       setFollowedIds(
-        currentUser.following.map((followedUser) => followedUser.id),
+        currentUser.following.map((followedUser) => followedUser.id)
       );
     }
   }, [currentUser]);
@@ -26,7 +26,7 @@ function Follows() {
     }
 
     backendFetch(setError, `/users/${userId}`).then((response) =>
-      setUser(response.user),
+      setUser(response.user)
     );
   }, [userId, setError]);
 

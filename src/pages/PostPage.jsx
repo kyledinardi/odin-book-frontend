@@ -12,7 +12,7 @@ import logError from '../utils/logError';
 import socket from '../utils/socket';
 
 function PostPage() {
-  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [hasMoreComments, setHasMoreComments] = useState(true);
   const [currentUser] = useOutletContext();
   const navigate = useNavigate();
   const postId = Number(useParams().postId);
@@ -20,6 +20,7 @@ function PostPage() {
   const postResult = useQuery(GET_POST, { variables: { postId } });
   const post = postResult.data?.getPost;
   const comments = post?.comments;
+  
 
   function fetchMoreComments() {
     postResult.fetchMore({
@@ -44,6 +45,14 @@ function PostPage() {
     });
   }
 
+  function handleNewComment(createdComment) {
+    postPageCache.createComment(postResult, createdComment);
+
+    if (post.userId !== Number(currentUser.id)) {
+      socket.emit('sendNotification', { userId: post.userId });
+    }
+  }
+
   if (postResult.error) {
     logError(postResult.error);
     return <ErrorPage error={postResult.error} />;
@@ -65,10 +74,7 @@ function PostPage() {
       />
       <ContentForm
         contentType='comment'
-        setContent={(createdComment) => {
-          postPageCache.createComment(postResult, createdComment);
-          socket.emit('sendNotification', { userId: post.userId });
-        }}
+        setContent={(createdComment) => handleNewComment(createdComment)}
         parentId={postId}
       />
       <div>

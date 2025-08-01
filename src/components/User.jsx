@@ -13,11 +13,12 @@ function User({ user, replaceUser, isFollowed, bio }) {
     onCompleted: () => {
       replaceUser();
 
-      if (!isFollowed) {
+      if (!isFollowed && user.id !== localStorage.getItem('userId')) {
         socket.emit('sendNotification', { userId: user.id });
       }
     },
   });
+  
 
   return (
     <div className={styles.user}>
@@ -28,7 +29,7 @@ function User({ user, replaceUser, isFollowed, bio }) {
         <strong>{user.displayName}</strong>
         <span className='gray'>{` @${user.username}`}</span>
       </Link>
-      {user.id !== parseInt(localStorage.getItem('userId'), 10) && (
+      {user.id !== localStorage.getItem('userId') && (
         <button
           className={styles.followButton}
           onClick={() => follow({ variables: { userId: user.id } })}

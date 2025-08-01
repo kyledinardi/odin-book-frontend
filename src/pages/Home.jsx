@@ -11,7 +11,7 @@ import logError from '../utils/logError';
 import socket from '../utils/socket';
 
 function Home() {
-  const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
   const [newPostCount, setNewPostCount] = useState(0);
   const [currentUser] = useOutletContext();
   const postsResult = useQuery(GET_INDEX_POSTS);
@@ -44,7 +44,7 @@ function Home() {
 
   function fetchNewerPosts() {
     postsResult.fetchMore({
-      variables: { timestamp: postsResult.data.getIndexPosts[0].timestamp },
+      variables: { timestamp: posts[0].timestamp },
 
       updateQuery: (previousData, { fetchMoreResult }) => ({
         ...previousData,
@@ -73,7 +73,7 @@ function Home() {
       <ContentForm
         contentType={'post'}
         setContent={(post) => {
-          indexFeedCache.createPost(postsResult, post);
+          indexFeedCache.create(postsResult, post);
           socket.emit('sendNewPost', { userId: post.userId });
         }}
       />
