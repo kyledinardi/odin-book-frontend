@@ -1,10 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
 import PollInputs from './PollInputs.jsx';
-import backendFetch from '../../utils/backendFetch';
+import {
+  CREATE_POST,
+  CREATE_REPLY,
+  CREATE_ROOT_COMMENT,
+  UPDATE_COMMENT,
+  UPDATE_POST,
+} from '../graphql/mutations';
+import logError from '../utils/logError';
 import styles from '../style/ContentForm.module.css';
 
 function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
@@ -21,7 +29,32 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
   const gifModal = useRef(null);
   const fileInput = useRef(null);
   const textarea = useRef(null);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
+
+  const [createPost] = useMutation(CREATE_POST, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.createPost),
+  });
+
+  const [updatePost] = useMutation(UPDATE_POST, {
+    onError: logError,
+    onCompleted: () => setContent(),
+  });
+
+  const [createRootComment] = useMutation(CREATE_ROOT_COMMENT, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.createRootComment),
+  });
+
+  const [updateComment] = useMutation(UPDATE_COMMENT, {
+    onError: logError,
+    onCompleted: () => setContent(),
+  });
+
+  const [createReply] = useMutation(CREATE_REPLY, {
+    onError: logError,
+    onCompleted: (data) => setContent(data.createReply),
+  });
 
   useEffect(() => {
     if (isModal) {
@@ -39,74 +72,61 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
     setGifUrl('');
   }
 
-  async function submitPostOrComment(e) {
+  async function submitContent(e) {
     e.preventDefault();
-    let path;
-    const formData = new FormData();
-    formData.append('text', e.target[0].value);
-    formData.append('gifUrl', gifUrl);
 
-    if (e.target[2].files) {
-      formData.append('image', e.target[2].files[0]);
+    const variables = {
+      text: e.target[0].value,
+      gifUrl,
+      image: newImage,
+    };
+
+    if (isPoll) {
+      variables.pollChoices = [];
+
+      for (let i = 1; i <= pollChoiceCount; i += 1) {
+        variables.pollChoices.push(e.target[i].value);
+      }
+    }
+
+    if (contentToEdit) {
+      variables[`${contentType}Id`] = contentToEdit.id;
     }
 
     switch (contentType) {
       case 'post':
         if (contentToEdit) {
-          path = `/posts/${contentToEdit.id}`;
+          updatePost({ variables });
         } else {
-          path = '/posts';
+          createPost({ variables });
         }
+
         break;
+
       case 'comment':
         if (contentToEdit) {
-          path = `/comments/${contentToEdit.id}`;
+          updateComment({ variables });
         } else {
-          path = `/posts/${parentId}/comments`;
+          variables.postId = parentId;
+          createRootComment({ variables });
         }
+
         break;
+
       case 'reply':
-        path = `/comments/${parentId}`;
+        variables.parentId = parentId;
+        createReply({ variables });
         break;
+
       default:
+        throw new Error(`Invalid content type: ${contentType}`);
     }
 
-    const response = await backendFetch(setError, path, {
-      method: contentToEdit ? 'PUT' : 'POST',
-      body: formData,
-    });
     e.target.reset();
     e.target[0].style.height = '64px';
-
     cancelNewImage();
-    setIsEmojiOpen(false);
-    setContent(contentType === 'post' ? response.post : response.comment);
-  }
-
-  async function submitPoll(e) {
-    e.preventDefault();
-    const choiceArray = [];
-
-    for (let i = 1; i <= pollChoiceCount; i += 1) {
-      choiceArray.push(e.target[i].value);
-    }
-
-    const response = await backendFetch(setError, '/polls', {
-      method: 'POST',
-
-      body: JSON.stringify({
-        question: e.target[0].value,
-        choices: choiceArray,
-      }),
-    });
-
-    cancelNewImage();
-    e.target.reset();
-    e.target[0].style.height = '64px';
     setIsEmojiOpen(false);
     setIsPoll(false);
-    setPollChoiceCount(2);
-    setContent(response.post);
   }
 
   function handlePlaceholder() {
@@ -146,7 +166,7 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
       <form
         className={styles.contentForm}
         encType='multipart/form-data'
-        onSubmit={(e) => (isPoll ? submitPoll(e) : submitPostOrComment(e))}
+        onSubmit={(e) => submitContent(e)}
       >
         {isModal && (
           <dialog

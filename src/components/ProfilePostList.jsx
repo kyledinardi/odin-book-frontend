@@ -1,117 +1,129 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Comment from './Comment.jsx';
 import Post from './Post.jsx';
-import editFeed from '../../utils/feedEdit';
-import backendFetch from '../../utils/backendFetch';
+import {
+  GET_USER_POSTS,
+  GET_USER_COMMENTS,
+  GET_IMAGE_POSTS,
+  GET_LIKED_POSTS,
+} from '../graphql/queries';
+import { profileCache } from '../utils/apolloCache';
+import logError from '../utils/logError';
 
 function ProfilePostList({ user, openTab }) {
-  const [posts, setPosts] = useState(null);
-  const [comments, setComments] = useState(null);
-  const [imagePosts, setImagePosts] = useState(null);
-  const [likedPosts, setLikedPosts] = useState(null);
-  
-  const [hasMorePosts, setHasMorePosts] = useState(false);
-  const [hasMoreComments, setHasMoreComments] = useState(false);
-  const [hasMoreImagePosts, setHasMoreImagePosts] = useState(false);
-  const [hasMoreLikedPosts, setHasMoreLikedPosts] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [hasMoreComments, setHasMoreComments] = useState(true);
+  const [hasMoreImagePosts, setHasMoreImagePosts] = useState(true);
+  const [hasMoreLikedPosts, setHasMoreLikedPosts] = useState(true);
 
-  useEffect(() => {
-    Promise.all([
-      backendFetch(setError, `/users/${user.id}/posts`),
-      backendFetch(setError, `/users/${user.id}/comments`),
-      backendFetch(setError, `/users/${user.id}/posts/images`),
-      backendFetch(setError, `/users/${user.id}/posts/likes`),
-    ]).then((responses) => {
-      setPosts(responses[0].posts);
-      setComments(responses[1].comments);
-      setImagePosts(responses[2].posts);
-      setLikedPosts(responses[3].posts);
-      setHasMorePosts(responses[0].posts.length === 20);
-      setHasMoreComments(responses[1].comments.length === 20);
-      setHasMoreImagePosts(responses[2].posts.length === 20);
-      setHasMoreLikedPosts(responses[3].posts.length === 20);
-    });
-  }, [setError, user]);
+  const [currentUser] = useOutletContext();
+  const variables = { userId: user.id };
+
+  const postsResult = useQuery(GET_USER_POSTS, { variables });
+  const commentsResult = useQuery(GET_USER_COMMENTS, { variables });
+  const imagePostsResult = useQuery(GET_IMAGE_POSTS, { variables });
+  const likedPostsResult = useQuery(GET_LIKED_POSTS, { variables });
+
+  const posts = postsResult.data?.getUserPosts;
+  const comments = commentsResult.data?.getUserComments;
+  const imagePosts = imagePostsResult.data?.getImagePosts;
+  const likedPosts = likedPostsResult.data?.getLikedPosts;
 
   const noPostsMessageTemplate =
     user.id === currentUser.id ? 'You have' : `${user.displayName} has`;
 
-  async function addMorePosts() {
+  function fetchMorePosts() {
     const lastPost = posts.findLast((post) => post.feedItemType === 'post');
     const lastRepost = posts.findLast((post) => post.feedItemType === 'repost');
 
-    const response = await backendFetch(
-      setError,
+    postsResult.fetchMore({
+      variables: { postCursor: lastPost?.id, repostCursor: lastRepost?.id },
 
-      `/users/${user.id}/posts?${lastPost ? `postId=${lastPost.id}` : ''}&${
-        lastRepost ? `repostId=${lastRepost.id}` : ''
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newPosts = fetchMoreResult.getUserPosts;
+        setHasMorePosts(newPosts.length % 20 === 0 && newPosts.length > 0);
 
-    setPosts([...posts, ...response.posts]);
-    setHasMorePosts(response.posts.length === 20);
+        return {
+          ...previousData,
+          getUserPosts: [...previousData.getUserPosts, ...newPosts],
+        };
+      },
+    });
   }
 
-  async function addMoreComments() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreComments() {
+    commentsResult.fetchMore({
+      variables: { cursor: comments[comments.length - 1].id },
 
-      `/users/${user.id}/comments?commentId=${
-        comments[comments.length - 1].id
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newComments = fetchMoreResult.getUserComments;
 
-    setComments([...comments, ...response.comments]);
-    setHasMoreComments(response.comments.length === 20);
+        setHasMoreComments(
+          newComments.length % 20 === 0 && newComments.length > 0
+        );
+
+        return {
+          ...previousData,
+          getUserComments: [...previousData.getUserComments, ...newComments],
+        };
+      },
+    });
   }
 
-  async function addMoreImagePosts() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreImagePosts() {
+    imagePostsResult.fetchMore({
+      variables: { cursor: imagePosts[imagePosts.length - 1].id },
 
-      `/users/${user.id}/posts/images?postId=${
-        imagePosts[imagePosts.length - 1].id
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newImagePosts = fetchMoreResult.getImagePosts;
 
-    setImagePosts([...imagePosts, ...response.posts]);
-    setHasMoreImagePosts(response.posts.length === 20);
+        setHasMoreImagePosts(
+          newImagePosts.length % 20 === 0 && newImagePosts.length > 0
+        );
+
+        return {
+          ...previousData,
+          getImagePosts: [...previousData.getImagePosts, ...newImagePosts],
+        };
+      },
+    });
   }
 
-  async function addMoreLikedPosts() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreLikedPosts() {
+    likedPostsResult.fetchMore({
+      variables: { cursor: likedPosts[likedPosts.length - 1].id },
 
-      `/users/${user.id}/posts/likes?postId=${
-        likedPosts[likedPosts.length - 1].id
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newLikedPosts = fetchMoreResult.getLikedPosts;
 
-    setLikedPosts([...likedPosts, ...response.posts]);
-    setHasMoreLikedPosts(response.posts.length === 20);
+        setHasMoreLikedPosts(
+          newLikedPosts.length % 20 === 0 && newLikedPosts.length > 0
+        );
+
+        return {
+          ...previousData,
+          getLikedPosts: [...previousData.getLikedPosts, ...newLikedPosts],
+        };
+      },
+    });
   }
 
   function replaceFeedItem(updatedFeedItem) {
-    setPosts(editFeed.replace(updatedFeedItem, posts));
-    setComments(editFeed.replace(updatedFeedItem, comments));
-    setImagePosts(editFeed.replace(updatedFeedItem, imagePosts));
-    setLikedPosts(editFeed.replace(updatedFeedItem, likedPosts));
+    profileCache.updatePost(
+      [postsResult, commentsResult, imagePostsResult, likedPostsResult],
+      updatedFeedItem
+    );
   }
 
   function removeFeedItem(deletedFeedItemId, deletedFeedItemType) {
-    setPosts(editFeed.remove(deletedFeedItemId, deletedFeedItemType, posts));
-    setComments(
-      editFeed.remove(deletedFeedItemId, deletedFeedItemType, comments),
-    );
-    setImagePosts(
-      editFeed.remove(deletedFeedItemId, deletedFeedItemType, imagePosts),
-    );
-    setLikedPosts(
-      editFeed.remove(deletedFeedItemId, deletedFeedItemType, likedPosts),
+    profileCache.deletePost(
+      [postsResult, commentsResult, imagePostsResult, likedPostsResult],
+      deletedFeedItemId,
+      deletedFeedItemType
     );
   }
 
@@ -127,6 +139,22 @@ function ProfilePostList({ user, openTab }) {
     );
   }
 
+  if (postsResult.error) {
+    logError(postsResult.error);
+  }
+
+  if (commentsResult.error) {
+    logError(commentsResult.error);
+  }
+
+  if (imagePostsResult.error) {
+    logError(imagePostsResult.error);
+  }
+
+  if (likedPostsResult.error) {
+    logError(likedPostsResult.error);
+  }
+
   if (posts) {
     switch (openTab) {
       case 'posts':
@@ -137,7 +165,7 @@ function ProfilePostList({ user, openTab }) {
         return (
           <InfiniteScroll
             dataLength={posts.length}
-            next={() => addMorePosts()}
+            next={() => fetchMorePosts()}
             hasMore={hasMorePosts}
             loader={
               <div className='loaderContainer'>
@@ -149,7 +177,7 @@ function ProfilePostList({ user, openTab }) {
             {posts.map((post) => {
               if (post.feedItemType === 'repost') {
                 return (
-                  <div key={`repost${post.id}`}>
+                  <div key={`r-${post.id}`}>
                     <p className='repostHeading'>
                       <span className='material-symbols-outlined'>repeat</span>
                       <span>{post.user.displayName} reposted</span>
@@ -192,7 +220,7 @@ function ProfilePostList({ user, openTab }) {
         return (
           <InfiniteScroll
             dataLength={comments.length}
-            next={() => addMoreComments()}
+            next={() => fetchMoreComments()}
             hasMore={hasMoreComments}
             loader={
               <div className='loaderContainer'>
@@ -248,7 +276,7 @@ function ProfilePostList({ user, openTab }) {
         return (
           <InfiniteScroll
             dataLength={imagePosts.length}
-            next={() => addMoreImagePosts()}
+            next={() => fetchMoreImagePosts()}
             hasMore={hasMoreImagePosts}
             loader={
               <div className='loaderContainer'>
@@ -268,7 +296,7 @@ function ProfilePostList({ user, openTab }) {
         return (
           <InfiniteScroll
             dataLength={likedPosts.length}
-            next={() => addMoreLikedPosts()}
+            next={() => fetchMoreLikedPosts()}
             hasMore={hasMoreLikedPosts}
             loader={
               <div className='loaderContainer'>

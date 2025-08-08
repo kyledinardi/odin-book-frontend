@@ -3,23 +3,17 @@ import PropTypes from 'prop-types';
 import ProfileBar from './ProfileBar.jsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({
-  currentUser,
-  logoutModal,
-  notificationCount,
-  theme,
-  setTheme,
-}) {
-  function getNotificationCount() {
-    if (notificationCount === 0) {
+function Sidebar({ currentUser, logoutModal, notifCount, theme, setTheme }) {
+  function getNotifCount() {
+    if (notifCount === 0) {
       return null;
     }
 
-    if (notificationCount > 20) {
+    if (notifCount > 20) {
       return '20+';
     }
 
-    return notificationCount;
+    return notifCount;
   }
 
   return !currentUser ? (
@@ -46,9 +40,7 @@ function Sidebar({
             <span className={`material-symbols-outlined ${styles.menuSvg}`}>
               notifications
             </span>
-            <span className={styles.notificationCount}>
-              {getNotificationCount()}
-            </span>
+            <span className={styles.notificationCount}>{getNotifCount()}</span>
           </div>
           <span className={styles.sidebarLabel}>Notifications</span>
         </Link>
@@ -100,7 +92,7 @@ function Sidebar({
 Sidebar.propTypes = {
   currentUser: PropTypes.object,
   logoutModal: PropTypes.object,
-  notificationCount: PropTypes.number,
+  notifCount: PropTypes.number,
   theme: PropTypes.string,
   setTheme: PropTypes.func,
 };

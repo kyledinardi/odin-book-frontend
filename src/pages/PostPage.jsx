@@ -1,60 +1,63 @@
+import { useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import ErrorPage from './ErrorPage.jsx';
 import ContentForm from '../components/ContentForm.jsx';
 import Post from '../components/Post.jsx';
 import Comment from '../components/Comment.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import { GET_POST } from '../graphql/queries';
+import { postPageCache } from '../utils/apolloCache';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 
 function PostPage() {
-  const [post, setPost] = useState(null);
-  const [hasMoreComments, setHasMoreComments] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [hasMoreComments, setHasMoreComments] = useState(true);
+  const [currentUser] = useOutletContext();
   const navigate = useNavigate();
-  const postId = parseInt(useParams().postId, 10);
+  const postId = Number(useParams().postId);
 
-  useEffect(() => {
-    if (!postId) {
-      setError({ status: 404, message: 'Post not found' });
-    } else {
-      backendFetch(setError, `/posts/${postId}`).then((response) => {
-        setPost(response.post);
-        setHasMoreComments(response.post.comments.length === 20);
-      });
+  const postResult = useQuery(GET_POST, { variables: { postId } });
+  const post = postResult.data?.getPost;
+  const comments = post?.comments;
+
+  function fetchMoreComments() {
+    postResult.fetchMore({
+      variables: { cursor: comments[comments.length - 1].id },
+
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newComments = fetchMoreResult.getPost.comments;
+
+        setHasMoreComments(
+          newComments.length % 20 === 0 && newComments.length > 0
+        );
+
+        return {
+          ...previousData,
+
+          getPost: {
+            ...previousData.getPost,
+            comments: [...previousData.getPost.comments, ...newComments],
+          },
+        };
+      },
+    });
+  }
+
+  function handleNewComment(createdComment) {
+    postPageCache.createComment(postResult, createdComment);
+
+    if (post.userId !== Number(currentUser.id)) {
+      socket.emit('sendNotification', { userId: post.userId });
     }
-  }, [postId, setError]);
-
-  async function addMoreComments() {
-    const response = await backendFetch(
-      setError,
-
-      `/posts/${postId}/comments?commentId=${
-        post.comments[post.comments.length - 1].id
-      }`,
-    );
-
-    setPost({ ...post, comments: [...post.comments, ...response.comments] });
-    setHasMoreComments(response.comments.length === 20);
   }
 
-  function replaceComment(updatedComment) {
-    const newComments = post.comments.map((comment) =>
-      comment.id === updatedComment.id ? updatedComment : comment,
-    );
-
-    setPost({ ...post, comments: newComments });
+  if (postResult.error) {
+    logError(postResult.error);
+    return <ErrorPage error={postResult.error} />;
   }
 
-  function removeComment(commentId) {
-    const newComments = post.comments.filter(
-      (comment) => comment.id !== commentId,
-    );
-
-    setPost({ ...post, comments: newComments });
-  }
-
-  return !post || !currentUser ? (
+  return !currentUser || !post ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>
@@ -62,42 +65,47 @@ function PostPage() {
     <main>
       <Post
         post={post}
-        replacePost={(updatedPost) => setPost(updatedPost)}
+        replacePost={(updatedPost) =>
+          postPageCache.updatePost(postResult, updatedPost)
+        }
         removePost={() => navigate('/')}
         displayType='focused'
       />
       <ContentForm
         contentType='comment'
-        setContent={(comment) => {
-          setPost({ ...post, comments: [comment, ...post.comments] });
-          socket.emit('sendNotification', { userId: post.userId });
-        }}
+        setContent={(createdComment) => handleNewComment(createdComment)}
         parentId={postId}
       />
       <div>
-        <InfiniteScroll
-          dataLength={post.comments.length}
-          next={() => addMoreComments()}
-          hasMore={hasMoreComments}
-          loader={
-            <div className='loaderContainer'>
-              <div className='loader'></div>
-            </div>
-          }
-          endMessage={<div></div>}
-        >
-          {post.comments.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              replaceComment={(updatedComment) =>
-                replaceComment(updatedComment)
-              }
-              removeComment={(commentId) => removeComment(commentId)}
-              displayType='reply'
-            />
-          ))}
-        </InfiniteScroll>
+        {comments.length === 0 ? (
+          <h2>No comments yet</h2>
+        ) : (
+          <InfiniteScroll
+            dataLength={comments.length}
+            next={() => fetchMoreComments()}
+            hasMore={hasMoreComments}
+            loader={
+              <div className='loaderContainer'>
+                <div className='loader'></div>
+              </div>
+            }
+            endMessage={<div></div>}
+          >
+            {comments.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                replaceComment={(updatedComment) =>
+                  postPageCache.updateComment(postResult, updatedComment)
+                }
+                removeComment={(commentId) =>
+                  postPageCache.deleteComment(postResult, commentId)
+                }
+                displayType='reply'
+              />
+            ))}
+          </InfiniteScroll>
+        )}
       </div>
     </main>
   );

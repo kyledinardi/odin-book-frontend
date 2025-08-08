@@ -1,34 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useParams } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
+import ErrorPage from './ErrorPage.jsx';
 import FollowList from '../components/FollowList.jsx';
-import backendFetch from '../../utils/backendFetch';
+import { GET_USER } from '../graphql/queries';
+import logError from '../utils/logError';
 import styles from '../style/Follows.module.css';
 
 function Follows() {
-  const [user, setUser] = useState(null);
   const [followedIds, setFollowedIds] = useState(null);
   const [openTab, setOpenTab] = useState('following');
-  const [setError, currentUser] = useOutletContext();
-  const userId = parseInt(useParams().userId, 10);
+  const [currentUser] = useOutletContext();
+
+  const userId = Number(useParams().userId);
+  const userResult = useQuery(GET_USER, { variables: { userId } });
+  const user = userResult.data?.getUser;
 
   useEffect(() => {
     if (currentUser) {
       setFollowedIds(
-        currentUser.following.map((followedUser) => followedUser.id),
+        currentUser.following.map((followedUser) => Number(followedUser.id))
       );
     }
   }, [currentUser]);
 
-  useEffect(() => {
-    if (!userId) {
-      setError({ status: 404, message: 'User not found' });
-      return;
-    }
-
-    backendFetch(setError, `/users/${userId}`).then((response) =>
-      setUser(response.user),
-    );
-  }, [userId, setError]);
+  if (userResult.error) {
+    logError(userResult.error);
+    return <ErrorPage error={userResult.error} />;
+  }
 
   return !user || !currentUser || !followedIds ? (
     <div className='loaderContainer'>

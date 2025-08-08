@@ -1,48 +1,50 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import ErrorPage from './ErrorPage.jsx';
 import ContentForm from '../components/ContentForm.jsx';
 import Post from '../components/Post.jsx';
 import Comment from '../components/Comment.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import { GET_COMMENT } from '../graphql/queries';
+import { commentPageCache } from '../utils/apolloCache';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 
 function CommentPage() {
-  const [comment, setComment] = useState(null);
-  const [hasMoreReplies, setHasMoreReplies] = useState(false);
-  const [setError, currentUser] = useOutletContext();
+  const [hasMoreReplies, setHasMoreReplies] = useState(true);
+  const [currentUser] = useOutletContext();
   const navigate = useNavigate();
-  const commentId = parseInt(useParams().commentId, 10);
+  const commentId = Number(useParams().commentId);
 
-  useEffect(() => {
-    if (!commentId) {
-      setError({ status: 404, message: 'Comment not found' });
-    } else {
-      backendFetch(setError, `/comments/${commentId}`).then((response) => {
-        setComment(response.comment);
-        setHasMoreReplies(response.comment.replies.length === 20);
-      });
-    }
-  }, [commentId, setError]);
+  const commentResult = useQuery(GET_COMMENT, { variables: { commentId } });
+  const comment = commentResult.data?.getComment;
+  const replies = comment?.replies;
 
-  async function addMoreReplies() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreReplies() {
+    commentResult.fetchMore({
+      variables: { cursor: replies[replies.length - 1].id },
 
-      `/comments/${commentId}/replies?replyId=${
-        comment.replies[comment.replies.length - 1].id
-      }`,
-    );
-    const newComment = {
-      ...comment,
-      replies: [...comment.replies, ...response.replies],
-    };
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newReplies = fetchMoreResult.getComment.replies;
 
-    setComment(newComment);
-    setHasMoreReplies(response.replies.length === 20);
+        setHasMoreReplies(
+          newReplies.length % 20 === 0 && newReplies.length > 0
+        );
+
+        return {
+          ...previousData,
+
+          getComment: {
+            ...previousData.getComment,
+            replies: [...previousData.getComment.replies, ...newReplies],
+          },
+        };
+      },
+    });
   }
 
-  function removeChainComment(chainComment) {
+  function navigateToAncestor(chainComment) {
     if (chainComment.parentId) {
       navigate(`/comments/${chainComment.parentId}`);
     } else {
@@ -50,30 +52,17 @@ function CommentPage() {
     }
   }
 
-  function replaceAncestor(updatedAncestor) {
-    const newCommentChain = comment.commentChain.map((ancestor) =>
-      ancestor.id === updatedAncestor.id ? updatedAncestor : ancestor,
-    );
+  function handleNewReply(newReply) {
+    commentPageCache.createReply(commentResult, newReply);
 
-    setComment({ ...comment, commentChain: newCommentChain });
+    if (comment.userId !== Number(currentUser.id)) {
+      socket.emit('sendNotification', { userId: comment.userId });
+    }
   }
 
-  function replaceReply(updatedReply) {
-    const newReplies = comment.replies.map((reply) =>
-      reply.id === updatedReply.id ? updatedReply : reply,
-    );
-
-    setComment({ ...comment, replies: newReplies });
-  }
-
-  function addNewReply(newReply) {
-    const newComment = { ...comment, replies: [newReply, ...comment.replies] };
-    setComment(newComment);
-  }
-
-  function removeReply(replyId) {
-    const newReplies = comment.replies.filter((reply) => reply.id !== replyId);
-    setComment({ ...comment, replies: newReplies });
+  if (commentResult.error) {
+    logError(commentResult.error);
+    return <ErrorPage error={commentResult.error} />;
   }
 
   return !comment || !currentUser ? (
@@ -84,7 +73,9 @@ function CommentPage() {
     <main>
       <Post
         post={comment.post}
-        replacePost={(updated) => setComment({ ...comment, post: updated })}
+        replacePost={(updatedPost) =>
+          commentPageCache.updatePost(commentResult, updatedPost)
+        }
         removePost={() => navigate('/')}
         displayType='ancestor'
       />
@@ -92,29 +83,30 @@ function CommentPage() {
         <Comment
           key={ancestor.id}
           comment={ancestor}
-          replaceComment={(updatedAncestor) => replaceAncestor(updatedAncestor)}
-          removeComment={() => removeChainComment(ancestor)}
+          replaceComment={(updatedComment) =>
+            commentPageCache.updateAncestor(commentResult, updatedComment)
+          }
+          removeComment={() => navigateToAncestor(ancestor)}
           displayType='ancestor'
         />
       ))}
       <Comment
         comment={comment}
-        replaceComment={(updatedComment) => setComment(updatedComment)}
-        removeComment={() => removeChainComment(comment)}
+        replaceComment={(updatedComment) =>
+          commentPageCache.updateComment(commentResult, updatedComment)
+        }
+        removeComment={() => navigateToAncestor(comment)}
         isCommentPage={true}
         displayType='focused'
       />
       <ContentForm
         contentType='reply'
-        setContent={(newReply) => {
-          addNewReply(newReply);
-          socket.emit('sendNotification', { userId: comment.userId });
-        }}
-        parentId={comment.id}
+        setContent={(newReply) => handleNewReply(newReply)}
+        parentId={commentId}
       />
-      <InfiniteScroll
+      {replies.length === 0 ? <h2>No replies yet</h2> : <InfiniteScroll
         dataLength={comment.replies.length}
-        next={() => addMoreReplies()}
+        next={() => fetchMoreReplies()}
         hasMore={hasMoreReplies}
         loader={
           <div className='loaderContainer'>
@@ -127,12 +119,16 @@ function CommentPage() {
           <Comment
             key={reply.id}
             comment={reply}
-            replaceComment={(updatedReply) => replaceReply(updatedReply)}
-            removeComment={(replyId) => removeReply(replyId)}
+            replaceComment={(updatedReply) =>
+              commentPageCache.updateReply(commentResult, updatedReply)
+            }
+            removeComment={(replyId) =>
+              commentPageCache.deleteReply(commentResult, replyId)
+            }
             displayType='reply'
           />
         ))}
-      </InfiniteScroll>
+      </InfiniteScroll>}
     </main>
   );
 }

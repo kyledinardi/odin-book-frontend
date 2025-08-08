@@ -1,107 +1,115 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import User from './User.jsx';
-import backendFetch from '../../utils/backendFetch';
+import {
+  GET_FOLLOWED_FOLLOWERS,
+  GET_FOLLOWERS,
+  GET_FOLLOWING,
+  GET_MUTUALS,
+} from '../graphql/queries';
 
 function FollowList({ openTab, user, followedIds }) {
-  const [following, setFollowing] = useState(null);
-  const [followers, setFollowers] = useState(null);
-  const [mutuals, setMutuals] = useState(null);
-  const [followedFollowers, setFollowedFollowers] = useState(null);
+  const [hasMoreFollowing, setHasMoreFollowing] = useState(true);
+  const [hasMoreFollowers, setHasMoreFollowers] = useState(true);
+  const [hasMoreMutuals, setHasMoreMutuals] = useState(true);
+  const [hasMoreFf, setHasMoreFf] = useState(true);
+  const [currentUser, setCurrentUser] = useOutletContext();
 
-  const [hasMoreFollowing, setHasMoreFollowing] = useState(null);
-  const [hasMoreFollowers, setHasMoreFollowers] = useState(null);
-  const [hasMoreMutuals, setHasMoreMutuals] = useState(null);
-  const [hasMoreFfs, setHasMoreFfs] = useState(null);
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const variables = { userId: user.id };
+  const followingResult = useQuery(GET_FOLLOWING, { variables });
+  const followersResult = useQuery(GET_FOLLOWERS, { variables });
+  const mutualsResult = useQuery(GET_MUTUALS, { variables });
 
-  useEffect(() => {
-    Promise.all([
-      backendFetch(setError, `/users/${user.id}/following`),
-      backendFetch(setError, `/users/${user.id}/followers`),
-      backendFetch(setError, `/users/${user.id}/mutuals`),
+  const followedFollowersResult = useQuery(GET_FOLLOWED_FOLLOWERS, {
+    variables,
+    skip: user.id === currentUser.id,
+  });
 
-      user.id !== currentUser.id &&
-        backendFetch(setError, `/users/${user.id}/followedFollowers`),
-    ]).then((responses) => {
-      setFollowing(responses[0].users);
-      setFollowers(responses[1].users);
-      setMutuals(responses[2].users);
-      setFollowedFollowers(responses[3].users);
-      setHasMoreFollowing(responses[0].users.length === 20);
-      setHasMoreFollowers(responses[1].users.length === 20);
-      setHasMoreMutuals(responses[2].users.length === 20);
+  const following = followingResult.data?.getFollowing;
+  const followers = followersResult.data?.getFollowers;
+  const mutuals = mutualsResult.data?.getMutuals;
+  const ff = followedFollowersResult.data?.getFollowedFollowers;
 
-      if (user.id !== currentUser.id) {
-        setHasMoreFfs(responses[3].users.length === 20);
-      }
+  function fetchMoreFollowing() {
+    followingResult.fetchMore({
+      variables: { cursor: following[following.length - 1].id },
+
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newFollowing = fetchMoreResult.getFollowing;
+        setHasMoreFollowing(newFollowing.length % 20 === 0);
+
+        return {
+          ...previousData,
+          getFollowing: [...previousData.getFollowing, ...newFollowing],
+        };
+      },
     });
-  }, [user, currentUser, setError]);
-
-  async function addMoreFollowing() {
-    const response = await backendFetch(
-      setError,
-
-      `/users/${user.id}/following?userId=${
-        following[following.length - 1].id
-      }`,
-    );
-
-    setFollowing([...following, ...response.users]);
-    setHasMoreFollowing(response.users.length === 20);
   }
 
-  async function addMoreFollowers() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreFollowers() {
+    followersResult.fetchMore({
+      variables: { cursor: followers[followers.length - 1].id },
 
-      `/users/${user.id}/followers?userId=${
-        followers[followers.length - 1].id
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newFollowers = fetchMoreResult.getFollowers;
+        setHasMoreFollowers(newFollowers.length % 20 === 0);
 
-    setFollowers([...followers, ...response.users]);
-    setHasMoreFollowers(response.users.length === 20);
+        return {
+          ...previousData,
+          getFollowers: [...previousData.getFollowers, ...newFollowers],
+        };
+      },
+    });
   }
 
-  async function addMoreMutuals() {
-    const response = await backendFetch(
-      setError,
-      `/users/${user.id}/mutuals?userId=${mutuals[mutuals.length - 1].id}`,
-    );
+  function fetchMoreMutuals() {
+    mutualsResult.fetchMore({
+      variables: { cursor: mutuals[mutuals.length - 1].id },
 
-    setMutuals([...mutuals, ...response.users]);
-    setHasMoreMutuals(response.users.length === 20);
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newMutuals = fetchMoreResult.getMutuals;
+        setHasMoreMutuals(newMutuals.length % 20 === 0);
+
+        return {
+          ...previousData,
+          getMutuals: [...previousData.getMutuals, ...newMutuals],
+        };
+      },
+    });
   }
 
-  async function addMoreFfs() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreFf() {
+    followedFollowersResult.fetchMore({
+      variables: { cursor: ff[ff.length - 1].id },
 
-      `/users/${user.id}/followedFollowers?userId=${
-        followedFollowers[followedFollowers.length - 1].id
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newFf = fetchMoreResult.getFollowedFollowers;
+        setHasMoreFf(newFf.length % 20 === 0);
 
-    setFollowedFollowers([...followedFollowers, ...response.users]);
-    setHasMoreFfs(response.users.length === 20);
+        return {
+          ...previousData,
+
+          getFollowedFollowers: [
+            ...previousData.getFollowedFollowers,
+            ...newFf,
+          ],
+        };
+      },
+    });
   }
 
-  function returnUser(userToReturn) {
-    return (
-      <User
-        key={userToReturn.id}
-        user={userToReturn}
-        bio={true}
-        isFollowed={followedIds.includes(userToReturn.id)}
-        replaceUser={(updated) =>
-          setCurrentUser({ ...currentUser, following: updated.following })
-        }
-      />
-    );
-  }
+  const returnUser = (userToReturn) => (
+    <User
+      key={userToReturn.id}
+      user={userToReturn}
+      bio={true}
+      isFollowed={followedIds.includes(Number(userToReturn.id))}
+      replaceUser={() => setCurrentUser()}
+    />
+  );
 
   if (following) {
     switch (openTab) {
@@ -119,7 +127,7 @@ function FollowList({ openTab, user, followedIds }) {
         return (
           <InfiniteScroll
             dataLength={following.length}
-            next={() => addMoreFollowing()}
+            next={() => fetchMoreFollowing()}
             hasMore={hasMoreFollowing}
             loader={
               <div className='loaderContainer'>
@@ -146,7 +154,7 @@ function FollowList({ openTab, user, followedIds }) {
         return (
           <InfiniteScroll
             dataLength={followers.length}
-            next={() => addMoreFollowers()}
+            next={() => fetchMoreFollowers()}
             hasMore={hasMoreFollowers}
             loader={
               <div className='loaderContainer'>
@@ -161,13 +169,19 @@ function FollowList({ openTab, user, followedIds }) {
 
       case 'mutuals': {
         if (mutuals.length === 0) {
-          return <h2>You have no mutuals</h2>;
+          return (
+            <h2>
+              {user.id === currentUser.id
+                ? 'You have no mutuals'
+                : `${user.displayName} has no mutuals`}
+            </h2>
+          );
         }
 
         return (
           <InfiniteScroll
             dataLength={mutuals.length}
-            next={() => addMoreMutuals()}
+            next={() => fetchMoreMutuals()}
             hasMore={hasMoreMutuals}
             loader={
               <div className='loaderContainer'>
@@ -182,7 +196,7 @@ function FollowList({ openTab, user, followedIds }) {
       }
 
       case 'followedFollowers': {
-        if (followedFollowers.length === 0) {
+        if (ff.length === 0) {
           return (
             <h2>{`You aren't following any of ${user.displayName}'s followers`}</h2>
           );
@@ -190,9 +204,9 @@ function FollowList({ openTab, user, followedIds }) {
 
         return (
           <InfiniteScroll
-            dataLength={followedFollowers.length}
-            next={() => addMoreFfs()}
-            hasMore={hasMoreFfs}
+            dataLength={ff.length}
+            next={() => fetchMoreFf()}
+            hasMore={hasMoreFf}
             loader={
               <div className='loaderContainer'>
                 <div className='loader'></div>
@@ -200,13 +214,13 @@ function FollowList({ openTab, user, followedIds }) {
             }
             endMessage={<div></div>}
           >
-            {followedFollowers.map((follower) => returnUser(follower))}
+            {ff.map((follower) => returnUser(follower))}
           </InfiniteScroll>
         );
       }
 
       default:
-        return null;
+        throw new Error(`Invalid tab: ${openTab}`);
     }
   }
 }

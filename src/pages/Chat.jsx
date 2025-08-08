@@ -1,73 +1,90 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import ErrorPage from './ErrorPage.jsx';
 import MessageForm from '../components/MessageForm.jsx';
 import Message from '../components/Message.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import { GET_ROOM } from '../graphql/queries';
+import { chatCache } from '../utils/apolloCache';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 import styles from '../style/Chat.module.css';
 
 function Chat() {
-  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [receiver, setReceiver] = useState(null);
-  const [messages, setMessages] = useState(null);
+  const [currentUser] = useOutletContext();
+  const roomId = Number(useParams().roomId);
+
+  const roomResult = useQuery(GET_ROOM, { variables: { roomId } });
+  const messages = roomResult.data?.getRoom.messages;
+  const roomResultRef = useRef(roomResult);
   const messagesEnd = useRef(null);
 
-  const [setError, currentUser] = useOutletContext();
-  const roomId = parseInt(useParams().roomId, 10);
+  useEffect(() => {
+    const room = roomResult.data?.getRoom;
+
+    if (room) {
+      setReceiver(room.users.find((user) => user.id !== currentUser.id));
+      socket.emit('joinChatRoom', room.id);
+    }
+  }, [roomResult.data, currentUser]);
 
   useEffect(() => {
-    if (!roomId) {
-      setError({ status: 404, message: 'Chat not found' });
-    } else if (currentUser) {
-      backendFetch(setError, `/rooms/${roomId}`).then((response) => {
-        setReceiver(response.room.users.find((u) => u.id !== currentUser.id));
-        setMessages(response.room.messages);
-        setHasMoreMessages(response.room.messages.length === 20);
-      });
+    const addNewMessage = (newMessage) =>
+      chatCache.createMessage(roomResultRef.current, newMessage);
 
-      socket.emit('joinChatRoom', roomId);
-    }
-  }, [setError, currentUser, roomId]);
+    const replaceMessage = (updatedMessage) =>
+      chatCache.updateMessage(roomResultRef.current, updatedMessage);
 
-  useEffect(() => {
-    function addNewMessage(newMessage) {
-      setMessages([newMessage, ...messages]);
-      setHasNewMessage(true);
-    }
+    const removeMessage = (deletedMessageId) =>
+      chatCache.deleteMessage(roomResultRef.current, deletedMessageId);
 
-    function replaceMessage(newMessage) {
-      const newMessages = messages.map((message) =>
-        message.id === newMessage.id ? newMessage : message,
-      );
-
-      setMessages(newMessages);
-    }
-
-    function removeMessage(messageId) {
-      setMessages(messages.filter((message) => message.id !== messageId));
-    }
-
-    if (messages) {
-      socket.on('addNewMessage', addNewMessage);
-      socket.on('replaceMessage', replaceMessage);
-      socket.on('removeMessage', removeMessage);
-    }
+    socket.on('addNewMessage', addNewMessage);
+    socket.on('replaceMessage', replaceMessage);
+    socket.on('removeMessage', removeMessage);
 
     return () => {
       socket.off('addNewMessage', addNewMessage);
       socket.off('replaceMessage', replaceMessage);
       socket.off('removeMessage', removeMessage);
     };
-  }, [messages]);
+  }, []);
 
   useEffect(() => {
     if (hasNewMessage) {
-      messagesEnd.current.scrollIntoView({ behavior: 'smooth' });
+      if (messages[messages.length - 1].userId !== Number(currentUser.id)) {
+        messagesEnd.current.scrollIntoView({ behavior: 'smooth' });
+      }
+
       setHasNewMessage(false);
     }
-  }, [hasNewMessage]);
+  }, [hasNewMessage, messages, currentUser.id]);
+
+  async function fetchMoreMessages() {
+    roomResult.fetchMore({
+      variables: { cursor: messages[messages.length - 1].id },
+
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newMessages = fetchMoreResult.getRoom.messages;
+
+        setHasMoreMessages(
+          newMessages.length % 20 === 0 && newMessages.length > 0
+        );
+
+        return {
+          ...previousData,
+
+          getRoom: {
+            ...previousData.getRoom,
+            messages: [...previousData.getRoom.messages, ...newMessages],
+          },
+        };
+      },
+    });
+  }
 
   function renderDate(i) {
     const current = new Date(messages[i].timestamp);
@@ -79,7 +96,7 @@ function Chat() {
           <hr />
           <div className={styles.date}>
             {Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
-              current,
+              current
             )}
           </div>
         </>
@@ -89,14 +106,9 @@ function Chat() {
     return null;
   }
 
-  async function addMoreMessages() {
-    const response = await backendFetch(
-      setError,
-      `/rooms/${roomId}/messages?messageId=${messages[messages.length - 1].id}`,
-    );
-
-    setMessages([...messages, ...response.messages]);
-    setHasMoreMessages(response.messages.length === 20);
+  if (roomResult.error) {
+    logError(roomResult.error);
+    return <ErrorPage error={roomResult.error} />;
   }
 
   return !receiver || !messages ? (
@@ -112,30 +124,36 @@ function Chat() {
           <span className='gray'>@{receiver.username}</span>
         </div>
       </Link>
-      <div className={styles.scrollContainer} id='scrollContainer'>
-        <div ref={messagesEnd}></div>
-        <InfiniteScroll
-          dataLength={messages.length}
-          next={() => addMoreMessages()}
-          hasMore={hasMoreMessages}
-          loader={
-            <div className='loaderContainer'>
-              <div className='loader'></div>
-            </div>
-          }
-          endMessage={<div></div>}
-          className={styles.infiniteScroll}
-          inverse={true}
-          scrollableTarget='scrollContainer'
-        >
-          {messages.map((message, i) => (
-            <div className={styles.messageContainer} key={message.id}>
-              {messages[i + 1] && renderDate(i)}
-              <Message message={message} roomId={roomId} />
-            </div>
-          ))}
-        </InfiniteScroll>
-      </div>
+      {
+        <div className={styles.scrollContainer} id='scrollContainer'>
+          <div ref={messagesEnd}></div>
+          {messages.length === 0 ? (
+            <h2>No messages yet</h2>
+          ) : (
+            <InfiniteScroll
+              dataLength={messages.length}
+              next={() => fetchMoreMessages()}
+              hasMore={hasMoreMessages}
+              loader={
+                <div className='loaderContainer'>
+                  <div className='loader'></div>
+                </div>
+              }
+              endMessage={<div></div>}
+              className={styles.infiniteScroll}
+              inverse={true}
+              scrollableTarget='scrollContainer'
+            >
+              {messages.map((message, i) => (
+                <div className={styles.messageContainer} key={message.id}>
+                  {messages[i + 1] && renderDate(i)}
+                  <Message message={message} roomId={roomId} />
+                </div>
+              ))}
+            </InfiniteScroll>
+          )}
+        </div>
+      }
       <MessageForm receiver={receiver} roomId={roomId} />
     </main>
   );

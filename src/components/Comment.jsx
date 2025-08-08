@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
 import ContentForm from './ContentForm.jsx';
-import backendFetch from '../../utils/backendFetch';
-import formatDate from '../../utils/formatDate';
-import socket from '../../utils/socket';
+import { LIKE_COMMENT, REPOST, DELETE_COMMENT } from '../graphql/mutations';
+import formatDate from '../utils/formatDate';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 import styles from '../style/Content.module.css';
 
 function Comment({ comment, replaceComment, removeComment, displayType }) {
@@ -15,11 +17,46 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
   const editTextarea = useRef(null);
   const deleteModal = useRef(null);
   const imageModal = useRef(null);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
+
+  const [likeComment] = useMutation(LIKE_COMMENT, {
+    onError: logError,
+
+    onCompleted: () => {
+      if (!isLiked && comment.userId !== Number(currentUser.id)) {
+        socket.emit('sendNotification', { userId: comment.userId });
+      }
+    },
+  });
+
+  const [repost] = useMutation(REPOST, {
+    onError: logError,
+
+    onCompleted: () => {
+      if (!currentUserRepostId && comment.userId !== Number(currentUser.id)) {
+        socket.emit('sendNotification', { userId: comment.userId });
+      } else {
+        const newReposts = comment.reposts.filter(
+          (repostObj) => repostObj.id !== currentUserRepostId
+        );
+
+        replaceComment({ ...comment, reposts: newReposts });
+      }
+    },
+  });
+
+  const [deleteComment] = useMutation(DELETE_COMMENT, {
+    onError: logError,
+
+    onCompleted: () => {
+      removeComment(comment.id);
+      deleteModal.current.close();
+    },
+  });
 
   useEffect(() => {
     const repostTemp = comment.reposts.find(
-      (repostObj) => repostObj.userId === currentUser.id,
+      (repostObj) => repostObj.userId === Number(currentUser.id)
     );
 
     setCurrentUserRepostId(repostTemp ? repostTemp.id : null);
@@ -33,64 +70,19 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
     }
   }, [isEditing]);
 
-  async function deleteComment() {
-    await backendFetch(setError, `/comments/${comment.id}`, {
-      method: 'DELETE',
-    });
-
-    removeComment(comment.id);
-    deleteModal.current.close();
-  }
-
-  async function repost() {
-    if (!currentUserRepostId) {
-      const response = await backendFetch(setError, '/reposts', {
-        method: 'Post',
-        body: JSON.stringify({ contentType: 'comment', id: comment.id }),
-      });
-
-      const newComment = {
-        ...comment,
-        reposts: [...comment.reposts, response.repost],
-      };
-
-      replaceComment(newComment);
-      socket.emit('sendNotification', { userId: comment.userId });
-    } else {
-      const response = await backendFetch(setError, '/reposts', {
-        method: 'Delete',
-        body: JSON.stringify({ id: currentUserRepostId }),
-      });
-
-      const newReposts = comment.reposts.filter(
-        (repostObj) => repostObj.id !== response.repost.id,
-      );
-
-      replaceComment({ ...comment, reposts: newReposts });
-    }
-  }
-
-  async function like() {
-    const response = await backendFetch(
-      setError,
-      `/comments/${comment.id}/${isLiked ? 'unlike' : 'like'}`,
-      { method: 'PUT' },
-    );
-
-    replaceComment({ ...comment, likes: response.comment.likes });
-
-    if (!isLiked) {
-      socket.emit('sendNotification', { userId: comment.userId });
-    }
-  }
-
   return (
     <div>
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this comment?</h2>
         <div className='modalButtons'>
           <button onClick={() => deleteModal.current.close()}>Cancel</button>
-          <button onClick={() => deleteComment()}>Delete</button>
+          <button
+            onClick={() =>
+              deleteComment({ variables: { commentId: comment.id } })
+            }
+          >
+            Delete
+          </button>
         </div>
       </dialog>
       <dialog ref={imageModal} className={styles.imageModal}>
@@ -120,7 +112,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
               </span>
             </Link>
           </div>
-          {comment.user.id === parseInt(localStorage.getItem('userId'), 10) && (
+          {comment.userId === Number(currentUser.id) && (
             <div className={styles.options}>
               <button onClick={() => setIsEditing(!isEditing)}>
                 <span className='material-symbols-outlined'>edit</span>
@@ -158,10 +150,7 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
           {isEditing ? (
             <ContentForm
               contentType='comment'
-              setContent={(updatedPost) => {
-                replaceComment(updatedPost);
-                setIsEditing(false);
-              }}
+              setContent={() => setIsEditing(false)}
               contentToEdit={comment}
             />
           ) : (
@@ -184,14 +173,14 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
           <Link to={`/comments/${comment.id}`}>
             <button>
               <span className='material-symbols-outlined'>comment</span>
-              <span>
-                {comment._count
-                  ? comment._count.replies
-                  : comment.replies.length}
-              </span>
+              <span>{comment._count.replies}</span>
             </button>
           </Link>
-          <button onClick={() => repost()}>
+          <button
+            onClick={() =>
+              repost({ variables: { id: comment.id, contentType: 'comment' } })
+            }
+          >
             <span
               className={`material-symbols-outlined ${
                 currentUserRepostId ? styles.reposted : ''
@@ -201,7 +190,11 @@ function Comment({ comment, replaceComment, removeComment, displayType }) {
             </span>
             <span>{comment.reposts.length}</span>
           </button>
-          <button onClick={() => like()}>
+          <button
+            onClick={() =>
+              likeComment({ variables: { commentId: comment.id } })
+            }
+          >
             <div>
               <span
                 className={`material-symbols-outlined ${

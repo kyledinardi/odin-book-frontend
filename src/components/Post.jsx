@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
 import Poll from './Poll.jsx';
 import ContentForm from './ContentForm.jsx';
-import backendFetch from '../../utils/backendFetch';
-import formatDate from '../../utils/formatDate';
-import socket from '../../utils/socket';
+import { LIKE_POST, REPOST, DELETE_POST } from '../graphql/mutations';
+import formatDate from '../utils/formatDate';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 import styles from '../style/Content.module.css';
 
 function Post({ post, replacePost, removePost, displayType }) {
@@ -13,20 +15,54 @@ function Post({ post, replacePost, removePost, displayType }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const editTextarea = useRef(null);
   const deleteModal = useRef(null);
+  const editTextarea = useRef(null);
   const imageModal = useRef(null);
-  const [setError, currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext();
+
+  const [likePost] = useMutation(LIKE_POST, {
+    onError: logError,
+
+    onCompleted: () => {
+      if (!isLiked && post.userId !== Number(currentUser.id)) {
+        socket.emit('sendNotification', { userId: post.userId });
+      }
+    },
+  });
+
+  const [repost] = useMutation(REPOST, {
+    onError: logError,
+
+    onCompleted: () => {
+      if (!currentUserRepostId && post.userId !== Number(currentUser.id)) {
+        socket.emit('sendNotification', { userId: post.userId });
+      } else {
+        const newReposts = post.reposts.filter(
+          (repostObj) => repostObj.id !== currentUserRepostId
+        );
+
+        replacePost({ ...post, reposts: newReposts });
+      }
+    },
+  });
+
+  const [deletePost] = useMutation(DELETE_POST, {
+    onError: logError,
+
+    onCompleted: () => {
+      removePost(post.id);
+      deleteModal.current.close();
+    },
+  });
 
   useEffect(() => {
     const repostTemp = post.reposts.find(
-      (repostObj) => repostObj.userId === currentUser.id,
+      (repostObj) => repostObj.userId === Number(currentUser.id)
     );
 
     setCurrentUserRepostId(repostTemp ? repostTemp.id : null);
-
     setIsLiked(post.likes.some((user) => user.id === currentUser.id));
-  }, [currentUser, post]);
+  }, [currentUser.id, post]);
 
   useEffect(() => {
     if (editTextarea.current) {
@@ -35,59 +71,17 @@ function Post({ post, replacePost, removePost, displayType }) {
     }
   }, [isEditing]);
 
-  async function deletePost() {
-    await backendFetch(setError, `/posts/${post.id}`, {
-      method: 'DELETE',
-    });
-
-    removePost(post.id);
-    deleteModal.current.close();
-  }
-
-  async function repost() {
-    if (!currentUserRepostId) {
-      const response = await backendFetch(setError, '/reposts', {
-        method: 'Post',
-        body: JSON.stringify({ contentType: 'post', id: post.id }),
-      });
-
-      replacePost({ ...post, reposts: [...post.reposts, response.repost] });
-      socket.emit('sendNotification', { userId: post.userId });
-    } else {
-      const response = await backendFetch(setError, '/reposts', {
-        method: 'Delete',
-        body: JSON.stringify({ id: currentUserRepostId }),
-      });
-
-      const newReposts = post.reposts.filter(
-        (repostObj) => repostObj.id !== response.repost.id,
-      );
-
-      replacePost({ ...post, reposts: newReposts });
-    }
-  }
-
-  async function like() {
-    const response = await backendFetch(
-      setError,
-      `/posts/${post.id}/${isLiked ? 'unlike' : 'like'}`,
-      { method: 'PUT' },
-    );
-
-    replacePost({ ...post, likes: response.post.likes });
-
-    if (!isLiked) {
-      socket.emit('sendNotification', { userId: post.userId });
-    }
-  }
-
   return (
     <div>
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this post?</h2>
         <div className='modalButtons'>
           <button onClick={() => deleteModal.current.close()}>Cancel</button>
-          <button onClick={() => deletePost()}>Delete</button>
+          <button
+            onClick={() => deletePost({ variables: { postId: post.id } })}
+          >
+            Delete
+          </button>
         </div>
       </dialog>
       <dialog ref={imageModal} className={styles.imageModal}>
@@ -115,7 +109,7 @@ function Post({ post, replacePost, removePost, displayType }) {
               <span className='gray'>{formatDate.short(post.timestamp)}</span>
             </Link>
           </div>
-          {post.userId === currentUser.id && (
+          {post.userId === Number(currentUser.id) && (
             <div className={styles.options}>
               <button onClick={() => setIsEditing(!isEditing)}>
                 <span className='material-symbols-outlined'>edit</span>
@@ -131,10 +125,7 @@ function Post({ post, replacePost, removePost, displayType }) {
           {isEditing ? (
             <ContentForm
               contentType='post'
-              setContent={(updatedPost) => {
-                replacePost(updatedPost);
-                setIsEditing(false);
-              }}
+              setContent={() => setIsEditing(false)}
               contentToEdit={post}
             />
           ) : (
@@ -149,9 +140,7 @@ function Post({ post, replacePost, removePost, displayType }) {
               />
             </div>
           )}
-          {post.poll && (
-            <Poll post={post} replacePost={(newPost) => replacePost(newPost)} />
-          )}
+          {post.pollChoices.length > 1 && <Poll post={post} />}
           {displayType === 'focused' && (
             <p className='gray'>{formatDate.long(post.timestamp)}</p>
           )}
@@ -165,7 +154,11 @@ function Post({ post, replacePost, removePost, displayType }) {
               </span>
             </button>
           </Link>
-          <button onClick={() => repost()}>
+          <button
+            onClick={() =>
+              repost({ variables: { id: post.id, contentType: 'post' } })
+            }
+          >
             <span
               className={`material-symbols-outlined ${
                 currentUserRepostId ? styles.reposted : ''
@@ -175,7 +168,7 @@ function Post({ post, replacePost, removePost, displayType }) {
             </span>
             <span>{post.reposts.length}</span>
           </button>
-          <button onClick={() => like()}>
+          <button onClick={() => likePost({ variables: { postId: post.id } })}>
             <div>
               <span
                 className={`material-symbols-outlined ${

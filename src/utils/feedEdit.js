@@ -56,6 +56,7 @@ const editFeed = {
 
           break;
         default:
+          throw new Error(`Invalid feed item type: ${feedItem.feedItemType}`);
       }
 
       return feedItem;
@@ -80,8 +81,10 @@ const editFeed = {
           return (
             feedItem.id !== deletedFeedItemId || deletedFeedItemType !== 'post'
           );
+
         case 'comment':
           return !isRelatedToComment(feedItem);
+
         case 'repost':
           if (feedItem.commentId) {
             return !isRelatedToComment(feedItem.comment);
@@ -91,6 +94,7 @@ const editFeed = {
             feedItem.postId !== deletedFeedItemId ||
             deletedFeedItemType !== 'post'
           );
+
         default:
           return true;
       }

@@ -3,8 +3,12 @@ module.exports = {
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   root: true,
   ignorePatterns: ['dist', '.eslintrc.cjs'],
-  settings: { react: { version: '18.2' } },
+  settings: { react: { version: '18.3' } },
   plugins: ['react-refresh'],
+  rules: {
+    'no-underscore-dangle': ['error', { allow: ['_count'] }],
+    'import/extensions': ['error', 'ignorePackages', { js: 'never' }],
+  },
 
   extends: [
     'eslint:recommended',
@@ -14,14 +18,4 @@ module.exports = {
     'airbnb-base',
     'prettier',
   ],
-
-  rules: {
-    'react/jsx-no-target-blank': 'off',
-    'no-underscore-dangle': ['error', { allow: ['_count'] }],
-
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
-  },
 };

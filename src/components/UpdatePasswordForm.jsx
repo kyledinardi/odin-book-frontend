@@ -1,33 +1,39 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
-import backendFetch from '../../utils/backendFetch';
+import { UPDATE_PASSWORD } from '../graphql/mutations';
+import logError from '../utils/logError';
 import styles from '../style/UpdatePasswordForm.module.css';
 
 function UpdatePasswordForm({ userModal }) {
-  const [errorArray, setErrorArray] = useState(null);
-  const [setError, currentUser] = useOutletContext();
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [currentUser] = useOutletContext();
 
-  async function submitPasswordChange(e) {
+  const [updatePassword] = useMutation(UPDATE_PASSWORD, {
+    onError: (err) => {
+      if (err.graphQLErrors[0].extensions.code === 'BAD_USER_INPUT') {
+        setErrorMessage(err.graphQLErrors[0].message);
+      } else {
+        logError(err);
+      }
+    },
+
+    onCompleted: () => userModal.current.close(),
+  });
+
+  function submitPasswordChange(e) {
     e.preventDefault();
 
-    const response = await backendFetch(setError, '/users/password', {
-      method: 'PUT',
-
-      body: JSON.stringify({
+    updatePassword({
+      variables: {
         currentPassword: e.target[0].value,
         newPassword: e.target[1].value,
         newPasswordConfirmation: e.target[2].value,
-      }),
+      },
     });
 
     e.target.reset();
-
-    if (response.expectedErrors) {
-      setErrorArray(response.expectedErrors);
-    } else {
-      userModal.current.close();
-    }
   }
 
   return (
@@ -35,6 +41,9 @@ function UpdatePasswordForm({ userModal }) {
       className={styles.passwordForm}
       onSubmit={(e) => submitPasswordChange(e)}
     >
+      {errorMessage && (
+        <p className={styles.error}>{errorMessage}</p>
+      )}
       <div className={styles.passwordFields}>
         <label htmlFor='currentPassword'>Current Password</label>
         <input
@@ -61,13 +70,6 @@ function UpdatePasswordForm({ userModal }) {
           required
         />
       </div>
-      {errorArray && (
-        <ul className={styles.error}>
-          {errorArray.map((error) => (
-            <li key={error.msg}>{error.msg}</li>
-          ))}
-        </ul>
-      )}
       {currentUser.username === 'Guest' ? (
         <button className={styles.submitPassword} disabled>
           Cannot change guest password

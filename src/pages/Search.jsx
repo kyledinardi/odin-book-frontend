@@ -1,22 +1,35 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Post from '../components/Post.jsx';
 import User from '../components/User.jsx';
-import backendFetch from '../../utils/backendFetch';
+import { SEARCH_POSTS, SEARCH_USERS } from '../graphql/queries';
+import { searchChache } from '../utils/apolloCache';
 import styles from '../style/Search.module.css';
 
 function Search() {
-  const [posts, setPosts] = useState(null);
-  const [users, setUsers] = useState(null);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const [followedIds, setFollowedIds] = useState(null);
-
-  const [hasMorePosts, setHasMorePosts] = useState(false);
-  const [hasMoreUsers, setHasMoreUsers] = useState(false);
   const [openTab, setOpenTab] = useState('posts');
 
+  const [currentUser, setCurrentUser] = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+
+  const postsResult = useQuery(SEARCH_POSTS, {
+    variables: { query: searchParams.get('query') },
+    skip: !searchParams.get('query'),
+  });
+
+  const usersResult = useQuery(SEARCH_USERS, {
+    variables: { query: searchParams.get('query') },
+    skip: !searchParams.get('query'),
+  });
+
+  const posts = postsResult.data?.searchPosts;
+  const users = usersResult.data?.searchUsers;
+  const readyToRender = posts && users && followedIds;
 
   useEffect(() => {
     if (currentUser) {
@@ -24,78 +37,36 @@ function Search() {
     }
   }, [currentUser]);
 
-  useEffect(() => {
-    async function search() {
-      const [postsResponse, usersResponse] = await Promise.all([
-        backendFetch(
-          setError,
-          `/posts/search?query=${searchParams.get('query')}`,
-        ),
+  function fetchMorePosts() {
+    postsResult.fetchMore({
+      variables: { cursor: posts[posts.length - 1].id },
 
-        backendFetch(
-          setError,
-          `/users/search?query=${searchParams.get('query')}`,
-        ),
-      ]);
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newPosts = fetchMoreResult.searchPosts;
+        setHasMorePosts(newPosts.length % 20 === 0 && newPosts.length > 0);
 
-      setPosts(postsResponse.posts);
-      setUsers(usersResponse.users);
-      setHasMorePosts(postsResponse.posts.length === 20);
-      setHasMoreUsers(usersResponse.users.length === 20);
-
-      if (postsResponse.posts.length > 0 && usersResponse.users.length === 0) {
-        setOpenTab('posts');
-      }
-
-      if (postsResponse.posts.length === 0 && usersResponse.users.length > 0) {
-        setOpenTab('users');
-      }
-    }
-
-    if (searchParams.has('query')) {
-      if (searchParams.get('query') !== '') {
-        search();
-      } else {
-        setPosts(null);
-        setUsers(null);
-        setHasMorePosts(false);
-        setHasMoreUsers(false);
-      }
-    }
-  }, [searchParams, setError]);
-
-  async function addMorePosts() {
-    const response = await backendFetch(
-      setError,
-
-      `/posts/search?query=${searchParams.get('query')}&postId=${
-        posts[posts.length - 1].id
-      }`,
-    );
-
-    setPosts([...posts, ...response.posts]);
-    setHasMorePosts(response.posts.length === 20);
+        return {
+          ...previousData,
+          searchPosts: [...previousData.searchPosts, ...newPosts],
+        };
+      },
+    });
   }
 
-  async function addMoreUsers() {
-    const response = await backendFetch(
-      setError,
+  function fetchMoreUsers() {
+    usersResult.fetchMore({
+      variables: { cursor: users[users.length - 1].id },
 
-      `/users/search?query=${searchParams.get('query')}&userId=${
-        users[users.length - 1].id
-      }`,
-    );
+      updateQuery: (previousData, { fetchMoreResult }) => {
+        const newUsers = fetchMoreResult.searchUsers;
+        setHasMoreUsers(newUsers.length % 20 === 0 && newUsers.length > 0);
 
-    setUsers([...users, ...response.users]);
-    setHasMoreUsers(response.users.length === 20);
-  }
-
-  function replacePost(updatedPost) {
-    const newPosts = posts.map((post) =>
-      post.id === updatedPost.id ? updatedPost : post,
-    );
-
-    setPosts(newPosts);
+        return {
+          ...previousData,
+          searchUsers: [...previousData.searchUsers, ...newUsers],
+        };
+      },
+    });
   }
 
   return (
@@ -134,15 +105,17 @@ function Search() {
           Users
         </button>
       </div>
-      {posts &&
-        users &&
-        followedIds &&
+      {readyToRender &&
         (openTab === 'posts' ? (
           <div>
-            {posts.length > 0 ? (
+            {posts.length === 0 ? (
+              <h2>No post results for {`"${searchParams.get('query')}"`}</h2>
+            ) : (
               <InfiniteScroll
                 dataLength={posts.length}
-                next={() => addMorePosts()}
+                next={() => {
+                  fetchMorePosts();
+                }}
                 hasMore={hasMorePosts}
                 loader={
                   <div className='loaderContainer'>
@@ -155,24 +128,26 @@ function Search() {
                   <Post
                     key={post.id}
                     post={post}
-                    replacePost={(updatedPost) => replacePost(updatedPost)}
+                    replacePost={(updatedPost) =>
+                      searchChache.updatePost(postsResult, updatedPost)
+                    }
                     removePost={(postId) =>
-                      setPosts(posts.filter((p) => p.id !== postId))
+                      searchChache.deletePost(postsResult, postId)
                     }
                     displayType='feed'
                   />
                 ))}
               </InfiniteScroll>
-            ) : (
-              <h2>No post results for {`"${searchParams.get('query')}"`}</h2>
             )}
           </div>
         ) : (
           <div>
             {users.length > 0 ? (
+              <h2>No user results for {`"${searchParams.get('query')}"`}</h2>
+            ) : (
               <InfiniteScroll
                 dataLength={users.length}
-                next={() => addMoreUsers()}
+                next={() => fetchMoreUsers()}
                 hasMore={hasMoreUsers}
                 loader={
                   <div className='loaderContainer'>
@@ -187,14 +162,10 @@ function Search() {
                     user={user}
                     bio={true}
                     isFollowed={followedIds.includes(user.id)}
-                    replaceUser={(u) =>
-                      setCurrentUser({ ...currentUser, following: u.following })
-                    }
+                    replaceUser={() => setCurrentUser()}
                   />
                 ))}
               </InfiniteScroll>
-            ) : (
-              <h2>No user results for {`"${searchParams.get('query')}"`}</h2>
             )}
           </div>
         ))}

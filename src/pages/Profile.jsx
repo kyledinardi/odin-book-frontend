@@ -1,14 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import * as reactRouterDom from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom';
+import { useMutation, useQuery } from '@apollo/client';
+import ErrorPage from './ErrorPage.jsx';
 import UpdateProfileForm from '../components/UpdateProfileForm.jsx';
 import UpdatePasswordForm from '../components/UpdatePasswordForm.jsx';
 import ProfilePostList from '../components/ProfilePostList.jsx';
-import backendFetch from '../../utils/backendFetch';
-import socket from '../../utils/socket';
+import { GET_USER } from '../graphql/queries';
+import { FIND_OR_CREATE_ROOM, FOLLOW } from '../graphql/mutations';
+import logError from '../utils/logError';
+import socket from '../utils/socket';
 import styles from '../style/Profile.module.css';
 
 function Profile() {
-  const [user, setUser] = useState(null);
   const [isFollowed, setIsFollowed] = useState(false);
   const [isUserModal, setIsUserModal] = useState(false);
   const [isUserModalRendered, setIsUserModalRendered] = useState(false);
@@ -19,28 +27,39 @@ function Profile() {
   const userModal = useRef(null);
   const imageModal = useRef(null);
 
-  const { Link, useNavigate, useOutletContext, useParams } = reactRouterDom;
-  const [setError, currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext();
   const navigate = useNavigate();
-  const userId = parseInt(useParams().userId, 10);
+  const userId = Number(useParams().userId);
+  const userResult = useQuery(GET_USER, { variables: { userId } });
+  const user = userResult.data?.getUser;
+
+  const [follow] = useMutation(FOLLOW, {
+    onError: logError,
+
+    onCompleted: () => {
+      setCurrentUser();
+      setIsFollowed(!isFollowed);
+
+      if (!isFollowed && user.id !== Number(currentUser.id)) {
+        socket.emit('sendNotification', { userId });
+      }
+    },
+  });
+
+  const [findOrCreateRoom] = useMutation(FIND_OR_CREATE_ROOM, {
+    onError: logError,
+    onCompleted: (data) => navigate(`/messages/${data.findOrCreateRoom.id}`),
+  });
 
   useEffect(() => {
-    if (!userId) {
-      setError({ status: 404, message: 'User not found' });
-      return;
-    }
+    if (currentUser && userId) {
+      const isFollowedTemp = currentUser.following.some(
+        (followedUser) => Number(followedUser.id) === userId
+      );
 
-    if (currentUser) {
-      backendFetch(setError, `/users/${userId}`).then((response) => {
-        const isFollowedTemp = currentUser.following.some(
-          (followedUser) => followedUser.id === userId,
-        );
-
-        setIsFollowed(isFollowedTemp);
-        setUser(response.user);
-      });
+      setIsFollowed(isFollowedTemp);
     }
-  }, [userId, currentUser, setError]);
+  }, [currentUser, userId]);
 
   useEffect(() => {
     if (isUserModal) {
@@ -52,29 +71,50 @@ function Profile() {
     }
   }, [isUserModal, isUserModalRendered]);
 
-  async function messageUser() {
-    const response = await backendFetch(setError, '/rooms', {
-      method: 'POST',
-      body: JSON.stringify({ userId }),
-    });
-
-    navigate(`/messages/${response.room.id}`);
+  if (userResult.error) {
+    logError(userResult.error);
+    return <ErrorPage error={userResult.error} />;
   }
 
-  async function follow() {
-    const response = await backendFetch(
-      setError,
-      `/users/${isFollowed ? 'unfollow' : 'follow'}`,
-      { method: 'PUT', body: JSON.stringify({ userId }) },
-    );
-
-    setCurrentUser({ ...currentUser, following: response.user.following });
-    setIsFollowed(!isFollowed);
-
-    if (!isFollowed) {
-      socket.emit('sendNotification', { userId });
+  const renderButtons = () => {
+    if (user.username === 'Guest' || user.username === 'Guest2') {
+      return null;
     }
-  }
+    
+    if (userId === Number(currentUser.id)) {
+      return (
+        <div className={styles.topButtons}>
+          <button
+            onClick={() => {
+              setUserModalType('profile');
+              setIsUserModal(true);
+            }}
+          >
+            Edit Profile
+          </button>
+          <button
+            onClick={() => {
+              setUserModalType('password');
+              setIsUserModal(true);
+            }}
+          >
+            Change Password
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className={styles.topButtons}>
+        <button onClick={() => findOrCreateRoom({ variables: { userId } })}>
+          Message
+        </button>
+        <button onClick={() => follow({ variables: { userId } })}>
+          {isFollowed ? 'Unfollow' : 'Follow'}
+        </button>
+      </div>
+    );
+  };
 
   return !user || !currentUser ? (
     <div className='loaderContainer'>
@@ -144,33 +184,7 @@ function Profile() {
             imageModal.current.showModal();
           }}
         />
-        {userId === currentUser.id ? (
-          <div className={styles.topButtons}>
-            <button
-              onClick={() => {
-                setUserModalType('profile');
-                setIsUserModal(true);
-              }}
-            >
-              Edit Profile
-            </button>
-            <button
-              onClick={() => {
-                setUserModalType('password');
-                setIsUserModal(true);
-              }}
-            >
-              Change Password
-            </button>
-          </div>
-        ) : (
-          <div className={styles.topButtons}>
-            <button onClick={() => messageUser()}>Message</button>
-            <button onClick={() => follow()}>
-              {isFollowed ? 'Unfollow' : 'Follow'}
-            </button>
-          </div>
-        )}
+        {renderButtons()}
       </div>
       <div className={styles.userInfo}>
         <h2>{user.displayName}</h2>
@@ -218,7 +232,7 @@ function Profile() {
               {Intl.DateTimeFormat(undefined, {
                 month: 'long',
                 year: 'numeric',
-              }).format(new Date(user.joinDate))}
+              }).format(new Date(Number(user.joinDate)))}
             </span>
           </div>
         </div>

@@ -1,31 +1,26 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@apollo/client';
 import PropTypes from 'prop-types';
 import User from './User.jsx';
-import backendFetch from '../../utils/backendFetch';
+import { GET_LISTED_USERS } from '../graphql/queries';
+import logError from '../utils/logError';
 import styles from '../style/UserList.module.css';
 
-function UserList({ currentUser, setCurrentUser, setError }) {
-  const [users, setUsers] = useState(null);
+function UserList({ currentUser, setCurrentUser }) {
   const [followedIds, setFollowedIds] = useState(null);
   const navigate = useNavigate();
-
-
-  useEffect(() => {
-    if (currentUser) {
-      setFollowedIds(currentUser.following.map((user) => user.id));
-    }
-  }, [currentUser]);
+  const usersResult = useQuery(GET_LISTED_USERS);
 
   useEffect(() => {
-    if (!users) {
-      backendFetch(setError, '/users').then((response) => {
-        setUsers(response.users);
-      });
-    }
-  }, [users, setError]);
+    setFollowedIds(currentUser.following.map((user) => user.id));
+  }, [currentUser.following]);
 
-  return !users || !followedIds ? (
+  if (usersResult.error) {
+    logError(usersResult.error);
+  }
+
+  return usersResult.loading || !followedIds ? (
     <div className='loaderContainer'>
       <div className='loader'></div>
     </div>
@@ -42,16 +37,12 @@ function UserList({ currentUser, setCurrentUser, setError }) {
         <input type='search' name='search' id='search' placeholder='Search' />
       </form>
       <div>
-        {users.map((user) => (
+        {usersResult.data.getListedUsers.map((user) => (
           <User
             key={user.id}
             user={user}
-            bio={false}
+            replaceUser={() => setCurrentUser()}
             isFollowed={followedIds.includes(user.id)}
-            replaceUser={(u) =>
-              setCurrentUser({ ...currentUser, following: u.following })
-            }
-            setError={(err) => setError(err)}
           />
         ))}
       </div>
@@ -62,7 +53,6 @@ function UserList({ currentUser, setCurrentUser, setError }) {
 UserList.propTypes = {
   currentUser: PropTypes.object,
   setCurrentUser: PropTypes.func,
-  setError: PropTypes.func,
 };
 
 export default UserList;

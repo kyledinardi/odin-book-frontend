@@ -3,9 +3,9 @@ const formatDate = {
     const msPerMinute = 60 * 1000;
     const msPerHour = msPerMinute * 60;
     const msPerDay = msPerHour * 24;
-
     const current = new Date();
-    const timestamp = new Date(dateString);
+    const timestamp = new Date(Number(dateString));
+
     const elapsed = current.getTime() - timestamp.getTime();
 
     if (elapsed < 1) {
@@ -39,14 +39,14 @@ const formatDate = {
   },
 
   long(dateString) {
-    const timestamp = new Date(dateString);
+    const timestamp = new Date(Number(dateString));
 
     const time = Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
-      timestamp,
+      timestamp
     );
 
     const date = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
-      timestamp,
+      timestamp
     );
 
     return `${time}, ${date}`;
