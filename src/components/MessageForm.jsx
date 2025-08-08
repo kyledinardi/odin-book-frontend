@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
 import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
-import backendFetch from '../utils/backendFetch';
+import { CREATE_MESSAGE } from '../graphql/mutations';
 import socket from '../utils/socket';
 import styles from '../style/MessageForm.module.css';
+import logError from '../utils/logError';
 
 function MessageForm({ receiver, roomId }) {
   const [text, setText] = useState('');
@@ -17,7 +18,14 @@ function MessageForm({ receiver, roomId }) {
   const [newImage, setNewImage] = useState(null);
   const fileInput = useRef(null);
   const textInput = useRef(null);
-  const [setError] = useOutletContext();
+
+  const [createMessage] = useMutation(CREATE_MESSAGE, {
+    onError: logError,
+
+    onCompleted: (data) => {
+      socket.emit('submitMessage', { message: data.createMessage, roomId });
+    },
+  });
 
   useEffect(() => {
     function receiveIsTyping(bool) {
@@ -40,26 +48,13 @@ function MessageForm({ receiver, roomId }) {
 
   async function submitMessage(e) {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('text', text);
-    formData.append('gifUrl', gifUrl);
-
-    if (e.target[4].files) {
-      formData.append('image', e.target[4].files[0]);
-    }
-
-    const response = await backendFetch(setError, `/rooms/${roomId}/messages`, {
-      method: 'Post',
-      body: formData,
-    });
+    createMessage({ variables: { roomId, text, gifUrl, image: newImage } });
 
     setText('');
     setGifPickerOpen(false);
     setEmojiPickerOpen(false);
-
     cancelNewImage();
     e.target.reset();
-    socket.emit('submitMessage', { message: response.message, roomId });
   }
 
   function handleFileInputChange(e) {

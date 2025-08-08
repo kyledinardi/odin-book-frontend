@@ -20,7 +20,6 @@ function PostPage() {
   const postResult = useQuery(GET_POST, { variables: { postId } });
   const post = postResult.data?.getPost;
   const comments = post?.comments;
-  
 
   function fetchMoreComments() {
     postResult.fetchMore({
@@ -78,31 +77,35 @@ function PostPage() {
         parentId={postId}
       />
       <div>
-        <InfiniteScroll
-          dataLength={comments.length}
-          next={() => fetchMoreComments()}
-          hasMore={hasMoreComments}
-          loader={
-            <div className='loaderContainer'>
-              <div className='loader'></div>
-            </div>
-          }
-          endMessage={<div></div>}
-        >
-          {comments.map((comment) => (
-            <Comment
-              key={comment.id}
-              comment={comment}
-              replaceComment={(updatedComment) =>
-                postPageCache.updateComment(postResult, updatedComment)
-              }
-              removeComment={(commentId) =>
-                postPageCache.deleteComment(postResult, commentId)
-              }
-              displayType='reply'
-            />
-          ))}
-        </InfiniteScroll>
+        {comments.length === 0 ? (
+          <h2>No comments yet</h2>
+        ) : (
+          <InfiniteScroll
+            dataLength={comments.length}
+            next={() => fetchMoreComments()}
+            hasMore={hasMoreComments}
+            loader={
+              <div className='loaderContainer'>
+                <div className='loader'></div>
+              </div>
+            }
+            endMessage={<div></div>}
+          >
+            {comments.map((comment) => (
+              <Comment
+                key={comment.id}
+                comment={comment}
+                replaceComment={(updatedComment) =>
+                  postPageCache.updateComment(postResult, updatedComment)
+                }
+                removeComment={(commentId) =>
+                  postPageCache.deleteComment(postResult, commentId)
+                }
+                displayType='reply'
+              />
+            ))}
+          </InfiniteScroll>
+        )}
       </div>
     </main>
   );

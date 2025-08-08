@@ -7,6 +7,10 @@ export default new InMemoryCache({
       fields: {
         getIndexPosts: { merge: (_, incoming) => incoming },
         searchPosts: { merge: (_, incoming) => incoming },
+        getUserPosts: { merge: (_, incoming) => incoming },
+        getImagePosts: { merge: (_, incoming) => incoming },
+        getLikedPosts: { merge: (_, incoming) => incoming },
+        getUserComments: { merge: (_, incoming) => incoming },
       },
     },
 
@@ -25,8 +29,20 @@ export default new InMemoryCache({
         reposts: { merge: (_, incoming) => incoming },
       },
     },
+
+    Room: {
+      fields: {
+        messages: { merge: (_, incoming) => incoming },
+      },
+    },
   },
 });
+
+const replace = (updatedItem, list) =>
+  list.map((item) => (item.id === updatedItem.id ? updatedItem : item));
+
+const remove = (deletedItemid, list) =>
+  list.filter((item) => item.id !== deletedItemid);
 
 export const indexFeedCache = {
   create: (result, created) =>
@@ -52,14 +68,12 @@ export const indexFeedCache = {
 export const searchChache = {
   updatePost: (result, updatedPost) =>
     result.updateQuery(({ searchPosts }) => ({
-      searchPosts: searchPosts.map((post) =>
-        post.id === updatedPost.id ? updatedPost : post
-      ),
+      searchPosts: replace(updatedPost, searchPosts),
     })),
 
   deletePost: (result, deletedPostId) =>
     result.updateQuery(({ searchPosts }) => ({
-      searchPosts: searchPosts.filter((post) => post.id !== deletedPostId),
+      searchPosts: remove(deletedPostId, searchPosts),
     })),
 };
 
@@ -73,22 +87,20 @@ export const postPageCache = {
     })),
 
   updateComment: (result, updatedComment) =>
-    result.updateQuery(({ getPost }) => {
-      const newComments = getPost.comments.map((comment) =>
-        comment.id === updatedComment.id ? updatedComment : comment
-      );
-
-      return { getPost: { ...getPost, comments: newComments } };
-    }),
+    result.updateQuery(({ getPost }) => ({
+      getPost: {
+        ...getPost,
+        comments: replace(updatedComment, getPost.comments),
+      },
+    })),
 
   deleteComment: (result, deletedCommentId) =>
-    result.updateQuery(({ getPost }) => {
-      const newComments = getPost.comments.filter(
-        (comment) => comment.id !== deletedCommentId
-      );
-
-      return { getPost: { ...getPost, comments: newComments } };
-    }),
+    result.updateQuery(({ getPost }) => ({
+      getPost: {
+        ...getPost,
+        comments: remove(deletedCommentId, getPost.comments),
+      },
+    })),
 };
 
 export const commentPageCache = {
@@ -97,20 +109,16 @@ export const commentPageCache = {
       getComment: { ...getComment, post: updatedPost },
     })),
 
-  updateComment: (result, updatedComment) => {
-    result.updateQuery(() => ({
-      getComment: updatedComment,
-    }));
-  },
+  updateComment: (result, updatedComment) =>
+    result.updateQuery(() => ({ getComment: updatedComment })),
 
   updateAncestor: (result, updatedAncestor) =>
-    result.updateQuery(({ getComment }) => {
-      const newCommentChain = getComment.commentChain.map((comment) =>
-        comment.id === updatedAncestor.id ? updatedAncestor : comment
-      );
-
-      return { getComment: { ...getComment, commentChain: newCommentChain } };
-    }),
+    result.updateQuery(({ getComment }) => ({
+      getComment: {
+        ...getComment,
+        commentChain: replace(updatedAncestor, getComment.commentChain),
+      },
+    })),
 
   createReply: (result, createdComment) =>
     result.updateQuery(({ getComment }) => ({
@@ -121,21 +129,66 @@ export const commentPageCache = {
     })),
 
   updateReply: (result, updatedReply) =>
-    result.updateQuery(({ getComment }) => {
-      const newReplies = getComment.replies.map((reply) =>
-        reply.id === updatedReply.id ? updatedReply : reply
-      );
+    result.updateQuery(({ getComment }) => ({
+      getComment: {
+        ...getComment,
+        replies: replace(updatedReply, getComment.replies),
+      },
+    })),
 
-      return { getComment: { ...getComment, replies: newReplies } };
-    }),
+  deleteReply: (result, deletedReplyId) =>
+    result.updateQuery(({ getComment }) => ({
+      getComment: {
+        ...getComment,
+        replies: remove(deletedReplyId, getComment.replies),
+      },
+    })),
+};
 
-  deleteReply: (result, deletedReplyId) => {
-    result.updateQuery(({ getComment }) => {
-      const newReplies = getComment.replies.filter(
-        (reply) => reply.id !== deletedReplyId
-      );
+export const chatCache = {
+  createMessage: (result, createdMessage) =>
+    result.updateQuery(({ getRoom }) => ({
+      getRoom: { ...getRoom, messages: [createdMessage, ...getRoom.messages] },
+    })),
 
-      return { getComment: { ...getComment, replies: newReplies } };
-    });
-  },
+  updateMessage: (result, updatedMessage) =>
+    result.updateQuery(({ getRoom }) => ({
+      getRoom: {
+        ...getRoom,
+        messages: replace(updatedMessage, getRoom.messages),
+      },
+    })),
+
+  deleteMessage: (result, deletedMessageId) =>
+    result.updateQuery(({ getRoom }) => ({
+      getRoom: {
+        ...getRoom,
+        messages: remove(deletedMessageId, getRoom.messages),
+      },
+    })),
+};
+
+export const profileCache = {
+  updatePost: (results, updatedPost) =>
+    results.forEach((result) =>
+      result.updateQuery((query) => {
+        const list = Object.keys(query)[0];
+        return { [list]: editFeed.replace(updatedPost, query[list]) };
+      })
+    ),
+
+  deletePost: (results, deletedPostId, deletedFeedItemType) =>
+    results.forEach((result) =>
+      result.updateQuery((query) => {
+        const list = Object.keys(query)[0];
+
+        return {
+          [list]: editFeed.remove(
+            deletedPostId,
+            deletedFeedItemType,
+            query[list]
+          ),
+        };
+      })
+    ),
 };

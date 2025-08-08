@@ -61,6 +61,7 @@ export const COMMENT_FRAGMENT = gql`
     id
     timestamp
     text
+    feedItemType
     imageUrl
     userId
     postId

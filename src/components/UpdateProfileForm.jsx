@@ -1,42 +1,43 @@
 import { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
-import backendFetch from '../utils/backendFetch';
-import headerPlaceholder from '../assets/header-placeholder.webp';
+import { UPDATE_PROFILE } from '../graphql/mutations';
+import logError from '../utils/logError';
 import styles from '../style/UpdateProfileForm.module.css';
+import headerPlaceholder from '../assets/header-placeholder.webp';
 
 function UpdateProfileForm({ userModal }) {
   const [newPfp, setNewPfp] = useState(null);
   const [newHeaderImage, setNewHeaderImage] = useState(null);
-  const [errorArray, setErrorArray] = useState(null);
 
   const profileForm = useRef(null);
   const newPfpInput = useRef(null);
   const newHeaderImageInput = useRef(null);
   const [currentUser, setCurrentUser] = useOutletContext();
 
-  async function submitProfileChange(e) {
+  const [updateProfile] = useMutation(UPDATE_PROFILE, {
+    onError: logError,
+
+    onCompleted: () => {
+      setCurrentUser();
+      userModal.current.close();
+    },
+  });
+
+  function submitProfileChange(e) {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('pfp', e.target[1].files[0]);
-    formData.append('headerImage', e.target[3].files[0]);
-    formData.append('displayName', e.target[4].value);
-    formData.append('location', e.target[5].value);
-    formData.append('website', e.target[6].value);
-    formData.append('bio', e.target[7].value);
-
-    const response = await backendFetch(setError, '/users', {
-      method: 'PUT',
-      body: formData,
+    updateProfile({
+      variables: {
+        pfp: e.target[1].files[0],
+        headerImage: e.target[3].files[0],
+        displayName: e.target[4].value,
+        location: e.target[5].value,
+        website: e.target[6].value,
+        bio: e.target[7].value,
+      },
     });
-    
-    if (response.expectedErrors) {
-      setErrorArray(response.expectedErrors);
-    } else {
-      setCurrentUser(response.user);
-      userModal.current.close();
-    }
   }
 
   function handleFileInputChange(e, imageType) {
@@ -144,13 +145,6 @@ function UpdateProfileForm({ userModal }) {
         maxLength={50}
         defaultValue={currentUser.website}
       />
-      {errorArray && (
-        <div className={styles.error}>
-          {errorArray.map((error, i) => (
-            <span key={i}>{error.msg}</span>
-          ))}
-        </div>
-      )}
       <label htmlFor='bio'>Bio</label>
       <textarea
         name='bio'

@@ -1,24 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
 import PropTypes from 'prop-types';
-import backendFetch from '../utils/backendFetch';
+import { DELETE_MESSAGE, UPDATE_MESSAGE } from '../graphql/mutations';
+import logError from '../utils/logError';
 import socket from '../utils/socket';
 import styles from '../style/Message.module.css';
 
 function Message({ message, roomId }) {
-  const [isCurrentUserMessage, setIsCurrentUserMessage] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [optionsOpened, setOptionsOpened] = useState(false);
   const deleteModal = useRef(null);
   const editText = useRef(null);
 
   const [currentUser] = useOutletContext();
+  const isCurrentUserMessage = message.userId === Number(currentUser.id);
 
-  useEffect(() => {
-    if (message.userId === currentUser.id) {
-      setIsCurrentUserMessage(true);
-    }
-  }, [message, currentUser]);
+  const [updateMessage] = useMutation(UPDATE_MESSAGE, {
+    onError: logError,
+
+    onCompleted: (data) => {
+      socket.emit('updateMessage', {
+        updatedMessage: data.updateMessage,
+        roomId,
+      });
+    },
+  });
+
+  const [deleteMessage] = useMutation(DELETE_MESSAGE, {
+    onError: logError,
+
+    onCompleted: () => {
+      deleteModal.current.close();
+      socket.emit('deleteMessage', { deletedMessageId: message.id, roomId });
+    },
+  });
 
   useEffect(() => {
     const textarea = editText.current;
@@ -29,27 +45,13 @@ function Message({ message, roomId }) {
     }
   }, [isEditing]);
 
-  async function updateMessage(e) {
+  async function submitEdit(e) {
     e.preventDefault();
     setIsEditing(false);
 
-    if (e.target[0].value !== message.text) {
-      const response = await backendFetch(setError, `/messages/${message.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ text: e.target[0].value }),
-      });
-
-      socket.emit('updateMessage', { message: response.message, roomId });
-    }
-  }
-
-  async function deleteMessage() {
-    await backendFetch(setError, `/messages/${message.id}`, {
-      method: 'Delete',
+    updateMessage({
+      variables: { messageId: message.id, text: e.target[0].value },
     });
-
-    deleteModal.current.close();
-    socket.emit('deleteMessage', { messageId: message.id, roomId });
   }
 
   return (
@@ -62,13 +64,19 @@ function Message({ message, roomId }) {
         <h2>Are you sure you want to delete this post?</h2>
         <div className='modalButtons'>
           <button onClick={() => deleteModal.current.close()}>Cancel</button>
-          <button onClick={() => deleteMessage()}>Delete</button>
+          <button
+            onClick={() =>
+              deleteMessage({ variables: { messageId: message.id } })
+            }
+          >
+            Delete
+          </button>
         </div>
       </dialog>
       <div className={styles.timestamp}>
         {Intl.DateTimeFormat(undefined, {
           timeStyle: 'short',
-        }).format(new Date(message.timestamp))}
+        }).format(new Date(Number(message.timestamp)))}
       </div>
       <div className={styles.messageBox}>
         {isCurrentUserMessage && (
@@ -102,7 +110,7 @@ function Message({ message, roomId }) {
           </div>
         )}
         {isEditing ? (
-          <form className={styles.editForm} onSubmit={(e) => updateMessage(e)}>
+          <form className={styles.editForm} onSubmit={(e) => submitEdit(e)}>
             <textarea
               ref={editText}
               name='editText'

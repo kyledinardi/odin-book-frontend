@@ -104,7 +104,7 @@ function CommentPage() {
         setContent={(newReply) => handleNewReply(newReply)}
         parentId={commentId}
       />
-      <InfiniteScroll
+      {replies.length === 0 ? <h2>No replies yet</h2> : <InfiniteScroll
         dataLength={comment.replies.length}
         next={() => fetchMoreReplies()}
         hasMore={hasMoreReplies}
@@ -128,7 +128,7 @@ function CommentPage() {
             displayType='reply'
           />
         ))}
-      </InfiniteScroll>
+      </InfiniteScroll>}
     </main>
   );
 }

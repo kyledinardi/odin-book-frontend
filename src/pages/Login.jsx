@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 import ErrorPage from './ErrorPage.jsx';
-import githubLogo from '../assets/github-mark.svg';
-import styles from '../style/Login.module.css';
 import { LOCAL_LOGIN } from '../graphql/queries';
+import styles from '../style/Login.module.css';
+import githubLogo from '../assets/github-mark.svg';
 
 function Login() {
   const [unexpectedError, setUnexpectedError] = useState(null);

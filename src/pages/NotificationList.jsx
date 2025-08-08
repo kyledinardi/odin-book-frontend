@@ -68,27 +68,28 @@ function NotificationList() {
   ) : (
     <main>
       <h2>Notifications</h2>
-      {notifs.length === 0 && (
+      {notifs.length === 0 ? (
         <div>
           <br />
-          <h2>No notifications</h2>
+          <h2>You have no notifications</h2>
         </div>
+      ) : (
+        <InfiniteScroll
+          dataLength={notifs.length}
+          next={() => fetchMoreNotifs()}
+          hasMore={hasMoreNotifs}
+          loader={
+            <div className='loaderContainer'>
+              <div className='loader'></div>
+            </div>
+          }
+          endMessage={<div></div>}
+        >
+          {notifs.map((notif) => (
+            <Notification key={notif.id} notif={notif} />
+          ))}
+        </InfiniteScroll>
       )}
-      <InfiniteScroll
-        dataLength={notifs.length}
-        next={() => fetchMoreNotifs()}
-        hasMore={hasMoreNotifs}
-        loader={
-          <div className='loaderContainer'>
-            <div className='loader'></div>
-          </div>
-        }
-        endMessage={<div></div>}
-      >
-        {notifs.map((notif) => (
-          <Notification key={notif.id} notif={notif} />
-        ))}
-      </InfiniteScroll>
     </main>
   );
 }

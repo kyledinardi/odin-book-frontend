@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
+import { useApolloClient, useQuery } from '@apollo/client';
 import ErrorPage from './pages/ErrorPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import UserList from './components/UserList.jsx';
@@ -13,8 +13,10 @@ function App() {
   const [theme, setTheme] = useState('');
   const [notifCount, setNotifCount] = useState(0);
   const logoutModal = useRef(null);
+
   const navigate = useNavigate();
   const currentUserResult = useQuery(GET_CURRENT_USER);
+  const client = useApolloClient();
 
   useEffect(() => {
     let themeName = localStorage.getItem('theme');
@@ -29,22 +31,31 @@ function App() {
   }, []);
 
   useEffect(() => {
+    client.reFetchObservableQueries();
+  }, [client]);
+
+  useEffect(() => {
     if (currentUserResult.data) {
       const { _count, id } = currentUserResult.data.getCurrentUser;
-      setNotifCount(_count.receivedNotifications);
       socket.emit('joinUserRoom', id);
+      setNotifCount(_count.receivedNotifications);
     }
   }, [currentUserResult.data]);
 
   useEffect(() => {
     function incrementNotifCount() {
-      console.log('incrementing notif count');
       setNotifCount(notifCount + 1);
     }
 
     socket.on('receiveNotification', incrementNotifCount);
     return () => socket.off('receiveNotification', incrementNotifCount);
   }, [notifCount]);
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    navigate('/login');
+  }
 
   if (currentUserResult.error) {
     logError(currentUserResult.error);
@@ -90,15 +101,7 @@ function App() {
               <button onClick={() => logoutModal.current.close()}>
                 Cancel
               </button>
-              <button
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('userId');
-                  navigate('/login');
-                }}
-              >
-                Log Out
-              </button>
+              <button onClick={() => logout()}>Log Out</button>
             </div>
           </dialog>
         </div>

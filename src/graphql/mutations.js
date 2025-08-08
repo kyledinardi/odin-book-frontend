@@ -30,6 +30,44 @@ export const CREATE_USER = gql`
   }
 `;
 
+export const UPDATE_PROFILE = gql`
+  mutation updateProfile(
+    $pfp: Upload
+    $headerImage: Upload
+    $displayName: String
+    $bio: String
+    $location: String
+    $website: String
+  ) {
+    updateProfile(
+      pfp: $pfp
+      headerImage: $headerImage
+      displayName: $displayName
+      location: $location
+      website: $website
+      bio: $bio
+    ) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_PASSWORD = gql`
+  mutation updatePassword(
+    $currentPassword: String!
+    $newPassword: String!
+    $newPasswordConfirmation: String!
+  ) {
+    updatePassword(
+      currentPassword: $currentPassword
+      newPassword: $newPassword
+      newPasswordConfirmation: $newPasswordConfirmation
+    ) {
+      id
+    }
+  }
+`;
+
 export const FOLLOW = gql`
   mutation follow($userId: ID!) {
     follow(userId: $userId) {
@@ -187,6 +225,56 @@ export const LIKE_COMMENT = gql`
 export const DELETE_COMMENT = gql`
   mutation deleteComment($commentId: ID!) {
     deleteComment(commentId: $commentId) {
+      id
+    }
+  }
+`;
+
+export const FIND_OR_CREATE_ROOM = gql`
+  mutation findOrCreateRoom($userId: ID!) {
+    findOrCreateRoom(userId: $userId) {
+      id
+    }
+  }
+`;
+
+export const CREATE_MESSAGE = gql`
+  mutation createMessage(
+    $roomId: ID!
+    $text: String!
+    $gifUrl: String
+    $image: Upload
+  ) {
+    createMessage(
+      roomId: $roomId
+      text: $text
+      gifUrl: $gifUrl
+      image: $image
+    ) {
+      id
+      timestamp
+      text
+      imageUrl
+      userId
+    }
+  }
+`;
+
+export const UPDATE_MESSAGE = gql`
+  mutation updateMessage($messageId: ID!, $text: String!) {
+    updateMessage(messageId: $messageId, text: $text) {
+      id
+      timestamp
+      text
+      imageUrl
+      userId
+    }
+  }
+`;
+
+export const DELETE_MESSAGE = gql`
+  mutation deleteMessage($messageId: ID!) {
+    deleteMessage(messageId: $messageId) {
       id
     }
   }

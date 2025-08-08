@@ -16,7 +16,7 @@ function Search() {
 
   const [currentUser, setCurrentUser] = useOutletContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const postsResult = useQuery(SEARCH_POSTS, {
     variables: { query: searchParams.get('query') },
     skip: !searchParams.get('query'),
@@ -29,6 +29,7 @@ function Search() {
 
   const posts = postsResult.data?.searchPosts;
   const users = usersResult.data?.searchUsers;
+  const readyToRender = posts && users && followedIds;
 
   useEffect(() => {
     if (currentUser) {
@@ -104,12 +105,12 @@ function Search() {
           Users
         </button>
       </div>
-      {posts &&
-        users &&
-        followedIds &&
+      {readyToRender &&
         (openTab === 'posts' ? (
           <div>
-            {posts.length > 0 ? (
+            {posts.length === 0 ? (
+              <h2>No post results for {`"${searchParams.get('query')}"`}</h2>
+            ) : (
               <InfiniteScroll
                 dataLength={posts.length}
                 next={() => {
@@ -137,13 +138,13 @@ function Search() {
                   />
                 ))}
               </InfiniteScroll>
-            ) : (
-              <h2>No post results for {`"${searchParams.get('query')}"`}</h2>
             )}
           </div>
         ) : (
           <div>
             {users.length > 0 ? (
+              <h2>No user results for {`"${searchParams.get('query')}"`}</h2>
+            ) : (
               <InfiniteScroll
                 dataLength={users.length}
                 next={() => fetchMoreUsers()}
@@ -165,8 +166,6 @@ function Search() {
                   />
                 ))}
               </InfiniteScroll>
-            ) : (
-              <h2>No user results for {`"${searchParams.get('query')}"`}</h2>
             )}
           </div>
         ))}
