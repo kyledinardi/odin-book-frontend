@@ -1,5 +1,5 @@
 const formatDate = {
-  short(dateString) {
+  short(dateString: string) {
     const msPerMinute = 60 * 1000;
     const msPerHour = msPerMinute * 60;
     const msPerDay = msPerHour * 24;
@@ -38,15 +38,15 @@ const formatDate = {
     }).format(timestamp);
   },
 
-  long(dateString) {
+  long(dateString: string) {
     const timestamp = new Date(Number(dateString));
 
     const time = Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(
-      timestamp
+      timestamp,
     );
 
     const date = Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(
-      timestamp
+      timestamp,
     );
 
     return `${time}, ${date}`;

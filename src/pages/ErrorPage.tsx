@@ -1,9 +1,12 @@
-import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import styles from '../style/ErrorPage.module.css';
 
-function ErrorPage({ error }) {
+import { useNavigate } from 'react-router-dom';
+
+import styles from '../style/ErrorPage.module.css';
+import logError from '../utils/logError.ts';
+import navigateTo from '../utils/navigateTo.ts';
+
+const ErrorPage = ({ error }: { error: Error }) => {
   const [theme, setTheme] = useState('');
   const navigate = useNavigate();
 
@@ -22,15 +25,28 @@ function ErrorPage({ error }) {
   return (
     <div className='themeWrapper' data-theme={theme}>
       <div className={styles.error}>
-        <h1>{error ? error.message : '404: Page not found'}</h1>
+        <h1>{error.message}</h1>
         <div>
-          <button onClick={() => navigate('/')}>Go Home</button>
-          <button onClick={() => navigate(-1)}>Go Back</button>
+          <button
+            type='button'
+            onClick={() => {
+              navigateTo(navigate, '/').catch(logError);
+            }}
+          >
+            Go Home
+          </button>
+          <button
+            type='button'
+            onClick={() => {
+              navigateTo(navigate, -1).catch(logError);
+            }}
+          >
+            Go Back
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
 
-ErrorPage.propTypes = { error: PropTypes.object, setError: PropTypes.func };
 export default ErrorPage;

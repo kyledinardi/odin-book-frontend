@@ -1,12 +1,14 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { setContext } from '@apollo/client/link/context';
+import React from 'react';
+
 import { ApolloClient, ApolloProvider } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import ReactDOM from 'react-dom/client';
-import React from 'react';
-import routes from './Router.jsx';
-import apolloCache from './utils/apolloCache';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import routes from './Router.tsx';
 import './style/index.css';
+import apolloCache from './utils/apolloCache.ts';
 
 const router = createBrowserRouter(routes);
 const uploadLink = createUploadLink({
@@ -18,7 +20,10 @@ const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('token');
 
   return {
-    headers: { ...headers, authorization: token ? `Bearer ${token}` : null },
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    } as Record<string, string>,
   };
 });
 
@@ -27,10 +32,16 @@ const client = new ApolloClient({
   link: authLink.concat(uploadLink),
 });
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = document.getElementById('root');
+
+if (!root) {
+  throw new Error('Root element not found');
+}
+
+ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      <RouterProvider router={router} />
     </ApolloProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

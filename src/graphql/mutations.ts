@@ -1,15 +1,23 @@
 import { gql } from '@apollo/client';
+
 import { COMMENT_FRAGMENT, POST_FRAGMENT, REPOST_FRAGMENT } from './fragments';
 
-export const LOCAL_LOGIN = gql`
-  mutation localLogin($email: String!, $password: String!) {
-    localLogin(email: $email, password: $password) {
+import type { TypedDocumentNode } from '@apollo/client';
+
+import type { CreateUser, LocalLogin } from '../types';
+
+export const LOCAL_LOGIN: TypedDocumentNode<LocalLogin> = gql`
+  mutation localLogin($username: String!, $password: String!) {
+    localLogin(username: $username, password: $password) {
       token
+      user {
+        id
+      }
     }
   }
 `;
 
-export const CREATE_USER = gql`
+export const CREATE_USER: TypedDocumentNode<CreateUser> = gql`
   mutation createUser(
     $displayName: String
     $username: String!

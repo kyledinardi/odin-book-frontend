@@ -1,21 +1,11 @@
 import { gql } from '@apollo/client';
+
 import {
   COMMENT_FRAGMENT,
   POST_FRAGMENT,
   REPOST_FRAGMENT,
   USER_FRAGMENT,
 } from './fragments';
-
-export const LOCAL_LOGIN = gql`
-  mutation localLogin($username: String!, $password: String!) {
-    localLogin(username: $username, password: $password) {
-      token
-      user {
-        id
-      }
-    }
-  }
-`;
 
 export const GET_CURRENT_USER = gql`
   query getCurrentUser {
