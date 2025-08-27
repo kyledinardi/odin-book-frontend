@@ -1,18 +1,30 @@
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import ThemeSwitch from './ThemeSwitch.jsx';
+
+import ThemeSwitch from './ThemeSwitch.tsx';
 import styles from '../style/ProfileBar.module.css';
 
-function ProfileBar({ currentUser, logoutModal, theme, setTheme }) {
-  return !currentUser ? (
+import type { User } from '../types.ts';
+
+const ProfileBar = ({
+  currentUser,
+  logoutModal,
+  theme,
+  setTheme,
+}: {
+  currentUser: User;
+  logoutModal?: React.RefObject<HTMLDialogElement | null>;
+  theme: string;
+  setTheme: React.Dispatch<React.SetStateAction<string>>;
+}) =>
+  !currentUser ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <div className={styles.profileBar}>
       <div className={styles.user}>
         <Link to={`/users/${currentUser.id}`}>
-          <img className='pfp' src={currentUser.pfpUrl} alt='' />
+          <img alt='' className='pfp' src={currentUser.pfpUrl} />
         </Link>
         <Link className={styles.names} to={`/users/${currentUser.id}`}>
           <span>{currentUser.displayName}</span>
@@ -21,11 +33,12 @@ function ProfileBar({ currentUser, logoutModal, theme, setTheme }) {
       </div>
       <label className={styles.themeSwitch} htmlFor='theme'>
         <span className={styles.themeLabel}>Dark Mode</span>
-        <ThemeSwitch theme={theme} setTheme={setTheme} />
+        <ThemeSwitch setTheme={setTheme} theme={theme} />
       </label>
       <button
         className={`${styles.sidebarButton} ${styles.logOut}`}
-        onClick={() => logoutModal.current.showModal()}
+        onClick={() => logoutModal?.current?.showModal()}
+        type='button'
       >
         <span className={`material-symbols-outlined ${styles.menuSvg}`}>
           logout
@@ -33,13 +46,9 @@ function ProfileBar({ currentUser, logoutModal, theme, setTheme }) {
       </button>
     </div>
   );
-}
 
-ProfileBar.propTypes = {
-  currentUser: PropTypes.object,
-  logoutModal: PropTypes.object,
-  theme: PropTypes.string,
-  setTheme: PropTypes.func,
+ProfileBar.defaultProps = {
+  logoutModal: null,
 };
 
 export default ProfileBar;

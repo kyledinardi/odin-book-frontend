@@ -24,12 +24,6 @@ const reactConfig = [
   plugins.reactA11y,
   ...configs.react.recommended,
   rules.react.strict,
-  {
-    rules: {
-      'react/jsx-filename-extension': 'off',
-      'react/react-in-jsx-scope': 'off',
-    },
-  },
 ];
 
 const typescriptConfig = [
@@ -51,6 +45,35 @@ const prettierConfig = [
   { name: 'prettier/config', rules: { ...prettierConfigRules } },
 ];
 
+const extraRules = {
+  'react/jsx-filename-extension': 'off',
+  'react/react-in-jsx-scope': 'off',
+
+  'jsx-a11y/label-has-associated-control': [
+    2,
+
+    {
+      labelComponents: [],
+      labelAttributes: [],
+      controlComponents: ['ThemeSwitch'],
+      assert: 'both',
+      depth: 25,
+    },
+  ],
+
+  '@typescript-eslint/naming-convention': [
+    'error',
+    { selector: 'function', format: ['camelCase', 'PascalCase'] },
+    { selector: 'typeLike', format: ['PascalCase'] },
+
+    {
+      selector: 'variable',
+      format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+      leadingUnderscore: 'allow',
+    },
+  ],
+};
+
 export default [
   globalIgnores(['build', 'eslint.config.mjs']),
   includeIgnoreFile(gitignorePath),
@@ -58,4 +81,5 @@ export default [
   ...reactConfig,
   ...typescriptConfig,
   ...prettierConfig,
+  { rules: extraRules },
 ];

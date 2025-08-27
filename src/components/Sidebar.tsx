@@ -1,9 +1,23 @@
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import ProfileBar from './ProfileBar.jsx';
+
+import ProfileBar from './ProfileBar.tsx';
 import styles from '../style/Sidebar.module.css';
 
-function Sidebar({ currentUser, logoutModal, notifCount, theme, setTheme }) {
+import type { User } from '../types.ts';
+
+const Sidebar = ({
+  currentUser,
+  logoutModal,
+  notifCount,
+  theme,
+  setTheme,
+}: {
+  currentUser: User;
+  logoutModal: React.RefObject<HTMLDialogElement | null>;
+  notifCount: number;
+  theme: string;
+  setTheme: React.Dispatch<React.SetStateAction<string>>;
+}) => {
   function getNotifCount() {
     if (notifCount === 0) {
       return null;
@@ -18,7 +32,7 @@ function Sidebar({ currentUser, logoutModal, notifCount, theme, setTheme }) {
 
   return !currentUser ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <aside className={styles.sidebar}>
@@ -70,7 +84,8 @@ function Sidebar({ currentUser, logoutModal, notifCount, theme, setTheme }) {
         </Link>
         <button
           className={`${styles.sidebarButton} ${styles.logOut}`}
-          onClick={() => logoutModal.current.showModal()}
+          onClick={() => logoutModal.current?.showModal()}
+          type='button'
         >
           <span className={`material-symbols-outlined ${styles.menuSvg}`}>
             logout
@@ -81,20 +96,12 @@ function Sidebar({ currentUser, logoutModal, notifCount, theme, setTheme }) {
       <div className={styles.profileBar}>
         <ProfileBar
           currentUser={currentUser}
-          theme={theme}
           setTheme={setTheme}
+          theme={theme}
         />
       </div>
     </aside>
   );
-}
-
-Sidebar.propTypes = {
-  currentUser: PropTypes.object,
-  logoutModal: PropTypes.object,
-  notifCount: PropTypes.number,
-  theme: PropTypes.string,
-  setTheme: PropTypes.func,
 };
 
 export default Sidebar;

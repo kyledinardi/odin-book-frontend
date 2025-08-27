@@ -7,17 +7,30 @@ import {
   USER_FRAGMENT,
 } from './fragments';
 
-export const GET_CURRENT_USER = gql`
-  query getCurrentUser {
-    getCurrentUser {
-      ...UserFragment
+import type { TypedDocumentNode } from '@apollo/client';
+
+import type {
+  NotificationArrayResult,
+  PostArrayResult,
+  PostOrRepostArrayResult,
+  PostResult,
+  RoomResult,
+  UserArrayResult,
+  UserResult,
+} from '../types';
+
+export const GET_CURRENT_USER: TypedDocumentNode<UserResult<'getCurrentUser'>> =
+  gql`
+    query getCurrentUser {
+      getCurrentUser {
+        ...UserFragment
+      }
     }
-  }
 
-  ${USER_FRAGMENT}
-`;
+    ${USER_FRAGMENT}
+  `;
 
-export const GET_USER = gql`
+export const GET_USER: TypedDocumentNode<UserResult<'getUser'>> = gql`
   query getUser($userId: ID!) {
     getUser(userId: $userId) {
       ...UserFragment
@@ -27,7 +40,9 @@ export const GET_USER = gql`
   ${USER_FRAGMENT}
 `;
 
-export const GET_LISTED_USERS = gql`
+export const GET_LISTED_USERS: TypedDocumentNode<
+  UserArrayResult<'getListedUsers'>
+> = gql`
   query getListedUsers {
     getListedUsers {
       ...UserFragment
@@ -37,47 +52,53 @@ export const GET_LISTED_USERS = gql`
   ${USER_FRAGMENT}
 `;
 
-export const SEARCH_USERS = gql`
-  query searchUsers($query: String!, $cursor: ID) {
-    searchUsers(query: $query, cursor: $cursor) {
-      ...UserFragment
+export const SEARCH_USERS: TypedDocumentNode<UserArrayResult<'searchUsers'>> =
+  gql`
+    query searchUsers($query: String!, $cursor: ID) {
+      searchUsers(query: $query, cursor: $cursor) {
+        ...UserFragment
+      }
     }
-  }
 
-  ${USER_FRAGMENT}
-`;
+    ${USER_FRAGMENT}
+  `;
 
-export const GET_FOLLOWING = gql`
-  query getFollowing($userId: ID!, $cursor: ID) {
-    getFollowing(userId: $userId, cursor: $cursor) {
-      ...UserFragment
+export const GET_FOLLOWING: TypedDocumentNode<UserArrayResult<'getFollowing'>> =
+  gql`
+    query getFollowing($userId: ID!, $cursor: ID) {
+      getFollowing(userId: $userId, cursor: $cursor) {
+        ...UserFragment
+      }
     }
-  }
 
-  ${USER_FRAGMENT}
-`;
+    ${USER_FRAGMENT}
+  `;
 
-export const GET_FOLLOWERS = gql`
-  query getFollowers($userId: ID!, $cursor: ID) {
-    getFollowers(userId: $userId, cursor: $cursor) {
-      ...UserFragment
+export const GET_FOLLOWERS: TypedDocumentNode<UserArrayResult<'getFollowers'>> =
+  gql`
+    query getFollowers($userId: ID!, $cursor: ID) {
+      getFollowers(userId: $userId, cursor: $cursor) {
+        ...UserFragment
+      }
     }
-  }
 
-  ${USER_FRAGMENT}
-`;
+    ${USER_FRAGMENT}
+  `;
 
-export const GET_MUTUALS = gql`
-  query getMutuals($userId: ID!, $cursor: ID) {
-    getMutuals(userId: $userId, cursor: $cursor) {
-      ...UserFragment
+export const GET_MUTUALS: TypedDocumentNode<UserArrayResult<'getMutuals'>> =
+  gql`
+    query getMutuals($userId: ID!, $cursor: ID) {
+      getMutuals(userId: $userId, cursor: $cursor) {
+        ...UserFragment
+      }
     }
-  }
 
-  ${USER_FRAGMENT}
-`;
+    ${USER_FRAGMENT}
+  `;
 
-export const GET_FOLLOWED_FOLLOWERS = gql`
+export const GET_FOLLOWED_FOLLOWERS: TypedDocumentNode<
+  UserArrayResult<'getFollowedFollowers'>
+> = gql`
   query getFollowedFollowers($userId: ID!, $cursor: ID) {
     getFollowedFollowers(userId: $userId, cursor: $cursor) {
       ...UserFragment
@@ -87,7 +108,9 @@ export const GET_FOLLOWED_FOLLOWERS = gql`
   ${USER_FRAGMENT}
 `;
 
-export const GET_INDEX_POSTS = gql`
+export const GET_INDEX_POSTS: TypedDocumentNode<
+  PostOrRepostArrayResult<'getIndexPosts'>
+> = gql`
   query getIndexPosts($postCursor: ID, $repostCursor: ID, $timestamp: String) {
     getIndexPosts(
       postCursor: $postCursor
@@ -107,17 +130,18 @@ export const GET_INDEX_POSTS = gql`
   ${REPOST_FRAGMENT}
 `;
 
-export const SEARCH_POSTS = gql`
-  query searchPosts($query: String!, $cursor: ID) {
-    searchPosts(query: $query, cursor: $cursor) {
-      ...PostFragment
+export const SEARCH_POSTS: TypedDocumentNode<PostArrayResult<'searchPosts'>> =
+  gql`
+    query searchPosts($query: String!, $cursor: ID) {
+      searchPosts(query: $query, cursor: $cursor) {
+        ...PostFragment
+      }
     }
-  }
 
-  ${POST_FRAGMENT}
-`;
+    ${POST_FRAGMENT}
+  `;
 
-export const GET_POST = gql`
+export const GET_POST: TypedDocumentNode<PostResult<'getPost'>> = gql`
   query getPost($postId: ID!, $cursor: ID) {
     getPost(postId: $postId, cursor: $cursor) {
       ...PostFragment
@@ -131,7 +155,9 @@ export const GET_POST = gql`
   ${COMMENT_FRAGMENT}
 `;
 
-export const GET_USER_POSTS = gql`
+export const GET_USER_POSTS: TypedDocumentNode<
+  PostOrRepostArrayResult<'getUserPosts'>
+> = gql`
   query getUserPosts($userId: ID!, $postCursor: ID, $repostCursor: ID) {
     getUserPosts(
       userId: $userId
@@ -151,7 +177,9 @@ export const GET_USER_POSTS = gql`
   ${REPOST_FRAGMENT}
 `;
 
-export const GET_IMAGE_POSTS = gql`
+export const GET_IMAGE_POSTS: TypedDocumentNode<
+  PostArrayResult<'getImagePosts'>
+> = gql`
   query getImagePosts($userId: ID!, $cursor: ID) {
     getImagePosts(userId: $userId, cursor: $cursor) {
       ...PostFragment
@@ -161,7 +189,9 @@ export const GET_IMAGE_POSTS = gql`
   ${POST_FRAGMENT}
 `;
 
-export const GET_LIKED_POSTS = gql`
+export const GET_LIKED_POSTS: TypedDocumentNode<
+  PostArrayResult<'getLikedPosts'>
+> = gql`
   query getLikedPosts($userId: ID!, $cursor: ID) {
     getLikedPosts(userId: $userId, cursor: $cursor) {
       ...PostFragment
@@ -211,7 +241,9 @@ export const GET_USER_COMMENTS = gql`
   ${COMMENT_FRAGMENT}
 `;
 
-export const GET_NOTIFICATIONS = gql`
+export const GET_NOTIFICATIONS: TypedDocumentNode<
+  NotificationArrayResult<'getNotifications'>
+> = gql`
   query getNotifications($cursor: ID, $timestamp: String) {
     getNotifications(cursor: $cursor, timestamp: $timestamp) {
       id
@@ -248,7 +280,7 @@ export const GET_ALL_ROOMS = gql`
   }
 `;
 
-export const GET_ROOM = gql`
+export const GET_ROOM: TypedDocumentNode<RoomResult<'getRoom'>> = gql`
   query getRoom($roomId: ID!, $cursor: ID) {
     getRoom(roomId: $roomId, cursor: $cursor) {
       id

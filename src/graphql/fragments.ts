@@ -32,9 +32,9 @@ export const POST_FRAGMENT = gql`
     imageUrl
     userId
     user {
-      pfpUrl
       username
       displayName
+      pfpUrl
     }
     pollChoices {
       id

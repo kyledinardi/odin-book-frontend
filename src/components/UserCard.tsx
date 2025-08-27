@@ -1,12 +1,24 @@
-import { Link } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
-import PropTypes from 'prop-types';
-import { FOLLOW } from '../graphql/mutations';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
-import styles from '../style/User.module.css';
+import { Link } from 'react-router-dom';
 
-function User({ user, replaceUser, isFollowed, bio }) {
+import { FOLLOW } from '../graphql/mutations.ts';
+import styles from '../style/User.module.css';
+import logError from '../utils/logError.ts';
+import socket from '../utils/socket.ts';
+
+import type { User as UserType } from '../types.ts';
+
+const UserCard = ({
+  user,
+  replaceUser,
+  isFollowed,
+  bio,
+}: {
+  user: UserType;
+  replaceUser: () => void;
+  isFollowed: boolean;
+  bio: boolean;
+}) => {
   const [follow] = useMutation(FOLLOW, {
     onError: logError,
 
@@ -18,12 +30,11 @@ function User({ user, replaceUser, isFollowed, bio }) {
       }
     },
   });
-  
 
   return (
     <div className={styles.user}>
       <Link className={styles.userPfp} to={`/users/${user.id}`}>
-        <img className='pfp' src={user.pfpUrl} alt='' />
+        <img alt='' className='pfp' src={user.pfpUrl} />
       </Link>
       <Link className={styles.username} to={`/users/${user.id}`}>
         <strong>{user.displayName}</strong>
@@ -32,21 +43,17 @@ function User({ user, replaceUser, isFollowed, bio }) {
       {user.id !== localStorage.getItem('userId') && (
         <button
           className={styles.followButton}
-          onClick={() => follow({ variables: { userId: user.id } })}
+          type='button'
+          onClick={() => {
+            follow({ variables: { userId: user.id } }).catch(logError);
+          }}
         >
           {isFollowed ? 'Unfollow' : 'Follow'}
         </button>
       )}
-      {bio && <p className={styles.bio}>{user.bio}</p>}
+      {bio ? <p className={styles.bio}>{user.bio}</p> : null}
     </div>
   );
-}
-
-User.propTypes = {
-  user: PropTypes.object,
-  replaceUser: PropTypes.func,
-  isFollowed: PropTypes.bool,
-  bio: PropTypes.bool,
 };
 
-export default User;
+export default UserCard;
