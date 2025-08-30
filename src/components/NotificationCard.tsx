@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
+
 import styles from '../style/Notification.module.css';
 
-function Notification({ notif }) {
+import type { Notification } from '../types';
+
+const NotificationCard = ({ notif }: { notif: Notification }) => {
   const [icon, setIcon] = useState('');
   const [text, setText] = useState('');
-  const [link, setLink] = useState('');
+  const [linkHref, setLinkHref] = useState('');
+  const [linkText, setLinkText] = useState('');
 
   useEffect(() => {
     switch (notif.type) {
@@ -15,11 +19,11 @@ function Notification({ notif }) {
         setText(' reposted your ');
 
         if (notif.postId) {
-          setLink(<Link to={`/posts/${notif.postId}`}>post</Link>);
+          setLinkHref(`/posts/${notif.postId}`);
+          setLinkText('post');
         } else {
-          setLink(
-            <Link to={`/comments/${notif.commentId}`}>comment</Link>
-          );
+          setLinkHref(`/comments/${notif.commentId}`);
+          setLinkText('comment');
         }
 
         break;
@@ -29,11 +33,11 @@ function Notification({ notif }) {
         setText(' liked your ');
 
         if (notif.postId) {
-          setLink(<Link to={`/posts/${notif.postId}`}>post</Link>);
+          setLinkHref(`/posts/${notif.postId}`);
+          setLinkText('post');
         } else {
-          setLink(
-            <Link to={`/comments/${notif.commentId}`}>comment</Link>
-          );
+          setLinkHref(`/comments/${notif.commentId}`);
+          setLinkText('comment');
         }
 
         break;
@@ -41,17 +45,15 @@ function Notification({ notif }) {
       case 'comment':
         setIcon('add_comment');
         setText(' commented on your ');
-        setLink(<Link to={`/posts/${notif.postId}`}>post</Link>);
+        setLinkHref(`/posts/${notif.postId}`);
+        setLinkText('post');
         break;
 
       case 'reply':
         setIcon('reply');
         setText(' replied to your ');
-
-        setLink(
-          <Link to={`/comments/${notif.commentId}`}>comment</Link>
-        );
-
+        setLinkHref(`/comments/${notif.commentId}`);
+        setLinkText('comment');
         break;
 
       case 'follow':
@@ -62,11 +64,8 @@ function Notification({ notif }) {
       case 'message':
         setIcon('forward_to_inbox');
         setText(' sent you a ');
-
-        setLink(
-          <Link to={`/messages/${notif.sourceUserId}`}>message</Link>
-        );
-
+        setLinkHref(`/messages/${notif.sourceUserId}`);
+        setLinkText('message');
         break;
 
       default:
@@ -85,22 +84,20 @@ function Notification({ notif }) {
       </span>
       <div>
         <Link to={`/users/${notif.sourceUserId}`}>
-          <img className='pfp' src={notif.sourceUser.pfpUrl} alt='' />
+          <img alt='' className='pfp' src={notif.sourceUser.pfpUrl} />
         </Link>
         <div className={styles.text}>
           <Link to={`/users/${notif.sourceUserId}`}>
             <strong>{notif.sourceUser.displayName}</strong>
           </Link>
           <span>{text}</span>
-          <strong>{link}.</strong>
+          <strong>
+            {!!linkHref && <Link to={linkHref}>{linkText}</Link>}.
+          </strong>
         </div>
       </div>
     </div>
   );
-}
-
-Notification.propTypes = {
-  notif: PropTypes.object,
 };
 
-export default Notification;
+export default NotificationCard;

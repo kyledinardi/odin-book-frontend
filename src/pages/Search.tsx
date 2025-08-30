@@ -1,21 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext, useSearchParams } from 'react-router-dom';
+
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Post from '../components/Post.jsx';
-import User from '../components/User.jsx';
-import { SEARCH_POSTS, SEARCH_USERS } from '../graphql/queries';
-import { searchChache } from '../utils/apolloCache';
-import styles from '../style/Search.module.css';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
 
-function Search() {
+import PostCard from '../components/PostCard.tsx';
+import UserCard from '../components/UserCard.tsx';
+import { SEARCH_POSTS, SEARCH_USERS } from '../graphql/queries.ts';
+import styles from '../style/Search.module.css';
+import { searchChache } from '../utils/apolloCache.ts';
+import logError from '../utils/logError.ts';
+
+import type { AppContext } from '../types.ts';
+
+const Search = () => {
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
-  const [followedIds, setFollowedIds] = useState(null);
+  const [followedIds, setFollowedIds] = useState<string[]>([]);
   const [openTab, setOpenTab] = useState('posts');
 
-  const [currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext<AppContext>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [inputValue, setInputValue] = useState(searchParams.get('query') || '');
 
   const postsResult = useQuery(SEARCH_POSTS, {
     variables: { query: searchParams.get('query') },
@@ -29,7 +35,6 @@ function Search() {
 
   const posts = postsResult.data?.searchPosts;
   const users = usersResult.data?.searchUsers;
-  const readyToRender = posts && users && followedIds;
 
   useEffect(() => {
     if (currentUser) {
@@ -37,8 +42,12 @@ function Search() {
     }
   }, [currentUser]);
 
-  function fetchMorePosts() {
-    postsResult.fetchMore({
+  const fetchMorePosts = async () => {
+    if (!posts) {
+      throw new Error('No posts');
+    }
+
+    await postsResult.fetchMore({
       variables: { cursor: posts[posts.length - 1].id },
 
       updateQuery: (previousData, { fetchMoreResult }) => {
@@ -51,10 +60,14 @@ function Search() {
         };
       },
     });
-  }
+  };
 
-  function fetchMoreUsers() {
-    usersResult.fetchMore({
+  const fetchMoreUsers = async () => {
+    if (!users) {
+      throw new Error('No users');
+    }
+
+    await usersResult.fetchMore({
       variables: { cursor: users[users.length - 1].id },
 
       updateQuery: (previousData, { fetchMoreResult }) => {
@@ -67,7 +80,7 @@ function Search() {
         };
       },
     });
-  }
+  };
 
   return (
     <main>
@@ -75,37 +88,40 @@ function Search() {
         className={styles.searchForm}
         onSubmit={(e) => {
           e.preventDefault();
-          setSearchParams({ query: e.target[0].value });
+          setSearchParams({ query: inputValue });
         }}
       >
         <span className='material-symbols-outlined'>search</span>
         <input
-          type='search'
-          name='search'
           id='search'
+          name='search'
+          onChange={(e) => setInputValue(e.target.value)}
           placeholder='Search'
-          defaultValue={searchParams.get('query')}
+          type='search'
+          value={inputValue}
         />
       </form>
       <div>
         <button
+          onClick={() => setOpenTab('posts')}
+          type='button'
           className={`${styles.categoryButton} ${
             openTab === 'posts' ? styles.openTab : null
           }`}
-          onClick={() => setOpenTab('posts')}
         >
           Posts
         </button>
         <button
+          onClick={() => setOpenTab('users')}
+          type='button'
           className={`${styles.categoryButton} ${
             openTab === 'users' ? styles.openTab : null
           }`}
-          onClick={() => setOpenTab('users')}
         >
           Users
         </button>
       </div>
-      {readyToRender &&
+      {!!(posts && users) &&
         (openTab === 'posts' ? (
           <div>
             {posts.length === 0 ? (
@@ -113,28 +129,28 @@ function Search() {
             ) : (
               <InfiniteScroll
                 dataLength={posts.length}
-                next={() => {
-                  fetchMorePosts();
-                }}
+                endMessage={<div />}
                 hasMore={hasMorePosts}
                 loader={
                   <div className='loaderContainer'>
-                    <div className='loader'></div>
+                    <div className='loader' />
                   </div>
                 }
-                endMessage={<div></div>}
+                next={() => {
+                  fetchMorePosts().catch(logError);
+                }}
               >
                 {posts.map((post) => (
-                  <Post
+                  <PostCard
                     key={post.id}
+                    displayType='feed'
                     post={post}
-                    replacePost={(updatedPost) =>
-                      searchChache.updatePost(postsResult, updatedPost)
-                    }
                     removePost={(postId) =>
                       searchChache.deletePost(postsResult, postId)
                     }
-                    displayType='feed'
+                    replacePost={(updatedPost) =>
+                      searchChache.updatePost(postsResult, updatedPost)
+                    }
                   />
                 ))}
               </InfiniteScroll>
@@ -147,22 +163,22 @@ function Search() {
             ) : (
               <InfiniteScroll
                 dataLength={users.length}
-                next={() => fetchMoreUsers()}
+                endMessage={<div />}
                 hasMore={hasMoreUsers}
+                next={() => fetchMoreUsers()}
                 loader={
                   <div className='loaderContainer'>
-                    <div className='loader'></div>
+                    <div className='loader' />
                   </div>
                 }
-                endMessage={<div></div>}
               >
                 {users.map((user) => (
-                  <User
+                  <UserCard
                     key={user.id}
-                    user={user}
-                    bio={true}
+                    bio
                     isFollowed={followedIds.includes(user.id)}
                     replaceUser={() => setCurrentUser()}
+                    user={user}
                   />
                 ))}
               </InfiniteScroll>
@@ -171,6 +187,6 @@ function Search() {
         ))}
     </main>
   );
-}
+};
 
 export default Search;

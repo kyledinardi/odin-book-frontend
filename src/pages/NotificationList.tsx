@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import ErrorPage from './ErrorPage.jsx';
-import Notification from '../components/Notification.jsx';
-import { GET_NOTIFICATIONS } from '../graphql/queries';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
+import { useOutletContext } from 'react-router-dom';
 
-function NotificationList() {
+import ErrorPage from './ErrorPage.tsx';
+import NotificationCard from '../components/NotificationCard.tsx';
+import { GET_NOTIFICATIONS } from '../graphql/queries.ts';
+import logError from '../utils/logError.ts';
+import socket from '../utils/socket.ts';
+
+import type { AppContext } from '../types.ts';
+
+const NotificationList = () => {
   const [hasMoreNotifs, setHasMoreNotifs] = useState(true);
-  const [, , notifCount, setNotifCount] = useOutletContext();
+  const [, , notifCount, setNotifCount] = useOutletContext<AppContext>();
   const notificationsResult = useQuery(GET_NOTIFICATIONS);
   const notifs = notificationsResult.data?.getNotifications;
 
@@ -21,8 +25,12 @@ function NotificationList() {
   }, [notifCount, setNotifCount]);
 
   useEffect(() => {
-    function refreshNotifs() {
-      notificationsResult.fetchMore({
+    const refreshNotifs = async () => {
+      if (!notifs) {
+        throw new Error('No notifications');
+      }
+
+      await notificationsResult.fetchMore({
         variables: { timestamp: notifs[0].timestamp },
 
         updateQuery: (previousData, { fetchMoreResult }) => ({
@@ -34,14 +42,21 @@ function NotificationList() {
           ],
         }),
       });
-    }
+    };
 
     socket.on('receiveNotification', refreshNotifs);
-    return () => socket.off('receiveNotification', refreshNotifs);
+
+    return () => {
+      socket.off('receiveNotification', refreshNotifs);
+    };
   }, [notificationsResult, notifs]);
 
-  async function fetchMoreNotifs() {
-    notificationsResult.fetchMore({
+  const fetchMoreNotifs = async () => {
+    if (!notifs) {
+      throw new Error('No notifications');
+    }
+
+    await notificationsResult.fetchMore({
       variables: { cursor: notifs[notifs.length - 1].id },
 
       updateQuery: (previousData, { fetchMoreResult }) => {
@@ -54,7 +69,7 @@ function NotificationList() {
         };
       },
     });
-  }
+  };
 
   if (notificationsResult.error) {
     logError(notificationsResult.error);
@@ -63,7 +78,7 @@ function NotificationList() {
 
   return !notifs ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <main>
@@ -76,22 +91,22 @@ function NotificationList() {
       ) : (
         <InfiniteScroll
           dataLength={notifs.length}
-          next={() => fetchMoreNotifs()}
+          endMessage={<div />}
           hasMore={hasMoreNotifs}
+          next={() => fetchMoreNotifs()}
           loader={
             <div className='loaderContainer'>
-              <div className='loader'></div>
+              <div className='loader' />
             </div>
           }
-          endMessage={<div></div>}
         >
           {notifs.map((notif) => (
-            <Notification key={notif.id} notif={notif} />
+            <NotificationCard key={notif.id} notif={notif} />
           ))}
         </InfiniteScroll>
       )}
     </main>
   );
-}
+};
 
 export default NotificationList;
