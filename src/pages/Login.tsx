@@ -68,7 +68,7 @@ const Login = () => {
       localStorage.setItem('userId', user.id);
       navigateTo(navigate, '/').catch(logError);
     }
-  }, [loginResult, navigate]);
+  }, [loginResult.data, navigate]);
 
   const submitLogin = async (e: FormEvent) => {
     e.preventDefault();

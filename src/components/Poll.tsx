@@ -1,19 +1,22 @@
-import { useMutation } from '@apollo/client';
 import { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { VOTE_IN_POLL } from '../graphql/mutations';
-import logError from '../utils/logError';
-import styles from '../style/Poll.module.css';
 
-function Poll({ post }) {
+import { useMutation } from '@apollo/client';
+
+import { VOTE_IN_POLL } from '../graphql/mutations.ts';
+import styles from '../style/Poll.module.css';
+import logError from '../utils/logError.ts';
+
+import type { Choice, Post } from '../types.ts';
+
+const Poll = ({ post }: { post: Post }) => {
   const [voteInPoll] = useMutation(VOTE_IN_POLL, { onError: logError });
 
   const totalVotes = post.pollChoices.reduce(
     (acc, choice) => acc + choice.votes.length,
-    0
+    0,
   );
 
-  function getWidth(choice) {
+  const getWidth = (choice: Choice) => {
     const numberOfVotes = choice.votes.length;
 
     if (totalVotes === 0 || numberOfVotes / totalVotes < 0.05) {
@@ -21,31 +24,34 @@ function Poll({ post }) {
     }
 
     return `${(numberOfVotes / totalVotes) * 100}%`;
-  }
+  };
 
-  function handleVote(choiceId) {
+  const handleVote = async (choiceId: string) => {
     const hasVoted = post.pollChoices.some((choice) =>
-      choice.votes.some((vote) => vote.id === localStorage.getItem('userId'))
+      choice.votes.some((vote) => vote.id === localStorage.getItem('userId')),
     );
 
     if (!hasVoted) {
-      voteInPoll({ variables: { choiceId } });
+      await voteInPoll({ variables: { choiceId } });
     }
-  }
+  };
 
   return (
-    <>
+    <Fragment>
       <div className={styles.pollChoices}>
         {post.pollChoices.map((choice) => (
           <Fragment key={choice.id}>
-            <div
+            <button
               className={styles.choiceBox}
-              onClick={() => handleVote(choice.id)}
+              type='button'
+              onClick={() => {
+                handleVote(choice.id).catch(logError);
+              }}
             >
               <div className={styles.choiceLabel}>
                 <span>{choice.text}</span>
-                {choice.votes.includes(
-                  Number(localStorage.getItem('userId'))
+                {choice.votes.some(
+                  (vote) => vote.id === localStorage.getItem('userId'),
                 ) && (
                   <span className={`material-symbols-outlined ${styles.voted}`}>
                     check_circle
@@ -55,8 +61,8 @@ function Poll({ post }) {
               <div
                 className={styles.progressBar}
                 style={{ width: getWidth(choice) }}
-              ></div>
-            </div>
+              />
+            </button>
             <div>
               {totalVotes === 0
                 ? '0% (0 votes)'
@@ -70,9 +76,8 @@ function Poll({ post }) {
         ))}
       </div>
       <p>{totalVotes} votes</p>
-    </>
+    </Fragment>
   );
-}
+};
 
-Poll.propTypes = { post: PropTypes.object };
 export default Poll;

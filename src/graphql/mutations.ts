@@ -7,6 +7,7 @@ import type { TypedDocumentNode } from '@apollo/client';
 import type {
   ChoiceResult,
   CommentResult,
+  IdResult,
   LoginResponseResult,
   MessageResult,
   PostResult,
@@ -47,7 +48,7 @@ export const CREATE_USER: TypedDocumentNode<LoginResponseResult<'createUser'>> =
     }
   `;
 
-export const UPDATE_PROFILE = gql`
+export const UPDATE_PROFILE: TypedDocumentNode<IdResult<'updateProfile'>> = gql`
   mutation updateProfile(
     $pfp: Upload
     $headerImage: Upload
@@ -69,23 +70,24 @@ export const UPDATE_PROFILE = gql`
   }
 `;
 
-export const UPDATE_PASSWORD = gql`
-  mutation updatePassword(
-    $currentPassword: String!
-    $newPassword: String!
-    $newPasswordConfirmation: String!
-  ) {
-    updatePassword(
-      currentPassword: $currentPassword
-      newPassword: $newPassword
-      newPasswordConfirmation: $newPasswordConfirmation
+export const UPDATE_PASSWORD: TypedDocumentNode<IdResult<'updatePassword'>> =
+  gql`
+    mutation updatePassword(
+      $currentPassword: String!
+      $newPassword: String!
+      $newPasswordConfirmation: String!
     ) {
-      id
+      updatePassword(
+        currentPassword: $currentPassword
+        newPassword: $newPassword
+        newPasswordConfirmation: $newPasswordConfirmation
+      ) {
+        id
+      }
     }
-  }
-`;
+  `;
 
-export const FOLLOW = gql`
+export const FOLLOW: TypedDocumentNode<IdResult<'follow'>> = gql`
   mutation follow($userId: ID!) {
     follow(userId: $userId) {
       id
@@ -113,7 +115,7 @@ export const CREATE_POST: TypedDocumentNode<PostResult<'createPost'>> = gql`
   ${POST_FRAGMENT}
 `;
 
-export const DELETE_POST = gql`
+export const DELETE_POST: TypedDocumentNode<IdResult<'deletePost'>> = gql`
   mutation deletePost($postId: ID!) {
     deletePost(postId: $postId) {
       id
@@ -244,7 +246,7 @@ export const LIKE_COMMENT: TypedDocumentNode<CommentResult<'likeComment'>> =
     ${COMMENT_FRAGMENT}
   `;
 
-export const DELETE_COMMENT = gql`
+export const DELETE_COMMENT: TypedDocumentNode<IdResult<'deleteComment'>> = gql`
   mutation deleteComment($commentId: ID!) {
     deleteComment(commentId: $commentId) {
       id
@@ -252,7 +254,9 @@ export const DELETE_COMMENT = gql`
   }
 `;
 
-export const FIND_OR_CREATE_ROOM = gql`
+export const FIND_OR_CREATE_ROOM: TypedDocumentNode<
+  IdResult<'findOrCreateRoom'>
+> = gql`
   mutation findOrCreateRoom($userId: ID!) {
     findOrCreateRoom(userId: $userId) {
       id
@@ -296,7 +300,7 @@ export const UPDATE_MESSAGE: TypedDocumentNode<MessageResult<'updateMessage'>> =
     }
   `;
 
-export const DELETE_MESSAGE = gql`
+export const DELETE_MESSAGE: TypedDocumentNode<IdResult<'deleteMessage'>> = gql`
   mutation deleteMessage($messageId: ID!) {
     deleteMessage(messageId: $messageId) {
       id

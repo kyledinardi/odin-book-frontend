@@ -1,35 +1,60 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+
 import { useMutation } from '@apollo/client';
-import PropTypes from 'prop-types';
-import GifPicker from 'gif-picker-react';
 import EmojiPicker from 'emoji-picker-react';
-import PollInputs from './PollInputs.jsx';
+import GifPicker, { Theme } from 'gif-picker-react';
+import { Link, useOutletContext } from 'react-router-dom';
+
+import PollInputs from './PollInputs.tsx';
 import {
   CREATE_POST,
   CREATE_REPLY,
   CREATE_ROOT_COMMENT,
   UPDATE_COMMENT,
   UPDATE_POST,
-} from '../graphql/mutations';
-import logError from '../utils/logError';
+} from '../graphql/mutations.ts';
 import styles from '../style/ContentForm.module.css';
+import { TENOR_API_KEY } from '../utils/config.ts';
+import logError from '../utils/logError.ts';
 
-function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
+import type { EmojiClickData } from 'emoji-picker-react';
+import type { TenorImage } from 'gif-picker-react';
+import type { FormEvent } from 'react';
+
+import type {
+  AppContext,
+  Comment,
+  Content,
+  CreateContentVariables,
+  Post,
+} from '../types.ts';
+
+const ContentForm = ({
+  contentType,
+  setContent,
+  parentId,
+  contentToEdit,
+}: {
+  contentType: string;
+  setContent: (content?: Content) => void;
+  parentId?: string;
+  contentToEdit?: Post | Comment;
+}) => {
+  const [text, setText] = useState(contentToEdit?.text || '');
   const [isModal, setIsModal] = useState(false);
   const [isModalRendered, setIsModalRendered] = useState(false);
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isPoll, setIsPoll] = useState(false);
 
-  const [pollChoiceCount, setPollChoiceCount] = useState(2);
+  const [pollChoices, setPollChoices] = useState(['', '']);
   const [gifUrl, setGifUrl] = useState('');
-  const [newImage, setNewImage] = useState(null);
+  const [newImage, setNewImage] = useState<File | null>(null);
 
   const uuid = useRef(crypto.randomUUID());
-  const gifModal = useRef(null);
-  const fileInput = useRef(null);
-  const textarea = useRef(null);
-  const [currentUser] = useOutletContext();
+  const gifModal = useRef<HTMLDialogElement>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const textarea = useRef<HTMLTextAreaElement>(null);
+  const [currentUser] = useOutletContext<AppContext>();
 
   const [createPost] = useMutation(CREATE_POST, {
     onError: logError,
@@ -61,94 +86,141 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
       setIsModalRendered(true);
 
       if (isModalRendered) {
-        gifModal.current.showModal();
+        gifModal.current?.showModal();
       }
     }
   }, [isModal, isModalRendered]);
 
-  function cancelNewImage() {
+  const cancelNewImage = () => {
+    if (!fileInput.current) {
+      throw new Error('No file input');
+    }
+
     fileInput.current.value = '';
     setNewImage(null);
     setGifUrl('');
-  }
+  };
 
-  async function submitContent(e) {
+  const submitContent = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const variables = {
-      text: e.target[0].value,
+    const variables: CreateContentVariables = {
+      text,
       gifUrl,
       image: newImage,
     };
 
     if (isPoll) {
-      variables.pollChoices = [];
-
-      for (let i = 1; i <= pollChoiceCount; i += 1) {
-        variables.pollChoices.push(e.target[i].value);
-      }
+      variables.pollChoices = pollChoices;
     }
 
     if (contentToEdit) {
-      variables[`${contentType}Id`] = contentToEdit.id;
+      if (contentType === 'post') {
+        variables.postId = contentToEdit.id;
+      } else {
+        variables.commentId = contentToEdit.id;
+      }
     }
 
     switch (contentType) {
       case 'post':
         if (contentToEdit) {
-          updatePost({ variables });
+          await updatePost({ variables });
         } else {
-          createPost({ variables });
+          await createPost({ variables });
         }
 
         break;
 
       case 'comment':
         if (contentToEdit) {
-          updateComment({ variables });
+          await updateComment({ variables });
         } else {
           variables.postId = parentId;
-          createRootComment({ variables });
+          await createRootComment({ variables });
         }
 
         break;
 
       case 'reply':
         variables.parentId = parentId;
-        createReply({ variables });
+        await createReply({ variables });
         break;
 
       default:
         throw new Error(`Invalid content type: ${contentType}`);
     }
 
-    e.target.reset();
-    e.target[0].style.height = '64px';
+    if (e.target instanceof HTMLFormElement && textarea.current) {
+      e.target.reset();
+      textarea.current.style.height = '64px';
+    }
+
     cancelNewImage();
     setIsEmojiOpen(false);
     setIsPoll(false);
-  }
+  };
 
-  function handlePlaceholder() {
+  const handlePlaceholder = () => {
     if (contentType === 'post') {
-      if (isPoll) {
-        return 'Question';
-      }
-
-      return 'New Post';
+      return isPoll ? 'Question' : 'New Post';
     }
 
     return 'New Comment';
-  }
+  };
 
-  function handleFileInputChange(e) {
+  const handleInput = () => {
+    const input = textarea.current;
+
+    if (!input) {
+      throw new Error('No textarea');
+    }
+
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) {
+      throw new Error('No files');
+    }
+
     const file = e.target.files[0];
     setGifUrl('');
 
     if (file) {
       setNewImage(file);
     }
-  }
+  };
+
+  const handleGifClick = (selected: TenorImage) => {
+    setGifUrl(selected.url);
+    setNewImage(null);
+    gifModal.current?.close();
+  };
+
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    if (!textarea.current) {
+      throw new Error('No textarea');
+    }
+    
+    textarea.current.value = `${textarea.current.value}${emojiData.emoji}`;
+  };
+
+  const getTheme = (): Theme => {
+    const theme = localStorage.getItem('theme');
+
+    switch (theme) {
+      case 'dark':
+        return Theme.DARK;
+
+      case 'light':
+        return Theme.LIGHT;
+
+      default:
+        return Theme.AUTO;
+    }
+  };
 
   return (
     <div
@@ -159,89 +231,78 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
       {!contentToEdit && (
         <div className={styles.currentUserPfp}>
           <Link to={`/users/${currentUser.id}`}>
-            <img className='pfp' src={currentUser.pfpUrl} alt='' />
+            <img alt='' className='pfp' src={currentUser.pfpUrl} />
           </Link>
         </div>
       )}
       <form
         className={styles.contentForm}
         encType='multipart/form-data'
-        onSubmit={(e) => submitContent(e)}
+        onSubmit={(e) => {
+          submitContent(e).catch(logError);
+        }}
       >
-        {isModal && (
+        {isModal ? (
           <dialog
-            className={styles.gifModal}
             ref={gifModal}
+            className={styles.gifModal}
             onClose={() => {
               setIsModal(false);
               setIsModalRendered(false);
             }}
           >
             <button
-              type='button'
               className='closeButton'
-              onClick={() => gifModal.current.close()}
+              onClick={() => gifModal.current?.close()}
+              type='button'
             >
               <span className='material-symbols-outlined closeIcon'>close</span>
             </button>
             <GifPicker
-              tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
-              theme={localStorage.getItem('theme')}
+              onGifClick={handleGifClick}
+              tenorApiKey={TENOR_API_KEY}
+              theme={getTheme()}
               width={'100%'}
-              onGifClick={(selected) => {
-                setGifUrl(selected.url);
-                setNewImage(null);
-                gifModal.current.close();
-              }}
             />
           </dialog>
-        )}
+        ) : null}
         <textarea
           ref={textarea}
-          name='text'
           id={`text-${uuid.current}`}
           maxLength={contentType === 'post' ? 50000 : 10000}
+          name='text'
+          onChange={(e) => setText(e.target.value)}
+          onInput={handleInput}
           placeholder={handlePlaceholder()}
-          onInput={(e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
-          defaultValue={contentToEdit ? contentToEdit.text : null}
           required={!newImage && !gifUrl}
-        ></textarea>
-        {isPoll && (
+          value={text}
+        />
+        {isPoll ? (
           <PollInputs
-            pollChoiceCount={pollChoiceCount}
-            setPollChoiceCount={(n) => setPollChoiceCount(n)}
+            pollChoices={pollChoices}
+            setPollChoices={(choices) => {
+              setPollChoices(choices);
+            }}
           />
-        )}
-        {(newImage || gifUrl !== '') && (
+        ) : null}
+        {newImage || gifUrl !== '' ? (
           <div className={styles.imgPreview}>
             <img
-              src={newImage ? URL.createObjectURL(newImage) : gifUrl}
               alt=''
+              src={newImage ? URL.createObjectURL(newImage) : gifUrl}
             />
             <button
-              type='button'
               className='closeButton'
               onClick={() => cancelNewImage()}
+              type='button'
             >
               <span className='material-symbols-outlined closeIcon'>close</span>
             </button>
           </div>
-        )}
-        <input
-          ref={fileInput}
-          type='file'
-          name='image'
-          id={`image-${uuid.current}`}
-          accept='image/*'
-          hidden
-          onChange={(e) => handleFileInputChange(e)}
-        />
+        ) : null}
         <div className={styles.formButtons}>
           {isPoll ? (
-            <button type='button' onClick={() => setIsPoll(false)}>
+            <button onClick={() => setIsPoll(false)} type='button'>
               Cancel Poll
             </button>
           ) : (
@@ -261,6 +322,15 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
               <button className={styles.svgButton} type='button'>
                 <label htmlFor={`image-${uuid.current}`}>
                   <span className='material-symbols-outlined'>image</span>
+                  <input
+                    ref={fileInput}
+                    hidden
+                    accept='image/*'
+                    id={`image-${uuid.current}`}
+                    name='image'
+                    onChange={(e) => handleFileInputChange(e)}
+                    type='file'
+                  />
                 </label>
               </button>
               <button
@@ -274,39 +344,35 @@ function ContentForm({ contentType, setContent, parentId, contentToEdit }) {
               </button>
               <button
                 className={styles.svgButton}
-                type='button'
                 onClick={() => setIsEmojiOpen(!isEmojiOpen)}
+                type='button'
               >
                 <span className='material-symbols-outlined'>add_reaction</span>
               </button>
             </div>
           )}
-          <button className={styles.submitButton}>
+          <button className={styles.submitButton} type='submit'>
             {contentToEdit ? 'Update' : 'Post'}
           </button>
         </div>
-        {isEmojiOpen && (
+        {isEmojiOpen ? (
           <div className={styles.emojiPicker}>
             <EmojiPicker
-              theme={localStorage.getItem('theme')}
-              skinTonesDisabled={true}
+              skinTonesDisabled
+              onEmojiClick={handleEmojiClick}
+              theme={getTheme()}
               width={'100%'}
-              onEmojiClick={(emojiData) => {
-                textarea.current.value = `${textarea.current.value}${emojiData.emoji}`;
-              }}
             />
           </div>
-        )}
+        ) : null}
       </form>
     </div>
   );
-}
+};
 
-ContentForm.propTypes = {
-  contentType: PropTypes.string,
-  setContent: PropTypes.func,
-  parentId: PropTypes.number,
-  contentToEdit: PropTypes.object,
+ContentForm.defaultProps = {
+  contentToEdit: null,
+  parentId: null,
 };
 
 export default ContentForm;

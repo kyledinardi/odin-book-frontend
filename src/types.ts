@@ -41,6 +41,7 @@ export interface Post {
   feedItemType: 'post';
   imageUrl: string | null;
   userId: string;
+  comments: Comment[];
 
   user: {
     __typename: 'User';
@@ -65,6 +66,10 @@ export interface Comment {
   userId: string;
   postId: string;
   parentId: string | null;
+  post: Post | null;
+  parent: Comment | null;
+  replies: Comment[];
+  commentChain: Comment[];
 
   user: {
     __typename: 'User';
@@ -85,24 +90,11 @@ export interface Repost {
   feedItemType: 'repost';
   userId: string;
   postId: string | null;
+  commentId: string | null;
   contentType: string | null;
-  user: { username: string };
+  user: { displayName: string };
   post: Post | null;
-
-  comment:
-    | (Comment & {
-        post: {
-          __typename: 'Post';
-          userId: string;
-          user: { username: string };
-        };
-        parent: {
-          __typename: 'Comment';
-          userId: string;
-          user: { username: string };
-        } | null;
-      })
-    | null;
+  comment: Comment | null;
 }
 
 export interface Notification {
@@ -160,7 +152,21 @@ export interface UserId {
   id: string;
 }
 
+export interface CreateContentVariables {
+  text: string;
+  gifUrl: string;
+  image: File | null;
+  pollChoices?: string[];
+  postId?: string;
+  commentId?: string;
+  parentId?: string;
+}
+
+export type AppContext = [User, () => void, number, (count: number) => void];
+export type Content = Post | Comment | undefined;
+export type FeedItem = Post | Comment | Repost;
 export type PostOrRepost = Post | Repost;
+export type IdResult<T extends string> = Record<T, { id: string }>;
 
 export type LoginResponseResult<T extends string> = Record<T, LoginResponse>;
 export type UserResult<T extends string> = Record<T, User>;
@@ -170,6 +176,7 @@ export type CommentResult<T extends string> = Record<T, Comment>;
 export type RepostResult<T extends string> = Record<T, Repost>;
 export type RoomResult<T extends string> = Record<T, Room>;
 export type MessageResult<T extends string> = Record<T, Message>;
+export type PostOrRepostResult<T extends string> = Record<T, PostOrRepost>;
 
 export type UserArrayResult<T extends string> = Record<T, User[]>;
 export type PostArrayResult<T extends string> = Record<T, Post[]>;

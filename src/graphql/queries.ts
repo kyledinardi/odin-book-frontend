@@ -10,10 +10,13 @@ import {
 import type { TypedDocumentNode } from '@apollo/client';
 
 import type {
+  CommentArrayResult,
+  CommentResult,
   NotificationArrayResult,
   PostArrayResult,
   PostOrRepostArrayResult,
   PostResult,
+  RoomArrayResult,
   RoomResult,
   UserArrayResult,
   UserResult,
@@ -201,7 +204,7 @@ export const GET_LIKED_POSTS: TypedDocumentNode<
   ${POST_FRAGMENT}
 `;
 
-export const GET_COMMENT = gql`
+export const GET_COMMENT: TypedDocumentNode<CommentResult<'getComment'>> = gql`
   query getComment($commentId: ID!, $cursor: ID) {
     getComment(commentId: $commentId, cursor: $cursor) {
       ...CommentFragment
@@ -224,7 +227,9 @@ export const GET_COMMENT = gql`
   ${COMMENT_FRAGMENT}
 `;
 
-export const GET_USER_COMMENTS = gql`
+export const GET_USER_COMMENTS: TypedDocumentNode<
+  CommentArrayResult<'getUserComments'>
+> = gql`
   query getUserComments($userId: ID!, $cursor: ID) {
     getUserComments(userId: $userId, cursor: $cursor) {
       ...CommentFragment
@@ -262,23 +267,24 @@ export const GET_NOTIFICATIONS: TypedDocumentNode<
   }
 `;
 
-export const GET_ALL_ROOMS = gql`
-  query getAllRooms($cursor: ID) {
-    getAllRooms(cursor: $cursor) {
-      id
-      lastUpdated
-      users {
+export const GET_ALL_ROOMS: TypedDocumentNode<RoomArrayResult<'getAllRooms'>> =
+  gql`
+    query getAllRooms($cursor: ID) {
+      getAllRooms(cursor: $cursor) {
         id
-        username
-        displayName
-        pfpUrl
-      }
-      messages {
-        text
+        lastUpdated
+        users {
+          id
+          username
+          displayName
+          pfpUrl
+        }
+        messages {
+          text
+        }
       }
     }
-  }
-`;
+  `;
 
 export const GET_ROOM: TypedDocumentNode<RoomResult<'getRoom'>> = gql`
   query getRoom($roomId: ID!, $cursor: ID) {

@@ -1,30 +1,46 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import PropTypes from 'prop-types';
-import Poll from './Poll.jsx';
-import ContentForm from './ContentForm.jsx';
-import { LIKE_POST, REPOST, DELETE_POST } from '../graphql/mutations';
-import formatDate from '../utils/formatDate';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
-import styles from '../style/Content.module.css';
 
-function Post({ post, replacePost, removePost, displayType }) {
-  const [currentUserRepostId, setCurrentUserRepostId] = useState(null);
+import { useMutation } from '@apollo/client';
+import { Link, useOutletContext } from 'react-router-dom';
+
+import ContentForm from './ContentForm.tsx';
+import Poll from './Poll.tsx';
+import { DELETE_POST, LIKE_POST, REPOST } from '../graphql/mutations.ts';
+import styles from '../style/Content.module.css';
+import formatDate from '../utils/formatDate.ts';
+import logError from '../utils/logError.ts';
+import socket from '../utils/socket.ts';
+
+import type { AppContext, Post } from '../types.ts';
+
+const PostCard = ({
+  post,
+  replacePost,
+  removePost,
+  displayType,
+}: {
+  post: Post;
+  replacePost: (updatedPost: Post) => void;
+  removePost: (deletedPostId: string) => void;
+  displayType: string;
+}) => {
+  const [currentUserRepostId, setCurrentUserRepostId] = useState<string | null>(
+    null,
+  );
+
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const deleteModal = useRef(null);
-  const editTextarea = useRef(null);
-  const imageModal = useRef(null);
-  const [currentUser] = useOutletContext();
+  const deleteModal = useRef<HTMLDialogElement>(null);
+  const imageModal = useRef<HTMLDialogElement>(null);
+  const editTextarea = useRef<HTMLTextAreaElement>(null);
+  const [currentUser] = useOutletContext<AppContext>();
 
   const [likePost] = useMutation(LIKE_POST, {
     onError: logError,
 
     onCompleted: () => {
-      if (!isLiked && post.userId !== Number(currentUser.id)) {
+      if (!isLiked && post.userId !== currentUser.id) {
         socket.emit('sendNotification', { userId: post.userId });
       }
     },
@@ -34,11 +50,11 @@ function Post({ post, replacePost, removePost, displayType }) {
     onError: logError,
 
     onCompleted: () => {
-      if (!currentUserRepostId && post.userId !== Number(currentUser.id)) {
+      if (!currentUserRepostId && post.userId !== currentUser.id) {
         socket.emit('sendNotification', { userId: post.userId });
       } else {
         const newReposts = post.reposts.filter(
-          (repostObj) => repostObj.id !== currentUserRepostId
+          (repostObj) => repostObj.id !== currentUserRepostId,
         );
 
         replacePost({ ...post, reposts: newReposts });
@@ -51,13 +67,13 @@ function Post({ post, replacePost, removePost, displayType }) {
 
     onCompleted: () => {
       removePost(post.id);
-      deleteModal.current.close();
+      deleteModal.current?.close();
     },
   });
 
   useEffect(() => {
     const repostTemp = post.reposts.find(
-      (repostObj) => repostObj.userId === Number(currentUser.id)
+      (repostObj) => repostObj.userId === currentUser.id,
     );
 
     setCurrentUserRepostId(repostTemp ? repostTemp.id : null);
@@ -65,10 +81,12 @@ function Post({ post, replacePost, removePost, displayType }) {
   }, [currentUser.id, post]);
 
   useEffect(() => {
-    if (editTextarea.current) {
-      editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
-      editTextarea.current.style.overflowY = 'hidden';
+    if (!editTextarea.current) {
+      throw new Error('No textarea');
     }
+
+    editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
+    editTextarea.current.style.overflowY = 'hidden';
   }, [isEditing]);
 
   return (
@@ -76,9 +94,14 @@ function Post({ post, replacePost, removePost, displayType }) {
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this post?</h2>
         <div className='modalButtons'>
-          <button onClick={() => deleteModal.current.close()}>Cancel</button>
+          <button onClick={() => deleteModal.current?.close()} type='button'>
+            Cancel
+          </button>
           <button
-            onClick={() => deletePost({ variables: { postId: post.id } })}
+            type='button'
+            onClick={() => {
+              deletePost({ variables: { postId: post.id } }).catch(logError);
+            }}
           >
             Delete
           </button>
@@ -87,15 +110,16 @@ function Post({ post, replacePost, removePost, displayType }) {
       <dialog ref={imageModal} className={styles.imageModal}>
         <button
           className='closeButton'
-          onClick={() => imageModal.current.close()}
+          onClick={() => imageModal.current?.close()}
+          type='button'
         >
           <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
-        <img src={post.imageUrl} alt='' />
+        <img alt='' src={post.imageUrl || ''} />
       </dialog>
       <div className={`${styles.content} ${styles[displayType]}`}>
         <Link className={styles.pfp} to={`/users/${post.userId}`}>
-          <img className='pfp' src={post.user.pfpUrl} alt='' />
+          <img alt='' className='pfp' src={post.user.pfpUrl} />
         </Link>
         <div className={styles.heading}>
           <div className={styles.namesAndTimestamp}>
@@ -109,37 +133,43 @@ function Post({ post, replacePost, removePost, displayType }) {
               <span className='gray'>{formatDate.short(post.timestamp)}</span>
             </Link>
           </div>
-          {post.userId === Number(currentUser.id) && (
+          {post.userId === currentUser.id && (
             <div className={styles.options}>
-              <button onClick={() => setIsEditing(!isEditing)}>
+              <button onClick={() => setIsEditing(!isEditing)} type='button'>
                 <span className='material-symbols-outlined'>edit</span>
               </button>
-              <button onClick={() => deleteModal.current.showModal()}>
+              <button
+                onClick={() => deleteModal.current?.showModal()}
+                type='button'
+              >
                 <span className='material-symbols-outlined'>delete</span>
               </button>
             </div>
           )}
         </div>
-        {displayType === 'ancestor' && <div className={styles.line}></div>}
+        {displayType === 'ancestor' && <div className={styles.line} />}
         <div className={styles.mainContent}>
           {isEditing ? (
             <ContentForm
+              contentToEdit={post}
               contentType='post'
               setContent={() => setIsEditing(false)}
-              contentToEdit={post}
             />
           ) : (
             post.text !== '' && <p className={styles.text}>{post.text}</p>
           )}
-          {post.imageUrl && (
+          {post.imageUrl ? (
             <div className={styles.imageContainer}>
-              <img
-                src={post.imageUrl}
-                alt=''
-                onClick={() => imageModal.current.showModal()}
-              />
+              <button
+                aria-label='View image'
+                className='imageButton'
+                onClick={() => imageModal.current?.showModal()}
+                type='button'
+              >
+                <img alt='' src={post.imageUrl} />
+              </button>
             </div>
-          )}
+          ) : null}
           {post.pollChoices.length > 1 && <Poll post={post} />}
           {displayType === 'focused' && (
             <p className='gray'>{formatDate.long(post.timestamp)}</p>
@@ -147,7 +177,7 @@ function Post({ post, replacePost, removePost, displayType }) {
         </div>
         <div className={styles.interact}>
           <Link to={`/posts/${post.id}`}>
-            <button>
+            <button type='button'>
               <span className='material-symbols-outlined'>comment</span>
               <span>
                 {post._count ? post._count.comments : post.comments.length}
@@ -155,9 +185,12 @@ function Post({ post, replacePost, removePost, displayType }) {
             </button>
           </Link>
           <button
-            onClick={() =>
-              repost({ variables: { id: post.id, contentType: 'post' } })
-            }
+            type='button'
+            onClick={() => {
+              repost({ variables: { id: post.id, contentType: 'post' } }).catch(
+                logError,
+              );
+            }}
           >
             <span
               className={`material-symbols-outlined ${
@@ -168,7 +201,12 @@ function Post({ post, replacePost, removePost, displayType }) {
             </span>
             <span>{post.reposts.length}</span>
           </button>
-          <button onClick={() => likePost({ variables: { postId: post.id } })}>
+          <button
+            type='button'
+            onClick={() => {
+              likePost({ variables: { postId: post.id } }).catch(logError);
+            }}
+          >
             <div>
               <span
                 className={`material-symbols-outlined ${
@@ -184,13 +222,6 @@ function Post({ post, replacePost, removePost, displayType }) {
       </div>
     </div>
   );
-}
-
-Post.propTypes = {
-  post: PropTypes.object,
-  replacePost: PropTypes.func,
-  removePost: PropTypes.func,
-  displayType: PropTypes.string,
 };
 
-export default Post;
+export default PostCard;

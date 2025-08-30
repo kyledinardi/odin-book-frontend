@@ -12,6 +12,9 @@
   cursor: pointer;
   background-color: var(--color-near-background);
   border-radius: 5px;
+  color: inherit;
+  font-weight: inherit;
+  font-size: inherit;
 }
 
 .choiceLabel {

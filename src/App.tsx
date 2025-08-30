@@ -39,16 +39,17 @@ const App = () => {
 
   useEffect(() => {
     if (currentUserResult.data) {
-      const { _count, id } = currentUserResult.data.getCurrentUser;
+      const { id } = currentUserResult.data.getCurrentUser;
+      const count = currentUserResult.data.getCurrentUser._count;
       socket.emit('joinUserRoom', id);
-      setNotifCount(_count.receivedNotifications);
+      setNotifCount(count.receivedNotifications);
     }
   }, [currentUserResult.data]);
 
   useEffect(() => {
-    function incrementNotifCount() {
+    const incrementNotifCount = () => {
       setNotifCount(notifCount + 1);
-    }
+    };
 
     socket.on('receiveNotification', incrementNotifCount);
 
@@ -69,61 +70,65 @@ const App = () => {
   }
 
   return (
-    <div className='themeWrapper' data-theme={theme}>
-      {currentUserResult.data ? (
-        <div className='app' data-theme={theme}>
-          <Sidebar
-            currentUser={currentUserResult.data?.getCurrentUser}
-            logoutModal={logoutModal}
-            notifCount={notifCount}
-            setTheme={setTheme}
-            theme={theme}
-          />
-          <div className='main'>
-            <div className='profileBar'>
-              <ProfileBar
-                currentUser={currentUserResult.data?.getCurrentUser}
-                logoutModal={logoutModal}
-                setTheme={setTheme}
-                theme={theme}
+    currentUserResult.data && (
+      <div className='themeWrapper' data-theme={theme}>
+        {currentUserResult.data ? (
+          <div className='app' data-theme={theme}>
+            <Sidebar
+              currentUser={currentUserResult.data.getCurrentUser}
+              logoutModal={logoutModal}
+              notifCount={notifCount}
+              setTheme={setTheme}
+              theme={theme}
+            />
+            <div className='main'>
+              <div className='profileBar'>
+                <ProfileBar
+                  currentUser={currentUserResult.data.getCurrentUser}
+                  logoutModal={logoutModal}
+                  setTheme={setTheme}
+                  theme={theme}
+                />
+              </div>
+              <Outlet
+                context={[
+                  currentUserResult.data.getCurrentUser,
+                  () => {
+                    currentUserResult.refetch().catch(logError);
+                  },
+                  notifCount,
+                  (count: number) => {
+                    setNotifCount(count);
+                  },
+                ]}
               />
             </div>
-            <Outlet
-              context={[
-                currentUserResult.data?.getCurrentUser,
-                () => {
-                  currentUserResult.refetch().catch(logError);
-                },
-                notifCount,
-                setNotifCount,
-              ]}
+            <UserList
+              currentUser={currentUserResult.data.getCurrentUser}
+              setCurrentUser={() => {
+                currentUserResult.refetch().catch(logError);
+              }}
             />
+            <dialog ref={logoutModal}>
+              <h2>Are you sure you want to log out?</h2>
+              <div className='modalButtons'>
+                <button
+                  type='button'
+                  onClick={() => {
+                    logoutModal.current?.close();
+                  }}
+                >
+                  Cancel
+                </button>
+                <button onClick={logout} type='button'>
+                  Log Out
+                </button>
+              </div>
+            </dialog>
           </div>
-          <UserList
-            currentUser={currentUserResult.data?.getCurrentUser}
-            setCurrentUser={() => {
-              currentUserResult.refetch().catch(logError);
-            }}
-          />
-          <dialog ref={logoutModal}>
-            <h2>Are you sure you want to log out?</h2>
-            <div className='modalButtons'>
-              <button
-                type='button'
-                onClick={() => {
-                  logoutModal.current?.close();
-                }}
-              >
-                Cancel
-              </button>
-              <button onClick={logout} type='button'>
-                Log Out
-              </button>
-            </div>
-          </dialog>
-        </div>
-      ) : null}
-    </div>
+        ) : null}
+      </div>
+    )
   );
 };
 

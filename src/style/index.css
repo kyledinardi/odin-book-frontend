@@ -156,6 +156,11 @@ button:disabled {
   background-color: gray;
 }
 
+.imageButton {
+  padding: 0;
+  background-color: inherit;
+}
+
 .refreshButton {
   width: 100%;
   background-color: inherit;

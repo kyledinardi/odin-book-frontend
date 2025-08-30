@@ -18,7 +18,7 @@ const Sidebar = ({
   theme: string;
   setTheme: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  function getNotifCount() {
+  const getNotifCount = () => {
     if (notifCount === 0) {
       return null;
     }
@@ -28,7 +28,7 @@ const Sidebar = ({
     }
 
     return notifCount;
-  }
+  };
 
   return !currentUser ? (
     <div className='loaderContainer'>

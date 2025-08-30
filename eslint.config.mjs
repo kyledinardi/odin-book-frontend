@@ -46,6 +46,7 @@ const prettierConfig = [
 ];
 
 const extraRules = {
+  'no-underscore-dangle': 'off',
   'react/jsx-filename-extension': 'off',
   'react/react-in-jsx-scope': 'off',
 
@@ -58,18 +59,6 @@ const extraRules = {
       controlComponents: ['ThemeSwitch'],
       assert: 'both',
       depth: 25,
-    },
-  ],
-
-  '@typescript-eslint/naming-convention': [
-    'error',
-    { selector: 'function', format: ['camelCase', 'PascalCase'] },
-    { selector: 'typeLike', format: ['PascalCase'] },
-
-    {
-      selector: 'variable',
-      format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
-      leadingUnderscore: 'allow',
     },
   ],
 };

@@ -16,16 +16,18 @@ const uploadLink = createUploadLink({
   headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('token');
+const authLink = setContext(
+  (_, { headers }: { headers?: Record<string, string> }) => {
+    const token = localStorage.getItem('token');
 
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : '',
-    } as Record<string, string>,
-  };
-});
+    return {
+      headers: {
+        ...headers,
+        authorization: token ? `Bearer ${token}` : '',
+      },
+    };
+  },
+);
 
 const client = new ApolloClient({
   cache: apolloCache,

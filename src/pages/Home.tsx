@@ -1,33 +1,49 @@
-import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import ErrorPage from './ErrorPage.jsx';
-import ContentForm from '../components/ContentForm.jsx';
-import IndexFeedItem from '../components/IndexFeedItem.jsx';
-import { GET_INDEX_POSTS } from '../graphql/queries';
-import { indexFeedCache } from '../utils/apolloCache';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
+import { useOutletContext } from 'react-router-dom';
 
-function Home() {
+import ErrorPage from './ErrorPage.tsx';
+import ContentForm from '../components/ContentForm.tsx';
+import IndexFeedItem from '../components/IndexFeedItem.tsx';
+import { GET_INDEX_POSTS } from '../graphql/queries.ts';
+import { indexFeedCache } from '../utils/apolloCache.ts';
+import logError from '../utils/logError.ts';
+import socket from '../utils/socket.ts';
+
+import type { AppContext, Content } from '../types.ts';
+
+const Home = () => {
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [newPostCount, setNewPostCount] = useState(0);
-  const [currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext<AppContext>();
   const postsResult = useQuery(GET_INDEX_POSTS);
   const posts = postsResult.data?.getIndexPosts;
 
   useEffect(() => {
     const incrementNewPostCount = () => setNewPostCount(newPostCount + 1);
     socket.on('receiveNewPost', incrementNewPostCount);
-    return () => socket.off('receiveNewPost', incrementNewPostCount);
+
+    return () => {
+      socket.off('receiveNewPost', incrementNewPostCount);
+    };
   }, [newPostCount]);
 
-  function fetchOlderPosts() {
-    const lastPost = posts.findLast((post) => post.feedItemType === 'post');
-    const lastRepost = posts.findLast((post) => post.feedItemType === 'repost');
+  const fetchOlderPosts = async () => {
+    if (!posts) {
+      throw new Error('No posts');
+    }
 
-    postsResult.fetchMore({
+    const lastPost = [...posts]
+      .reverse()
+      .find((post) => post.feedItemType === 'post');
+
+    const lastRepost = [...posts]
+      .reverse()
+      .find((post) => post.feedItemType === 'repost');
+
+    await postsResult.fetchMore({
       variables: { postCursor: lastPost?.id, repostCursor: lastRepost?.id },
 
       updateQuery: (previousData, { fetchMoreResult }) => {
@@ -40,10 +56,14 @@ function Home() {
         };
       },
     });
-  }
+  };
 
-  function fetchNewerPosts() {
-    postsResult.fetchMore({
+  const fetchNewerPosts = async () => {
+    if (!posts) {
+      throw new Error('No posts');
+    }
+
+    await postsResult.fetchMore({
       variables: { timestamp: posts[0].timestamp },
 
       updateQuery: (previousData, { fetchMoreResult }) => ({
@@ -57,45 +77,53 @@ function Home() {
     });
 
     setNewPostCount(0);
-  }
+  };
 
   if (postsResult.error) {
     logError(postsResult.error);
     return <ErrorPage error={postsResult.error} />;
   }
 
-  return !currentUser || postsResult.loading ? (
+  return !currentUser || !posts ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <main>
       <ContentForm
         contentType={'post'}
-        setContent={(post) => {
-          indexFeedCache.create(postsResult, post);
-          socket.emit('sendNewPost', { userId: post.userId });
+        setContent={(post: Content) => {
+          if (post?.feedItemType === 'post') {
+            indexFeedCache.create(postsResult, post);
+            socket.emit('sendNewPost', { userId: post?.userId });
+          }
         }}
       />
       {newPostCount > 0 && (
-        <button className='refreshButton' onClick={() => fetchNewerPosts()}>
+        <button
+          className='refreshButton'
+          type='button'
+          onClick={() => {
+            fetchNewerPosts().catch(logError);
+          }}
+        >
           {newPostCount} new post{newPostCount === 1 ? '' : 's'}
         </button>
       )}
       <div>
-        {posts.length === 0 ? (
+        {posts?.length === 0 ? (
           <h2>You and your followers have no posts</h2>
         ) : (
           <InfiniteScroll
             dataLength={posts.length}
-            next={() => fetchOlderPosts()}
+            endMessage={<div />}
             hasMore={hasMorePosts}
+            next={() => fetchOlderPosts()}
             loader={
               <div className='loaderContainer'>
-                <div className='loader'></div>
+                <div className='loader' />
               </div>
             }
-            endMessage={<div></div>}
           >
             {posts.map((post) => (
               <IndexFeedItem
@@ -111,6 +139,6 @@ function Home() {
       </div>
     </main>
   );
-}
+};
 
 export default Home;
