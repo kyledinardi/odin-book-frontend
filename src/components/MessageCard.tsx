@@ -1,20 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import PropTypes from 'prop-types';
-import { DELETE_MESSAGE, UPDATE_MESSAGE } from '../graphql/mutations';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
-import styles from '../style/Message.module.css';
 
-function Message({ message, roomId }) {
+import { useMutation } from '@apollo/client';
+import { useOutletContext } from 'react-router-dom';
+
+import { DELETE_MESSAGE, UPDATE_MESSAGE } from '../graphql/mutations.ts';
+import styles from '../style/Message.module.css';
+import logError from '../utils/logError.ts';
+import socket from '../utils/socket.ts';
+
+import type { FormEvent } from 'react';
+
+import type { AppContext, Message } from '../types.ts';
+
+const MessageCard = ({
+  message,
+  roomId,
+}: {
+  message: Message;
+  roomId: string;
+}) => {
+  const [text, setText] = useState(message.text);
   const [isEditing, setIsEditing] = useState(false);
   const [optionsOpened, setOptionsOpened] = useState(false);
-  const deleteModal = useRef(null);
-  const editText = useRef(null);
+  const deleteModal = useRef<HTMLDialogElement>(null);
+  const editText = useRef<HTMLTextAreaElement>(null);
 
-  const [currentUser] = useOutletContext();
-  const isCurrentUserMessage = message.userId === Number(currentUser.id);
+  const [currentUser] = useOutletContext<AppContext>();
+  const isCurrentUserMessage = message.userId === currentUser.id;
 
   const [updateMessage] = useMutation(UPDATE_MESSAGE, {
     onError: logError,
@@ -31,6 +43,10 @@ function Message({ message, roomId }) {
     onError: logError,
 
     onCompleted: () => {
+      if (!deleteModal.current) {
+        throw new Error('No delete modal');
+      }
+
       deleteModal.current.close();
       socket.emit('deleteMessage', { deletedMessageId: message.id, roomId });
     },
@@ -45,14 +61,22 @@ function Message({ message, roomId }) {
     }
   }, [isEditing]);
 
-  async function submitEdit(e) {
+  const submitEdit = async (e: FormEvent) => {
     e.preventDefault();
     setIsEditing(false);
+    await updateMessage({ variables: { messageId: message.id, text } });
+  };
 
-    updateMessage({
-      variables: { messageId: message.id, text: e.target[0].value },
-    });
-  }
+  const handleInput = () => {
+    const input = editText.current;
+
+    if (!input) {
+      throw new Error('No textarea');
+    }
+
+    input.style.height = 'auto';
+    input.style.height = `${input.scrollHeight}px`;
+  };
 
   return (
     <div
@@ -63,11 +87,16 @@ function Message({ message, roomId }) {
       <dialog ref={deleteModal}>
         <h2>Are you sure you want to delete this post?</h2>
         <div className='modalButtons'>
-          <button onClick={() => deleteModal.current.close()}>Cancel</button>
+          <button onClick={() => deleteModal.current?.close()} type='button'>
+            Cancel
+          </button>
           <button
-            onClick={() =>
-              deleteMessage({ variables: { messageId: message.id } })
-            }
+            type='button'
+            onClick={() => {
+              deleteMessage({ variables: { messageId: message.id } }).catch(
+                logError,
+              );
+            }}
           >
             Delete
           </button>
@@ -76,20 +105,22 @@ function Message({ message, roomId }) {
       <div className={styles.timestamp}>
         {Intl.DateTimeFormat(undefined, {
           timeStyle: 'short',
-        }).format(new Date(Number(message.timestamp)))}
+        }).format(new Date(message.timestamp))}
       </div>
       <div className={styles.messageBox}>
-        {isCurrentUserMessage && (
+        {isCurrentUserMessage ? (
           <div className={styles.optionsMenu}>
             <button
               className={styles.moreOptions}
               onClick={() => setOptionsOpened(!optionsOpened)}
+              type='button'
             >
               <span className='material-symbols-outlined'>more_vert</span>
             </button>
-            {optionsOpened && (
+            {optionsOpened ? (
               <div className={styles.options}>
                 <button
+                  type='button'
                   onClick={() => {
                     setIsEditing(!isEditing);
                     setOptionsOpened(false);
@@ -98,53 +129,52 @@ function Message({ message, roomId }) {
                   <span className='material-symbols-outlined'>edit</span>
                 </button>
                 <button
+                  type='button'
                   onClick={() => {
-                    deleteModal.current.showModal();
+                    deleteModal.current?.showModal();
                     setOptionsOpened(false);
                   }}
                 >
                   <span className='material-symbols-outlined'>delete</span>
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
         {isEditing ? (
-          <form className={styles.editForm} onSubmit={(e) => submitEdit(e)}>
+          <form
+            className={styles.editForm}
+            onSubmit={(e) => {
+              submitEdit(e).catch(logError);
+            }}
+          >
             <textarea
               ref={editText}
-              name='editText'
               id={`editText-${message.id}`}
               maxLength={200}
+              name='editText'
+              onChange={(e) => setText(e.target.value)}
+              onInput={handleInput}
               placeholder='Edit Message'
               required={!message.imageUrl}
-              defaultValue={message.text}
-              onInput={(e) => {
-                e.target.style.height = 'auto';
-                e.target.style.height = `${e.target.scrollHeight}px`;
-              }}
-            ></textarea>
+              value={text}
+            />
             <div className={styles.formButtons}>
-              <button type='button' onClick={() => setIsEditing(false)}>
+              <button onClick={() => setIsEditing(false)} type='button'>
                 Cancel
               </button>
-              <button>Edit</button>
+              <button type='submit'>Edit</button>
             </div>
           </form>
         ) : (
           message.text !== '' && <span>{message.text}</span>
         )}
-        {message.imageUrl && (
-          <img className={styles.image} src={message.imageUrl} alt='' />
-        )}
+        {message.imageUrl ? (
+          <img alt='' className={styles.image} src={message.imageUrl} />
+        ) : null}
       </div>
     </div>
   );
-}
-
-Message.propTypes = {
-  message: PropTypes.object,
-  roomId: PropTypes.number,
 };
 
-export default Message;
+export default MessageCard;

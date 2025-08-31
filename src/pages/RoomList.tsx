@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { Link, useOutletContext } from 'react-router-dom';
+
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { GET_ALL_ROOMS } from '../graphql/queries';
-import formatDate from '../utils/formatDate';
-import styles from '../style/RoomList.module.css';
+import { Link, useOutletContext } from 'react-router-dom';
 
-function RoomList() {
+import { GET_ALL_ROOMS } from '../graphql/queries.ts';
+import styles from '../style/RoomList.module.css';
+import formatDate from '../utils/formatDate.ts';
+
+import type { AppContext } from '../types.ts';
+
+const RoomList = () => {
   const [hasMoreRooms, setHasMoreRooms] = useState(true);
-  const [currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext<AppContext>();
   const roomsResult = useQuery(GET_ALL_ROOMS);
 
   const rooms = roomsResult.data?.getAllRooms.map((room) => ({
@@ -16,8 +20,12 @@ function RoomList() {
     receiver: room.users.find((user) => user.id !== currentUser.id),
   }));
 
-  async function fetchMoreRooms() {
-    roomsResult.fetchMore({
+  const fetchMoreRooms = async () => {
+    if (!rooms) {
+      throw new Error('No rooms result');
+    }
+
+    await roomsResult.fetchMore({
       variables: { cursor: rooms[rooms.length - 1].id },
 
       updateQuery: (previousData, { fetchMoreResult }) => {
@@ -30,11 +38,11 @@ function RoomList() {
         };
       },
     });
-  }
+  };
 
   return !currentUser || !rooms ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <main className={styles.roomList}>
@@ -47,23 +55,23 @@ function RoomList() {
       ) : (
         <InfiniteScroll
           dataLength={rooms.length}
-          next={() => fetchMoreRooms()}
+          endMessage={<div />}
           hasMore={hasMoreRooms}
+          next={() => fetchMoreRooms()}
           loader={
             <div className='loaderContainer'>
-              <div className='loader'></div>
+              <div className='loader' />
             </div>
           }
-          endMessage={<div></div>}
         >
           {rooms.map((room) => (
             <div key={room.id}>
               <Link className={styles.room} to={`/messages/${room.id}`}>
-                <img className='pfp' src={room.receiver.pfpUrl} alt='' />
+                <img alt='' className='pfp' src={room.receiver?.pfpUrl} />
                 <div>
                   <div className={styles.namesAndDate}>
-                    <strong>{room.receiver.displayName}</strong>
-                    <span className='gray'>@{room.receiver.username}</span>
+                    <strong>{room.receiver?.displayName}</strong>
+                    <span className='gray'>@{room.receiver?.username}</span>
                     <span className='gray'>
                       {formatDate.short(room.lastUpdated)}
                     </span>
@@ -79,6 +87,6 @@ function RoomList() {
       )}
     </main>
   );
-}
+};
 
 export default RoomList;

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useMutation } from '@apollo/client';
 import EmojiPicker from 'emoji-picker-react';
-import GifPicker, { Theme } from 'gif-picker-react';
+import GifPicker from 'gif-picker-react';
 import { Link, useOutletContext } from 'react-router-dom';
 
 import PollInputs from './PollInputs.tsx';
@@ -15,11 +15,12 @@ import {
 } from '../graphql/mutations.ts';
 import styles from '../style/ContentForm.module.css';
 import { TENOR_API_KEY } from '../utils/config.ts';
+import getTheme from '../utils/getTheme.ts';
 import logError from '../utils/logError.ts';
 
 import type { EmojiClickData } from 'emoji-picker-react';
 import type { TenorImage } from 'gif-picker-react';
-import type { FormEvent } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 
 import type {
   AppContext,
@@ -154,6 +155,8 @@ const ContentForm = ({
     if (e.target instanceof HTMLFormElement && textarea.current) {
       e.target.reset();
       textarea.current.style.height = '64px';
+    } else {
+      throw new Error('No form');
     }
 
     cancelNewImage();
@@ -180,7 +183,7 @@ const ContentForm = ({
     input.style.height = `${input.scrollHeight}px`;
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
       throw new Error('No files');
     }
@@ -203,23 +206,8 @@ const ContentForm = ({
     if (!textarea.current) {
       throw new Error('No textarea');
     }
-    
+
     textarea.current.value = `${textarea.current.value}${emojiData.emoji}`;
-  };
-
-  const getTheme = (): Theme => {
-    const theme = localStorage.getItem('theme');
-
-    switch (theme) {
-      case 'dark':
-        return Theme.DARK;
-
-      case 'light':
-        return Theme.LIGHT;
-
-      default:
-        return Theme.AUTO;
-    }
   };
 
   return (

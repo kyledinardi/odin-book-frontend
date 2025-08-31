@@ -4,12 +4,15 @@ export interface LoginResponse {
   user: { __typename: 'User'; id: string };
 }
 
-export interface User {
+export interface UserBase {
   __typename: 'User';
   id: string;
   username: string;
   displayName: string;
   pfpUrl: string;
+}
+
+export interface User extends UserBase {
   joinDate: string;
   headerUrl: string;
   bio: string;
