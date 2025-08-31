@@ -1,35 +1,44 @@
 import { useState } from 'react';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+
 import { useQuery } from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import ErrorPage from './ErrorPage.jsx';
-import ContentForm from '../components/ContentForm.jsx';
-import Post from '../components/Post.jsx';
-import Comment from '../components/Comment.jsx';
-import { GET_POST } from '../graphql/queries';
-import { postPageCache } from '../utils/apolloCache';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 
-function PostPage() {
+import ErrorPage from './ErrorPage.tsx';
+import CommentCard from '../components/CommentCard.tsx';
+import ContentForm from '../components/ContentForm.tsx';
+import PostCard from '../components/PostCard.tsx';
+import { GET_POST } from '../graphql/queries.ts';
+import { postPageCache } from '../utils/apolloCache.ts';
+import logError from '../utils/logError.ts';
+import navigateTo from '../utils/navigateTo.ts';
+import socket from '../utils/socket.ts';
+
+import type { AppContext, Content } from '../types.ts';
+
+const PostPage = () => {
   const [hasMoreComments, setHasMoreComments] = useState(true);
-  const [currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext<AppContext>();
   const navigate = useNavigate();
-  const postId = Number(useParams().postId);
+  const { postId } = useParams();
 
   const postResult = useQuery(GET_POST, { variables: { postId } });
   const post = postResult.data?.getPost;
   const comments = post?.comments;
 
-  function fetchMoreComments() {
-    postResult.fetchMore({
+  const fetchMoreComments = async () => {
+    if (!comments) {
+      throw new Error('No comments');
+    }
+
+    await postResult.fetchMore({
       variables: { cursor: comments[comments.length - 1].id },
 
       updateQuery: (previousData, { fetchMoreResult }) => {
         const newComments = fetchMoreResult.getPost.comments;
 
         setHasMoreComments(
-          newComments.length % 20 === 0 && newComments.length > 0
+          newComments.length % 20 === 0 && newComments.length > 0,
         );
 
         return {
@@ -42,39 +51,49 @@ function PostPage() {
         };
       },
     });
-  }
+  };
 
-  function handleNewComment(createdComment) {
+  const handleNewComment = (createdComment: Content) => {
+    if (createdComment?.feedItemType !== 'comment') {
+      throw new Error('Invalid comment');
+    }
+
+    if (!post) {
+      throw new Error('No post');
+    }
+
     postPageCache.createComment(postResult, createdComment);
 
-    if (post.userId !== Number(currentUser.id)) {
+    if (post.userId !== currentUser.id) {
       socket.emit('sendNotification', { userId: post.userId });
     }
-  }
+  };
 
   if (postResult.error) {
     logError(postResult.error);
     return <ErrorPage error={postResult.error} />;
   }
 
-  return !currentUser || !post ? (
+  return !currentUser || !comments ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <main>
-      <Post
+      <PostCard
+        displayType='focused'
         post={post}
+        removePost={() => {
+          navigateTo(navigate, '/').catch(logError);
+        }}
         replacePost={(updatedPost) =>
           postPageCache.updatePost(postResult, updatedPost)
         }
-        removePost={() => navigate('/')}
-        displayType='focused'
       />
       <ContentForm
         contentType='comment'
-        setContent={(createdComment) => handleNewComment(createdComment)}
         parentId={postId}
+        setContent={(createdComment) => handleNewComment(createdComment)}
       />
       <div>
         {comments.length === 0 ? (
@@ -82,26 +101,26 @@ function PostPage() {
         ) : (
           <InfiniteScroll
             dataLength={comments.length}
-            next={() => fetchMoreComments()}
+            endMessage={<div />}
             hasMore={hasMoreComments}
+            next={() => fetchMoreComments()}
             loader={
               <div className='loaderContainer'>
-                <div className='loader'></div>
+                <div className='loader' />
               </div>
             }
-            endMessage={<div></div>}
           >
             {comments.map((comment) => (
-              <Comment
+              <CommentCard
                 key={comment.id}
                 comment={comment}
-                replaceComment={(updatedComment) =>
-                  postPageCache.updateComment(postResult, updatedComment)
-                }
+                displayType='reply'
                 removeComment={(commentId) =>
                   postPageCache.deleteComment(postResult, commentId)
                 }
-                displayType='reply'
+                replaceComment={(updatedComment) =>
+                  postPageCache.updateComment(postResult, updatedComment)
+                }
               />
             ))}
           </InfiniteScroll>
@@ -109,6 +128,6 @@ function PostPage() {
       </div>
     </main>
   );
-}
+};
 
 export default PostPage;

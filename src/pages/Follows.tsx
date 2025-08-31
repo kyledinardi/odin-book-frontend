@@ -1,25 +1,29 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+
 import { useQuery } from '@apollo/client';
-import ErrorPage from './ErrorPage.jsx';
-import FollowList from '../components/FollowList.jsx';
-import { GET_USER } from '../graphql/queries';
-import logError from '../utils/logError';
+import { useOutletContext, useParams } from 'react-router-dom';
+
+import ErrorPage from './ErrorPage.tsx';
+import FollowList from '../components/FollowList.tsx';
+import { GET_USER } from '../graphql/queries.ts';
 import styles from '../style/Follows.module.css';
+import logError from '../utils/logError.ts';
 
-function Follows() {
-  const [followedIds, setFollowedIds] = useState(null);
+import type { AppContext } from '../types.ts';
+
+const Follows = () => {
+  const [followedIds, setFollowedIds] = useState<string[]>([]);
   const [openTab, setOpenTab] = useState('following');
-  const [currentUser] = useOutletContext();
+  const [currentUser] = useOutletContext<AppContext>();
 
-  const userId = Number(useParams().userId);
+  const { userId } = useParams();
   const userResult = useQuery(GET_USER, { variables: { userId } });
   const user = userResult.data?.getUser;
 
   useEffect(() => {
     if (currentUser) {
       setFollowedIds(
-        currentUser.following.map((followedUser) => Number(followedUser.id))
+        currentUser.following.map((followedUser) => followedUser.id),
       );
     }
   }, [currentUser]);
@@ -31,7 +35,7 @@ function Follows() {
 
   return !user || !currentUser || !followedIds ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <main className={styles.followContainer}>
@@ -41,43 +45,47 @@ function Follows() {
       </div>
       <div>
         <button
+          onClick={() => setOpenTab('following')}
+          type='button'
           className={`${styles.categoryButton} ${
             openTab === 'following' ? styles.openTab : null
           }`}
-          onClick={() => setOpenTab('following')}
         >
           Following
         </button>
         <button
+          onClick={() => setOpenTab('followers')}
+          type='button'
           className={`${styles.categoryButton} ${
             openTab === 'followers' ? styles.openTab : null
           }`}
-          onClick={() => setOpenTab('followers')}
         >
           Followers
         </button>
         <button
+          onClick={() => setOpenTab('mutuals')}
+          type='button'
           className={`${styles.categoryButton} ${
             openTab === 'mutuals' ? styles.openTab : null
           }`}
-          onClick={() => setOpenTab('mutuals')}
         >
           Mutuals
         </button>
         {user.id !== currentUser.id && (
           <button
+            onClick={() => setOpenTab('followedFollowers')}
+            type='button'
             className={`${styles.categoryButton} ${
               openTab === 'followedFollowers' ? styles.openTab : null
             }`}
-            onClick={() => setOpenTab('followedFollowers')}
           >
             Followers you follow
           </button>
         )}
       </div>
-      <FollowList openTab={openTab} user={user} followedIds={followedIds} />
+      <FollowList followedIds={followedIds} openTab={openTab} user={user} />
     </main>
   );
-}
+};
 
 export default Follows;
