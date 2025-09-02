@@ -103,7 +103,7 @@ const PostPage = () => {
             dataLength={comments.length}
             endMessage={<div />}
             hasMore={hasMoreComments}
-            next={() => fetchMoreComments()}
+            next={fetchMoreComments}
             loader={
               <div className='loaderContainer'>
                 <div className='loader' />

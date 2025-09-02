@@ -103,7 +103,7 @@ const Chat = () => {
     });
   };
 
-  function renderDate(i: number) {
+  const renderDate = (i: number) => {
     if (!messages) {
       throw new Error('No messages result');
     }
@@ -125,7 +125,7 @@ const Chat = () => {
     }
 
     return null;
-  }
+  };
 
   if (roomResult.error) {
     logError(roomResult.error);
@@ -157,7 +157,7 @@ const Chat = () => {
               dataLength={messages.length}
               endMessage={<div />}
               hasMore={hasMoreMessages}
-              next={() => fetchMoreMessages()}
+              next={fetchMoreMessages}
               scrollableTarget='scrollContainer'
               loader={
                 <div className='loaderContainer'>

@@ -133,7 +133,7 @@ const FollowList = ({
       key={userToReturn.id}
       bio
       isFollowed={followedIds.includes(userToReturn.id)}
-      replaceUser={() => setCurrentUser()}
+      replaceUser={setCurrentUser}
       user={userToReturn}
     />
   );
@@ -163,7 +163,7 @@ const FollowList = ({
           dataLength={following.length}
           endMessage={<div />}
           hasMore={hasMoreFollowing}
-          next={() => fetchMoreFollowing()}
+          next={fetchMoreFollowing}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />
@@ -190,7 +190,7 @@ const FollowList = ({
           dataLength={followers.length}
           endMessage={<div />}
           hasMore={hasMoreFollowers}
-          next={() => fetchMoreFollowers()}
+          next={fetchMoreFollowers}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />
@@ -217,7 +217,7 @@ const FollowList = ({
           dataLength={mutuals.length}
           endMessage={<div />}
           hasMore={hasMoreMutuals}
-          next={() => fetchMoreMutuals()}
+          next={fetchMoreMutuals}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />
@@ -241,7 +241,7 @@ const FollowList = ({
           dataLength={ff.length}
           endMessage={<div />}
           hasMore={hasMoreFf}
-          next={() => fetchMoreFf()}
+          next={fetchMoreFf}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />

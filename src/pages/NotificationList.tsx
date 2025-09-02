@@ -93,7 +93,7 @@ const NotificationList = () => {
           dataLength={notifs.length}
           endMessage={<div />}
           hasMore={hasMoreNotifs}
-          next={() => fetchMoreNotifs()}
+          next={fetchMoreNotifs}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />

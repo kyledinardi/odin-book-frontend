@@ -57,7 +57,7 @@ const RoomList = () => {
           dataLength={rooms.length}
           endMessage={<div />}
           hasMore={hasMoreRooms}
-          next={() => fetchMoreRooms()}
+          next={fetchMoreRooms}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />

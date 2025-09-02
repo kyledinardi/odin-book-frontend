@@ -1,22 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
+
+import { useMutation, useQuery } from '@apollo/client';
 import {
   Link,
   useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom';
-import { useMutation, useQuery } from '@apollo/client';
-import ErrorPage from './ErrorPage.jsx';
-import UpdateProfileForm from '../components/UpdateProfileForm.jsx';
-import UpdatePasswordForm from '../components/UpdatePasswordForm.jsx';
-import ProfilePostList from '../components/ProfilePostList.jsx';
-import { GET_USER } from '../graphql/queries';
-import { FIND_OR_CREATE_ROOM, FOLLOW } from '../graphql/mutations';
-import logError from '../utils/logError';
-import socket from '../utils/socket';
-import styles from '../style/Profile.module.css';
 
-function Profile() {
+import ErrorPage from './ErrorPage.tsx';
+import ProfilePostList from '../components/ProfilePostList.tsx';
+import UpdatePasswordForm from '../components/UpdatePasswordForm.tsx';
+import UpdateProfileForm from '../components/UpdateProfileForm.tsx';
+import { FIND_OR_CREATE_ROOM, FOLLOW } from '../graphql/mutations.ts';
+import { GET_USER } from '../graphql/queries.ts';
+import styles from '../style/Profile.module.css';
+import logError from '../utils/logError.ts';
+import navigateTo from '../utils/navigateTo.ts';
+import socket from '../utils/socket.ts';
+
+import type { AppContext } from '../types.ts';
+
+const Profile = () => {
   const [isFollowed, setIsFollowed] = useState(false);
   const [isUserModal, setIsUserModal] = useState(false);
   const [isUserModalRendered, setIsUserModalRendered] = useState(false);
@@ -24,12 +29,12 @@ function Profile() {
   const [openTab, setOpenTab] = useState('posts');
   const [userModalType, setUserModalType] = useState('');
   const [imageModalType, setImageModalType] = useState('');
-  const userModal = useRef(null);
-  const imageModal = useRef(null);
+  const userModal = useRef<HTMLDialogElement>(null);
+  const imageModal = useRef<HTMLDialogElement>(null);
 
-  const [currentUser, setCurrentUser] = useOutletContext();
+  const [currentUser, setCurrentUser] = useOutletContext<AppContext>();
   const navigate = useNavigate();
-  const userId = Number(useParams().userId);
+  const { userId } = useParams();
   const userResult = useQuery(GET_USER, { variables: { userId } });
   const user = userResult.data?.getUser;
 
@@ -40,7 +45,7 @@ function Profile() {
       setCurrentUser();
       setIsFollowed(!isFollowed);
 
-      if (!isFollowed && user.id !== Number(currentUser.id)) {
+      if (!isFollowed && user?.id !== currentUser.id) {
         socket.emit('sendNotification', { userId });
       }
     },
@@ -48,13 +53,18 @@ function Profile() {
 
   const [findOrCreateRoom] = useMutation(FIND_OR_CREATE_ROOM, {
     onError: logError,
-    onCompleted: (data) => navigate(`/messages/${data.findOrCreateRoom.id}`),
+
+    onCompleted: (data) => {
+      navigateTo(navigate, `/messages/${data.findOrCreateRoom.id}`).catch(
+        logError,
+      );
+    },
   });
 
   useEffect(() => {
     if (currentUser && userId) {
       const isFollowedTemp = currentUser.following.some(
-        (followedUser) => Number(followedUser.id) === userId
+        (followedUser) => followedUser.id === userId,
       );
 
       setIsFollowed(isFollowedTemp);
@@ -66,7 +76,7 @@ function Profile() {
       setIsUserModalRendered(true);
 
       if (isUserModalRendered) {
-        userModal.current.showModal();
+        userModal.current?.showModal();
       }
     }
   }, [isUserModal, isUserModalRendered]);
@@ -77,14 +87,19 @@ function Profile() {
   }
 
   const renderButtons = () => {
+    if (!user) {
+      throw new Error('No user result');
+    }
+
     if (user.username === 'Guest' || user.username === 'Guest2') {
       return null;
     }
-    
-    if (userId === Number(currentUser.id)) {
+
+    if (userId === currentUser.id) {
       return (
         <div className={styles.topButtons}>
           <button
+            type={'button'}
             onClick={() => {
               setUserModalType('profile');
               setIsUserModal(true);
@@ -93,6 +108,7 @@ function Profile() {
             Edit Profile
           </button>
           <button
+            type={'button'}
             onClick={() => {
               setUserModalType('password');
               setIsUserModal(true);
@@ -106,10 +122,20 @@ function Profile() {
 
     return (
       <div className={styles.topButtons}>
-        <button onClick={() => findOrCreateRoom({ variables: { userId } })}>
+        <button
+          type={'button'}
+          onClick={() => {
+            findOrCreateRoom({ variables: { userId } }).catch(logError);
+          }}
+        >
           Message
         </button>
-        <button onClick={() => follow({ variables: { userId } })}>
+        <button
+          type={'button'}
+          onClick={() => {
+            follow({ variables: { userId } }).catch(logError);
+          }}
+        >
           {isFollowed ? 'Unfollow' : 'Follow'}
         </button>
       </div>
@@ -118,11 +144,11 @@ function Profile() {
 
   return !user || !currentUser ? (
     <div className='loaderContainer'>
-      <div className='loader'></div>
+      <div className='loader' />
     </div>
   ) : (
     <main>
-      {isUserModal && (
+      {isUserModal ? (
         <dialog
           ref={userModal}
           onClose={() => {
@@ -132,7 +158,8 @@ function Profile() {
         >
           <button
             className='closeButton'
-            onClick={() => userModal.current.close()}
+            onClick={() => userModal.current?.close()}
+            type={'button'}
           >
             <span className='material-symbols-outlined closeIcon'>close</span>
           </button>
@@ -142,17 +169,18 @@ function Profile() {
             <UpdatePasswordForm userModal={userModal} />
           )}
         </dialog>
-      )}
+      ) : null}
       <dialog ref={imageModal} className={styles.imageModal}>
         <button
           className='closeButton'
-          onClick={() => imageModal.current.close()}
+          onClick={() => imageModal.current?.close()}
+          type={'button'}
         >
           <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
         <img
-          src={imageModalType === 'pfp' ? user.pfpUrl : user.headerUrl}
           alt=''
+          src={imageModalType === 'pfp' ? user.pfpUrl : user.headerUrl}
         />
       </dialog>
       <div className={styles.heading}>
@@ -163,27 +191,29 @@ function Profile() {
           </p>
         </div>
       </div>
-      {user.headerUrl && (
-        <img
-          className={styles.headerImage}
-          src={user.headerUrl}
-          alt=''
+      {user.headerUrl ? (
+        <button
+          aria-label='header'
+          type='button'
           onClick={() => {
             setImageModalType('header');
-            imageModal.current.showModal();
+            imageModal.current?.showModal();
           }}
-        />
-      )}
+        >
+          <img alt='' className={styles.headerImage} src={user.headerUrl} />
+        </button>
+      ) : null}
       <div className={styles.pfpAndButtons}>
-        <img
-          className={styles.profilePagePfp}
-          src={user.pfpUrl}
-          alt=''
+        <button
+          aria-label='pfp'
+          type='button'
           onClick={() => {
             setImageModalType('pfp');
-            imageModal.current.showModal();
+            imageModal.current?.showModal();
           }}
-        />
+        >
+          <img alt='' className={styles.profilePagePfp} src={user.pfpUrl} />
+        </button>
         {renderButtons()}
       </div>
       <div className={styles.userInfo}>
@@ -191,7 +221,7 @@ function Profile() {
         <span className='gray'>@{user.username}</span>
         <p>{user.bio}</p>
         <div className={styles.userDetails}>
-          {user.location && (
+          {user.location ? (
             <div className={styles.detail}>
               <span
                 className={`material-symbols-outlined ${styles.profileIcon}`}
@@ -200,8 +230,8 @@ function Profile() {
               </span>
               <span>{user.location}</span>
             </div>
-          )}
-          {user.website && (
+          ) : null}
+          {user.website ? (
             <div className={styles.detail}>
               <span
                 className={`material-symbols-outlined ${styles.profileIcon}`}
@@ -210,19 +240,19 @@ function Profile() {
               </span>
               <a
                 className={styles.websiteLink}
+                rel='noopener noreferrer'
+                target='_blank'
                 href={
                   user.website.startsWith('http://') ||
                   user.website.startsWith('https://')
                     ? user.website
                     : `https://${user.website}`
                 }
-                target='_blank'
-                rel='noopener noreferrer'
               >
                 {user.website}
               </a>
             </div>
-          )}
+          ) : null}
           <div className={styles.detail}>
             <span className={`material-symbols-outlined ${styles.profileIcon}`}>
               calendar_month
@@ -232,7 +262,7 @@ function Profile() {
               {Intl.DateTimeFormat(undefined, {
                 month: 'long',
                 year: 'numeric',
-              }).format(new Date(Number(user.joinDate)))}
+              }).format(new Date(user.joinDate))}
             </span>
           </div>
         </div>
@@ -251,33 +281,37 @@ function Profile() {
         <button
           className={`categoryButton ${openTab === 'posts' ? 'openTab' : ''}`}
           onClick={() => setOpenTab('posts')}
+          type={'button'}
         >
           Posts
         </button>
         <button
+          onClick={() => setOpenTab('comments')}
+          type={'button'}
           className={`categoryButton ${
             openTab === 'comments' ? 'openTab' : ''
           }`}
-          onClick={() => setOpenTab('comments')}
         >
           Comments
         </button>
         <button
           className={`categoryButton ${openTab === 'images' ? 'openTab' : ''}`}
           onClick={() => setOpenTab('images')}
+          type={'button'}
         >
           Images
         </button>
         <button
           className={`categoryButton ${openTab === 'likes' ? 'openTab' : ''}`}
           onClick={() => setOpenTab('likes')}
+          type={'button'}
         >
           Likes
         </button>
       </div>
-      <ProfilePostList user={user} openTab={openTab} />
+      <ProfilePostList openTab={openTab} user={user} />
     </main>
   );
-}
+};
 
 export default Profile;

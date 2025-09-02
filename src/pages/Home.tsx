@@ -118,7 +118,7 @@ const Home = () => {
             dataLength={posts.length}
             endMessage={<div />}
             hasMore={hasMorePosts}
-            next={() => fetchOlderPosts()}
+            next={fetchOlderPosts}
             loader={
               <div className='loaderContainer'>
                 <div className='loader' />

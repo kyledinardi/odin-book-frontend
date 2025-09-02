@@ -10,8 +10,8 @@ import {
 import type { TypedDocumentNode } from '@apollo/client';
 
 import type {
-  CommentArrayResult,
-  CommentResult,
+  CommentWithPostArrayResult,
+  CommentWithRepliesResult,
   NotificationArrayResult,
   PostArrayResult,
   PostOrRepostArrayResult,
@@ -204,7 +204,9 @@ export const GET_LIKED_POSTS: TypedDocumentNode<
   ${POST_FRAGMENT}
 `;
 
-export const GET_COMMENT: TypedDocumentNode<CommentResult<'getComment'>> = gql`
+export const GET_COMMENT: TypedDocumentNode<
+  CommentWithRepliesResult<'getComment'>
+> = gql`
   query getComment($commentId: ID!, $cursor: ID) {
     getComment(commentId: $commentId, cursor: $cursor) {
       ...CommentFragment
@@ -228,7 +230,7 @@ export const GET_COMMENT: TypedDocumentNode<CommentResult<'getComment'>> = gql`
 `;
 
 export const GET_USER_COMMENTS: TypedDocumentNode<
-  CommentArrayResult<'getUserComments'>
+  CommentWithPostArrayResult<'getUserComments'>
 > = gql`
   query getUserComments($userId: ID!, $cursor: ID) {
     getUserComments(userId: $userId, cursor: $cursor) {

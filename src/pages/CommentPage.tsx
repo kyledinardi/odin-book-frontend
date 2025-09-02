@@ -135,7 +135,7 @@ const CommentPage = () => {
           dataLength={comment.replies.length}
           endMessage={<div />}
           hasMore={hasMoreReplies}
-          next={() => fetchMoreReplies()}
+          next={fetchMoreReplies}
           loader={
             <div className='loaderContainer'>
               <div className='loader' />

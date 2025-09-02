@@ -281,7 +281,7 @@ const ContentForm = ({
             />
             <button
               className='closeButton'
-              onClick={() => cancelNewImage()}
+              onClick={cancelNewImage}
               type='button'
             >
               <span className='material-symbols-outlined closeIcon'>close</span>
@@ -316,7 +316,7 @@ const ContentForm = ({
                     accept='image/*'
                     id={`image-${uuid.current}`}
                     name='image'
-                    onChange={(e) => handleFileInputChange(e)}
+                    onChange={handleFileInputChange}
                     type='file'
                   />
                 </label>

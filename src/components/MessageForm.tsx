@@ -121,7 +121,7 @@ const MessageForm = ({
           />
           <button
             className='closeButton'
-            onClick={() => cancelNewImage()}
+            onClick={cancelNewImage}
             type='button'
           >
             <span className='material-symbols-outlined closeIcon'>close</span>
@@ -171,7 +171,7 @@ const MessageForm = ({
                 accept='image/*'
                 id='image'
                 name='image'
-                onChange={(e) => handleFileInputChange(e)}
+                onChange={handleFileInputChange}
                 type='file'
               />
             </label>

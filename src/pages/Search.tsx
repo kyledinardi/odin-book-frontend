@@ -165,7 +165,7 @@ const Search = () => {
                 dataLength={users.length}
                 endMessage={<div />}
                 hasMore={hasMoreUsers}
-                next={() => fetchMoreUsers()}
+                next={fetchMoreUsers}
                 loader={
                   <div className='loaderContainer'>
                     <div className='loader' />
@@ -177,7 +177,7 @@ const Search = () => {
                     key={user.id}
                     bio
                     isFollowed={followedIds.includes(user.id)}
-                    replaceUser={() => setCurrentUser()}
+                    replaceUser={setCurrentUser}
                     user={user}
                   />
                 ))}

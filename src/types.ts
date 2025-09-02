@@ -86,6 +86,16 @@ export interface Comment {
   _count: { __typename: 'CommentCounts'; replies: number };
 }
 
+export interface CommentWithPost extends Comment {
+  post: Post;
+  parent: Comment;
+}
+
+export interface CommentWithReplies extends CommentWithPost {
+  replies: Comment[];
+  commentChain: Comment[];
+}
+
 export interface Repost {
   __typename: 'Repost';
   id: string;
@@ -181,10 +191,20 @@ export type RoomResult<T extends string> = Record<T, Room>;
 export type MessageResult<T extends string> = Record<T, Message>;
 export type PostOrRepostResult<T extends string> = Record<T, PostOrRepost>;
 
+export type CommentWithRepliesResult<T extends string> = Record<
+  T,
+  CommentWithReplies
+>;
+
 export type UserArrayResult<T extends string> = Record<T, User[]>;
 export type PostArrayResult<T extends string> = Record<T, Post[]>;
 export type CommentArrayResult<T extends string> = Record<T, Comment[]>;
 export type RoomArrayResult<T extends string> = Record<T, Room[]>;
+
+export type CommentWithPostArrayResult<T extends string> = Record<
+  T,
+  CommentWithPost[]
+>;
 
 export type NotificationArrayResult<T extends string> = Record<
   T,
