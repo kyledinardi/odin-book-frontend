@@ -159,9 +159,15 @@ const ContentForm = ({
       throw new Error('No form');
     }
 
-    cancelNewImage();
+    setText('');
+    setGifUrl('');
     setIsEmojiOpen(false);
     setIsPoll(false);
+    setPollChoices(['', '']);
+
+    if (!isPoll) {
+      cancelNewImage();
+    }
   };
 
   const handlePlaceholder = () => {
@@ -250,7 +256,7 @@ const ContentForm = ({
               onGifClick={handleGifClick}
               tenorApiKey={TENOR_API_KEY}
               theme={getTheme()}
-              width={'100%'}
+              width='100%'
             />
           </dialog>
         ) : null}
@@ -349,7 +355,7 @@ const ContentForm = ({
               skinTonesDisabled
               onEmojiClick={handleEmojiClick}
               theme={getTheme()}
-              width={'100%'}
+              width='100%'
             />
           </div>
         ) : null}

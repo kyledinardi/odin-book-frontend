@@ -53,3 +53,10 @@
   border-radius: 40px;
   object-fit: cover;
 }
+
+.profileForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}

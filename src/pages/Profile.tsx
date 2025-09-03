@@ -91,15 +91,11 @@ const Profile = () => {
       throw new Error('No user result');
     }
 
-    if (user.username === 'Guest' || user.username === 'Guest2') {
-      return null;
-    }
-
     if (userId === currentUser.id) {
       return (
         <div className={styles.topButtons}>
           <button
-            type={'button'}
+            type='button'
             onClick={() => {
               setUserModalType('profile');
               setIsUserModal(true);
@@ -108,7 +104,7 @@ const Profile = () => {
             Edit Profile
           </button>
           <button
-            type={'button'}
+            type='button'
             onClick={() => {
               setUserModalType('password');
               setIsUserModal(true);
@@ -123,7 +119,7 @@ const Profile = () => {
     return (
       <div className={styles.topButtons}>
         <button
-          type={'button'}
+          type='button'
           onClick={() => {
             findOrCreateRoom({ variables: { userId } }).catch(logError);
           }}
@@ -131,7 +127,7 @@ const Profile = () => {
           Message
         </button>
         <button
-          type={'button'}
+          type='button'
           onClick={() => {
             follow({ variables: { userId } }).catch(logError);
           }}
@@ -159,7 +155,7 @@ const Profile = () => {
           <button
             className='closeButton'
             onClick={() => userModal.current?.close()}
-            type={'button'}
+            type='button'
           >
             <span className='material-symbols-outlined closeIcon'>close</span>
           </button>
@@ -174,7 +170,7 @@ const Profile = () => {
         <button
           className='closeButton'
           onClick={() => imageModal.current?.close()}
-          type={'button'}
+          type='button'
         >
           <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
@@ -194,6 +190,7 @@ const Profile = () => {
       {user.headerUrl ? (
         <button
           aria-label='header'
+          className='imageButton'
           type='button'
           onClick={() => {
             setImageModalType('header');
@@ -206,6 +203,7 @@ const Profile = () => {
       <div className={styles.pfpAndButtons}>
         <button
           aria-label='pfp'
+          className='imageButton'
           type='button'
           onClick={() => {
             setImageModalType('pfp');
@@ -262,7 +260,7 @@ const Profile = () => {
               {Intl.DateTimeFormat(undefined, {
                 month: 'long',
                 year: 'numeric',
-              }).format(new Date(user.joinDate))}
+              }).format(new Date(Number(user.joinDate)))}
             </span>
           </div>
         </div>
@@ -281,13 +279,13 @@ const Profile = () => {
         <button
           className={`categoryButton ${openTab === 'posts' ? 'openTab' : ''}`}
           onClick={() => setOpenTab('posts')}
-          type={'button'}
+          type='button'
         >
           Posts
         </button>
         <button
           onClick={() => setOpenTab('comments')}
-          type={'button'}
+          type='button'
           className={`categoryButton ${
             openTab === 'comments' ? 'openTab' : ''
           }`}
@@ -297,14 +295,14 @@ const Profile = () => {
         <button
           className={`categoryButton ${openTab === 'images' ? 'openTab' : ''}`}
           onClick={() => setOpenTab('images')}
-          type={'button'}
+          type='button'
         >
           Images
         </button>
         <button
           className={`categoryButton ${openTab === 'likes' ? 'openTab' : ''}`}
           onClick={() => setOpenTab('likes')}
-          type={'button'}
+          type='button'
         >
           Likes
         </button>

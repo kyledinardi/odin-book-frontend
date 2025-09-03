@@ -91,7 +91,7 @@ const Home = () => {
   ) : (
     <main>
       <ContentForm
-        contentType={'post'}
+        contentType="post"
         setContent={(post: Content) => {
           if (post?.feedItemType === 'post') {
             indexFeedCache.create(postsResult, post);

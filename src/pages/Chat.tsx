@@ -59,15 +59,7 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    if (!messages) {
-      throw new Error('No messages result');
-    }
-
-    if (!messagesEnd.current) {
-      throw new Error('No messages end ref');
-    }
-
-    if (hasNewMessage) {
+    if (hasNewMessage && messages && messagesEnd.current) {
       if (messages[messages.length - 1].userId !== currentUser.id) {
         messagesEnd.current.scrollIntoView({ behavior: 'smooth' });
       }
@@ -145,36 +137,34 @@ const Chat = () => {
           <span className='gray'>@{receiver.username}</span>
         </div>
       </Link>
-      {
-        <div className={styles.scrollContainer} id='scrollContainer'>
-          <div ref={messagesEnd} />
-          {messages.length === 0 ? (
-            <h2>No messages yet</h2>
-          ) : (
-            <InfiniteScroll
-              inverse
-              className={styles.infiniteScroll}
-              dataLength={messages.length}
-              endMessage={<div />}
-              hasMore={hasMoreMessages}
-              next={fetchMoreMessages}
-              scrollableTarget='scrollContainer'
-              loader={
-                <div className='loaderContainer'>
-                  <div className='loader' />
-                </div>
-              }
-            >
-              {messages.map((message, i) => (
-                <div key={message.id} className={styles.messageContainer}>
-                  {messages[i + 1] ? renderDate(i) : null}
-                  <MessageCard message={message} roomId={roomId} />
-                </div>
-              ))}
-            </InfiniteScroll>
-          )}
-        </div>
-      }
+      <div className={styles.scrollContainer} id='scrollContainer'>
+        <div ref={messagesEnd} />
+        {messages.length === 0 ? (
+          <h2>No messages yet</h2>
+        ) : (
+          <InfiniteScroll
+            inverse
+            className={styles.infiniteScroll}
+            dataLength={messages.length}
+            endMessage={<div />}
+            hasMore={hasMoreMessages}
+            next={fetchMoreMessages}
+            scrollableTarget='scrollContainer'
+            loader={
+              <div className='loaderContainer'>
+                <div className='loader' />
+              </div>
+            }
+          >
+            {messages.map((message, i) => (
+              <div key={message.id} className={styles.messageContainer}>
+                {messages[i + 1] ? renderDate(i) : null}
+                <MessageCard message={message} roomId={roomId} />
+              </div>
+            ))}
+          </InfiniteScroll>
+        )}
+      </div>
       <MessageForm receiver={receiver} roomId={roomId} />
     </main>
   );

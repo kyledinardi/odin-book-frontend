@@ -158,7 +158,7 @@ const Search = () => {
           </div>
         ) : (
           <div>
-            {users.length > 0 ? (
+            {users.length === 0 ? (
               <h2>No user results for {`"${searchParams.get('query')}"`}</h2>
             ) : (
               <InfiniteScroll

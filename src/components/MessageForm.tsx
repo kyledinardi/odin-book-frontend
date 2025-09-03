@@ -132,10 +132,10 @@ const MessageForm = ({
         <div className={styles.popUp}>
           {gifPickerOpen ? (
             <GifPicker
-              height={'300px'}
+              height="300px"
               tenorApiKey={TENOR_API_KEY}
               theme={getTheme()}
-              width={'100%'}
+              width="100%"
               onGifClick={(selected) => {
                 setGifUrl(selected.url);
                 setGifPickerOpen(false);
@@ -145,11 +145,11 @@ const MessageForm = ({
             <EmojiPicker
               skinTonesDisabled
               className={styles.emojiPicker}
-              height={'300px'}
+              height="300px"
               onEmojiClick={handleEmojiClick}
               previewConfig={{ showPreview: false }}
               theme={getTheme()}
-              width={'100%'}
+              width="100%"
             />
           )}
         </div>

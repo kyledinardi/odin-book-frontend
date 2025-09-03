@@ -80,12 +80,10 @@ const CommentCard = ({
   }, [comment, currentUser]);
 
   useEffect(() => {
-    if (!editTextarea.current) {
-      throw new Error('No textarea');
+    if (editTextarea.current) {
+      editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
+      editTextarea.current.style.overflowY = 'hidden';
     }
-
-    editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
-    editTextarea.current.style.overflowY = 'hidden';
   }, [isEditing]);
 
   return (
@@ -116,7 +114,7 @@ const CommentCard = ({
         >
           <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
-        <img alt='' src={comment.imageUrl || ''} />
+        <img alt='' src={comment.imageUrl || undefined} />
       </dialog>
       <div className={`${styles.content} ${styles[displayType]}`}>
         <Link className={styles.pfp} to={`/users/${comment.userId}`}>

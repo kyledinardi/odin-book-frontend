@@ -44,6 +44,9 @@ const FollowList = ({
   const mutuals = mutualsResult.data?.getMutuals;
   const ff = followedFollowersResult.data?.getFollowedFollowers;
 
+  const readyToRender =
+    following && followers && mutuals && (user.id === currentUser.id || ff);
+
   const fetchMoreFollowing = async () => {
     if (!following) {
       throw new Error('No following result');
@@ -138,7 +141,7 @@ const FollowList = ({
     />
   );
 
-  if (!following || !followers || !mutuals || !ff) {
+  if (!readyToRender) {
     return (
       <div className='loaderContainer'>
         <div className='loader' />
@@ -230,6 +233,10 @@ const FollowList = ({
     }
 
     case 'followedFollowers': {
+      if (!ff) {
+        throw new Error('No ff result');
+      }
+
       if (ff.length === 0) {
         return (
           <h2>{`You aren't following any of ${user.displayName}'s followers`}</h2>

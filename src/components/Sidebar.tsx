@@ -43,7 +43,7 @@ const Sidebar = ({
           </span>
           <span className={styles.sidebarLabel}>Home</span>
         </Link>
-        <Link className={styles.sidebarButton} to={'/search'}>
+        <Link className={styles.sidebarButton} to="/search">
           <span className={`material-symbols-outlined ${styles.menuSvg}`}>
             search
           </span>

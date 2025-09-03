@@ -26,9 +26,9 @@ const UpdateProfileForm = ({
   const [currentUser, setCurrentUser] = useOutletContext<AppContext>();
 
   const [displayName, setDisplayName] = useState(currentUser.displayName);
-  const [location, setLocation] = useState(currentUser.location);
-  const [website, setWebsite] = useState(currentUser.website);
-  const [bio, setBio] = useState(currentUser.bio);
+  const [location, setLocation] = useState(currentUser.location || '');
+  const [website, setWebsite] = useState(currentUser.website || '');
+  const [bio, setBio] = useState(currentUser.bio || '');
 
   const [updateProfile] = useMutation(UPDATE_PROFILE, {
     onError: logError,

@@ -81,12 +81,10 @@ const PostCard = ({
   }, [currentUser.id, post]);
 
   useEffect(() => {
-    if (!editTextarea.current) {
-      throw new Error('No textarea');
+    if (editTextarea.current) {
+      editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
+      editTextarea.current.style.overflowY = 'hidden';
     }
-
-    editTextarea.current.style.height = `${editTextarea.current.scrollHeight}px`;
-    editTextarea.current.style.overflowY = 'hidden';
   }, [isEditing]);
 
   return (
@@ -115,7 +113,7 @@ const PostCard = ({
         >
           <span className='material-symbols-outlined closeIcon'>close</span>
         </button>
-        <img alt='' src={post.imageUrl || ''} />
+        <img alt='' src={post.imageUrl || undefined} />
       </dialog>
       <div className={`${styles.content} ${styles[displayType]}`}>
         <Link className={styles.pfp} to={`/users/${post.userId}`}>

@@ -105,7 +105,7 @@ const MessageCard = ({
       <div className={styles.timestamp}>
         {Intl.DateTimeFormat(undefined, {
           timeStyle: 'short',
-        }).format(new Date(message.timestamp))}
+        }).format(new Date(Number(message.timestamp)))}
       </div>
       <div className={styles.messageBox}>
         {isCurrentUserMessage ? (
